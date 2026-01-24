@@ -16,7 +16,7 @@ export default function Dashboard() {
 
   const totalMembers = members?.length || 0;
   
-  // 計算本週收入（來自驗光服務金額）
+  // 計算本週營收（來自驗光服務金額）
   const now = new Date();
   const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
   const weeklyPrescriptions = prescriptions?.filter(p => 
@@ -60,7 +60,7 @@ export default function Dashboard() {
               variant="primary"
             />
             <StatCard
-              title="本週收入"
+              title="本週營收"
               value={`NT$${weeklyIncome.toLocaleString()}`}
               subtitle={`共 ${weeklyCount} 筆服務`}
               icon={TrendingUp}
