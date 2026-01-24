@@ -383,7 +383,7 @@ export type Database = {
     Enums: {
       app_role: "admin" | "optician" | "sales"
       item_type: "frame" | "lens" | "exam" | "accessory" | "other"
-      member_level: "gold" | "silver" | "black"
+      member_level: "gold" | "silver" | "black" | "regular"
       payment_method: "cash" | "card" | "transfer"
     }
     CompositeTypes: {
@@ -514,7 +514,7 @@ export const Constants = {
     Enums: {
       app_role: ["admin", "optician", "sales"],
       item_type: ["frame", "lens", "exam", "accessory", "other"],
-      member_level: ["gold", "silver", "black"],
+      member_level: ["gold", "silver", "black", "regular"],
       payment_method: ["cash", "card", "transfer"],
     },
   },
