@@ -47,18 +47,18 @@ export default function Members() {
               variant="primary"
             />
             <StatCard
-              title="金卡會員"
+              title="VIP 金卡"
               value={goldCount}
               icon={Crown}
               variant="accent"
             />
             <StatCard
-              title="銀卡會員"
+              title="VIP 銀卡"
               value={silverCount}
               icon={Medal}
             />
             <StatCard
-              title="黑卡會員"
+              title="VIP 黑卡"
               value={blackCount}
               icon={Star}
             />

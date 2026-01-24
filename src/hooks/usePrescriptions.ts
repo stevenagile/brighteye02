@@ -14,6 +14,14 @@ export interface PrescriptionWithMember extends Prescription {
   } | null;
 }
 
+export interface PrescriptionWithTransactions extends Prescription {
+  transactions?: {
+    id: string;
+    transaction_date: string;
+    total: number;
+  }[];
+}
+
 export function usePrescriptions() {
   return useQuery({
     queryKey: ['prescriptions'],
@@ -28,6 +36,24 @@ export function usePrescriptions() {
       
       if (error) throw error;
       return data as PrescriptionWithMember[];
+    },
+  });
+}
+
+export function usePrescriptionsWithTransactions() {
+  return useQuery({
+    queryKey: ['prescriptions', 'with-transactions'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('prescriptions')
+        .select(`
+          *,
+          transactions (id, transaction_date, total)
+        `)
+        .order('exam_date', { ascending: false });
+      
+      if (error) throw error;
+      return data as PrescriptionWithTransactions[];
     },
   });
 }
