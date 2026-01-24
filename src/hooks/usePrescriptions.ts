@@ -73,6 +73,32 @@ export function useCreatePrescription() {
   });
 }
 
+export function useUpdatePrescription() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, ...updates }: Partial<Prescription> & { id: string }) => {
+      const { data, error } = await supabase
+        .from('prescriptions')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['prescriptions'] });
+      queryClient.invalidateQueries({ queryKey: ['transactions'] });
+      toast.success('驗光記錄更新成功');
+    },
+    onError: (error) => {
+      toast.error('更新驗光記錄失敗：' + error.message);
+    },
+  });
+}
+
 export function useDeletePrescription() {
   const queryClient = useQueryClient();
 

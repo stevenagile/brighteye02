@@ -1,10 +1,13 @@
 import { MainLayout } from '@/components/layout/MainLayout';
 import { usePrescriptions, PrescriptionWithMember } from '@/hooks/usePrescriptions';
-import { Eye, User, Plus, Calendar, DollarSign, UserCheck } from 'lucide-react';
+import { useTransactions } from '@/hooks/useTransactions';
+import { Eye, User, Plus, Calendar, DollarSign, UserCheck, Pencil, Link2 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import { AddPrescriptionDialog } from '@/components/prescriptions/AddPrescriptionDialog';
+import { EditPrescriptionDialog } from '@/components/prescriptions/EditPrescriptionDialog';
+import { Badge } from '@/components/ui/badge';
 import {
   Table,
   TableBody,
@@ -22,8 +25,15 @@ import {
 
 export default function Prescriptions() {
   const { data: prescriptions, isLoading } = usePrescriptions();
+  const { data: transactions } = useTransactions();
   const [showAddDialog, setShowAddDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
   const [selectedPrescription, setSelectedPrescription] = useState<PrescriptionWithMember | null>(null);
+
+  // 檢查驗光記錄是否有關聯的交易
+  const getLinkedTransaction = (prescriptionId: string) => {
+    return transactions?.find(t => t.prescription_id === prescriptionId);
+  };
 
   if (isLoading) {
     return (
@@ -154,18 +164,50 @@ export default function Prescriptions() {
         {/* Add Prescription Dialog */}
         <AddPrescriptionDialog open={showAddDialog} onOpenChange={setShowAddDialog} />
 
+        {/* Edit Prescription Dialog */}
+        <EditPrescriptionDialog 
+          open={showEditDialog} 
+          onOpenChange={setShowEditDialog}
+          prescription={selectedPrescription}
+        />
+
         {/* Prescription Detail Dialog */}
-        <Dialog open={!!selectedPrescription} onOpenChange={() => setSelectedPrescription(null)}>
+        <Dialog open={!!selectedPrescription && !showEditDialog} onOpenChange={() => setSelectedPrescription(null)}>
           <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <Eye className="w-5 h-5" />
-                驗光記錄詳情
-              </DialogTitle>
+              <div className="flex items-center justify-between">
+                <DialogTitle className="flex items-center gap-2">
+                  <Eye className="w-5 h-5" />
+                  驗光記錄詳情
+                </DialogTitle>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setShowEditDialog(true)}
+                  className="flex items-center gap-2"
+                >
+                  <Pencil className="w-4 h-4" />
+                  編輯
+                </Button>
+              </div>
             </DialogHeader>
 
             {selectedPrescription && (
               <div className="space-y-6">
+                {/* 關聯交易提示 */}
+                {getLinkedTransaction(selectedPrescription.id) && (
+                  <div className="flex items-center gap-2 p-3 bg-primary/10 rounded-lg border border-primary/20">
+                    <Link2 className="w-4 h-4 text-primary" />
+                    <span className="text-sm text-foreground">
+                      已連結至交易記錄
+                    </span>
+                    <Badge variant="secondary" className="text-xs">
+                      {getLinkedTransaction(selectedPrescription.id)?.transaction_date} - 
+                      NT${Number(getLinkedTransaction(selectedPrescription.id)?.total || 0).toLocaleString()}
+                    </Badge>
+                  </div>
+                )}
+
                 {/* 基本資訊 */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 bg-muted/50 rounded-lg">
                   <div className="flex items-center gap-2">
