@@ -1,10 +1,90 @@
+import { useState, useEffect } from 'react';
 import { MainLayout } from '@/components/layout/MainLayout';
-import { Store, Users, Bell } from 'lucide-react';
+import { Store, Users, Bell, Save, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { Button } from '@/components/ui/button';
+import {
+  useStoreInfo,
+  useMemberLevels,
+  useNotificationSettings,
+  useUpdateStoreInfo,
+  useUpdateMemberLevels,
+  useUpdateNotifications,
+  StoreInfo,
+  MemberLevels,
+  NotificationSettings,
+} from '@/hooks/useSettings';
 
 export default function Settings() {
+  // Store Info State
+  const { data: storeInfo, isLoading: loadingStore } = useStoreInfo();
+  const updateStoreInfo = useUpdateStoreInfo();
+  const [storeForm, setStoreForm] = useState<StoreInfo>({
+    name: '',
+    phone: '',
+    address: '',
+  });
+
+  // Member Levels State
+  const { data: memberLevels, isLoading: loadingLevels } = useMemberLevels();
+  const updateMemberLevels = useUpdateMemberLevels();
+  const [levelsForm, setLevelsForm] = useState<MemberLevels>({
+    gold: { discount: 0.9, points_multiplier: 2 },
+    silver: { discount: 0.95, points_multiplier: 1.5 },
+    black: { discount: 0.85, points_multiplier: 3 },
+  });
+
+  // Notification State
+  const { data: notifications, isLoading: loadingNotifications } = useNotificationSettings();
+  const updateNotifications = useUpdateNotifications();
+  const [notificationsForm, setNotificationsForm] = useState<NotificationSettings>({
+    low_stock: true,
+    birthday_reminder: true,
+    daily_report: false,
+  });
+
+  // Sync form state with fetched data
+  useEffect(() => {
+    if (storeInfo) {
+      setStoreForm(storeInfo);
+    }
+  }, [storeInfo]);
+
+  useEffect(() => {
+    if (memberLevels) {
+      setLevelsForm(memberLevels);
+    }
+  }, [memberLevels]);
+
+  useEffect(() => {
+    if (notifications) {
+      setNotificationsForm(notifications);
+    }
+  }, [notifications]);
+
+  const handleSaveStore = () => {
+    updateStoreInfo.mutate(storeForm);
+  };
+
+  const handleSaveLevels = () => {
+    updateMemberLevels.mutate(levelsForm);
+  };
+
+  const handleSaveNotifications = () => {
+    updateNotifications.mutate(notificationsForm);
+  };
+
+  const discountToDisplay = (discount: number) => {
+    return `${Math.round(discount * 100) / 10}折`;
+  };
+
+  const displayToDiscount = (display: string): number => {
+    const num = parseFloat(display.replace('折', ''));
+    return num / 10;
+  };
+
   return (
     <MainLayout>
       <div className="space-y-8 animate-fade-in">
@@ -17,122 +97,292 @@ export default function Settings() {
         <div className="grid gap-6">
           {/* Store Info */}
           <div className="stat-card">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="flex items-center justify-center w-10 h-10 rounded-xl gradient-primary">
-                <Store className="w-5 h-5 text-primary-foreground" />
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="flex items-center justify-center w-10 h-10 rounded-xl gradient-primary">
+                  <Store className="w-5 h-5 text-primary-foreground" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-foreground">店鋪資訊</h3>
+                  <p className="text-sm text-muted-foreground">基本店鋪資料設定</p>
+                </div>
               </div>
-              <div>
-                <h3 className="text-lg font-semibold text-foreground">店鋪資訊</h3>
-                <p className="text-sm text-muted-foreground">基本店鋪資料設定</p>
-              </div>
+              <Button
+                onClick={handleSaveStore}
+                disabled={updateStoreInfo.isPending || loadingStore}
+                size="sm"
+              >
+                {updateStoreInfo.isPending ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Save className="w-4 h-4 mr-2" />
+                )}
+                儲存
+              </Button>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <Label htmlFor="storeName">店鋪名稱</Label>
-                <Input id="storeName" defaultValue="伯洸眼鏡行" />
+            {loadingStore ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="phone">聯絡電話</Label>
-                <Input id="phone" defaultValue="02-12345678" />
+            ) : (
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label htmlFor="storeName">店鋪名稱</Label>
+                  <Input
+                    id="storeName"
+                    value={storeForm.name}
+                    onChange={(e) => setStoreForm({ ...storeForm, name: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="phone">聯絡電話</Label>
+                  <Input
+                    id="phone"
+                    value={storeForm.phone}
+                    onChange={(e) => setStoreForm({ ...storeForm, phone: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2 md:col-span-2">
+                  <Label htmlFor="address">店鋪地址</Label>
+                  <Input
+                    id="address"
+                    value={storeForm.address}
+                    onChange={(e) => setStoreForm({ ...storeForm, address: e.target.value })}
+                  />
+                </div>
               </div>
-              <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="address">店鋪地址</Label>
-                <Input id="address" defaultValue="台北市XX區XX路XX號" />
-              </div>
-            </div>
+            )}
           </div>
 
           {/* Member Settings */}
           <div className="stat-card">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="flex items-center justify-center w-10 h-10 rounded-xl gradient-gold">
-                <Users className="w-5 h-5 text-primary-foreground" />
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="flex items-center justify-center w-10 h-10 rounded-xl gradient-gold">
+                  <Users className="w-5 h-5 text-primary-foreground" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-foreground">會員等級設定</h3>
+                  <p className="text-sm text-muted-foreground">配置各等級會員的權益</p>
+                </div>
               </div>
-              <div>
-                <h3 className="text-lg font-semibold text-foreground">會員等級設定</h3>
-                <p className="text-sm text-muted-foreground">配置各等級會員的權益</p>
-              </div>
+              <Button
+                onClick={handleSaveLevels}
+                disabled={updateMemberLevels.isPending || loadingLevels}
+                size="sm"
+              >
+                {updateMemberLevels.isPending ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Save className="w-4 h-4 mr-2" />
+                )}
+                儲存
+              </Button>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-6">
-              <div className="p-4 border border-border rounded-xl">
-                <div className="member-badge-gold mb-4">金卡會員</div>
-                <div className="space-y-3">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">消費折扣</span>
-                    <span className="font-medium">9折</span>
+            {loadingLevels ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+              </div>
+            ) : (
+              <div className="grid md:grid-cols-3 gap-6">
+                {/* Gold Member */}
+                <div className="p-4 border border-border rounded-xl">
+                  <div className="member-badge-gold mb-4">金卡會員</div>
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label className="text-sm text-muted-foreground">消費折扣</Label>
+                      <Input
+                        value={discountToDisplay(levelsForm.gold.discount)}
+                        onChange={(e) =>
+                          setLevelsForm({
+                            ...levelsForm,
+                            gold: {
+                              ...levelsForm.gold,
+                              discount: displayToDiscount(e.target.value) || levelsForm.gold.discount,
+                            },
+                          })
+                        }
+                        placeholder="9折"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-sm text-muted-foreground">積分倍率</Label>
+                      <Input
+                        type="number"
+                        step="0.5"
+                        min="1"
+                        value={levelsForm.gold.points_multiplier}
+                        onChange={(e) =>
+                          setLevelsForm({
+                            ...levelsForm,
+                            gold: {
+                              ...levelsForm.gold,
+                              points_multiplier: parseFloat(e.target.value) || 1,
+                            },
+                          })
+                        }
+                      />
+                    </div>
                   </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">積分倍率</span>
-                    <span className="font-medium">2倍</span>
+                </div>
+
+                {/* Silver Member */}
+                <div className="p-4 border border-border rounded-xl">
+                  <div className="member-badge-silver mb-4">銀卡會員</div>
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label className="text-sm text-muted-foreground">消費折扣</Label>
+                      <Input
+                        value={discountToDisplay(levelsForm.silver.discount)}
+                        onChange={(e) =>
+                          setLevelsForm({
+                            ...levelsForm,
+                            silver: {
+                              ...levelsForm.silver,
+                              discount: displayToDiscount(e.target.value) || levelsForm.silver.discount,
+                            },
+                          })
+                        }
+                        placeholder="95折"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-sm text-muted-foreground">積分倍率</Label>
+                      <Input
+                        type="number"
+                        step="0.5"
+                        min="1"
+                        value={levelsForm.silver.points_multiplier}
+                        onChange={(e) =>
+                          setLevelsForm({
+                            ...levelsForm,
+                            silver: {
+                              ...levelsForm.silver,
+                              points_multiplier: parseFloat(e.target.value) || 1,
+                            },
+                          })
+                        }
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Black Member */}
+                <div className="p-4 border border-border rounded-xl">
+                  <div className="member-badge-black mb-4">黑卡會員</div>
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label className="text-sm text-muted-foreground">消費折扣</Label>
+                      <Input
+                        value={discountToDisplay(levelsForm.black.discount)}
+                        onChange={(e) =>
+                          setLevelsForm({
+                            ...levelsForm,
+                            black: {
+                              ...levelsForm.black,
+                              discount: displayToDiscount(e.target.value) || levelsForm.black.discount,
+                            },
+                          })
+                        }
+                        placeholder="85折"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-sm text-muted-foreground">積分倍率</Label>
+                      <Input
+                        type="number"
+                        step="0.5"
+                        min="1"
+                        value={levelsForm.black.points_multiplier}
+                        onChange={(e) =>
+                          setLevelsForm({
+                            ...levelsForm,
+                            black: {
+                              ...levelsForm.black,
+                              points_multiplier: parseFloat(e.target.value) || 1,
+                            },
+                          })
+                        }
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
-              <div className="p-4 border border-border rounded-xl">
-                <div className="member-badge-silver mb-4">銀卡會員</div>
-                <div className="space-y-3">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">消費折扣</span>
-                    <span className="font-medium">95折</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">積分倍率</span>
-                    <span className="font-medium">1.5倍</span>
-                  </div>
-                </div>
-              </div>
-              <div className="p-4 border border-border rounded-xl">
-                <div className="member-badge-black mb-4">黑卡會員</div>
-                <div className="space-y-3">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">消費折扣</span>
-                    <span className="font-medium">85折</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">積分倍率</span>
-                    <span className="font-medium">3倍</span>
-                  </div>
-                </div>
-              </div>
-            </div>
+            )}
           </div>
 
           {/* Notifications */}
           <div className="stat-card">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-secondary">
-                <Bell className="w-5 h-5 text-primary" />
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-secondary">
+                  <Bell className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-foreground">通知設定</h3>
+                  <p className="text-sm text-muted-foreground">配置系統通知和提醒</p>
+                </div>
               </div>
-              <div>
-                <h3 className="text-lg font-semibold text-foreground">通知設定</h3>
-                <p className="text-sm text-muted-foreground">配置系統通知和提醒</p>
-              </div>
+              <Button
+                onClick={handleSaveNotifications}
+                disabled={updateNotifications.isPending || loadingNotifications}
+                size="sm"
+              >
+                {updateNotifications.isPending ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Save className="w-4 h-4 mr-2" />
+                )}
+                儲存
+              </Button>
             </div>
 
-            <div className="space-y-4">
-              <div className="flex items-center justify-between p-4 border border-border rounded-xl">
-                <div>
-                  <p className="font-medium text-foreground">低庫存提醒</p>
-                  <p className="text-sm text-muted-foreground">當商品庫存低於閾值時通知</p>
-                </div>
-                <Switch defaultChecked />
+            {loadingNotifications ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
               </div>
-              <div className="flex items-center justify-between p-4 border border-border rounded-xl">
-                <div>
-                  <p className="font-medium text-foreground">會員生日提醒</p>
-                  <p className="text-sm text-muted-foreground">在會員生日前一週發送提醒</p>
+            ) : (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-4 border border-border rounded-xl">
+                  <div>
+                    <p className="font-medium text-foreground">低庫存提醒</p>
+                    <p className="text-sm text-muted-foreground">當商品庫存低於閾值時通知</p>
+                  </div>
+                  <Switch
+                    checked={notificationsForm.low_stock}
+                    onCheckedChange={(checked) =>
+                      setNotificationsForm({ ...notificationsForm, low_stock: checked })
+                    }
+                  />
                 </div>
-                <Switch defaultChecked />
-              </div>
-              <div className="flex items-center justify-between p-4 border border-border rounded-xl">
-                <div>
-                  <p className="font-medium text-foreground">每日銷售報告</p>
-                  <p className="text-sm text-muted-foreground">每日發送銷售匯總郵件</p>
+                <div className="flex items-center justify-between p-4 border border-border rounded-xl">
+                  <div>
+                    <p className="font-medium text-foreground">會員生日提醒</p>
+                    <p className="text-sm text-muted-foreground">在會員生日前一週發送提醒</p>
+                  </div>
+                  <Switch
+                    checked={notificationsForm.birthday_reminder}
+                    onCheckedChange={(checked) =>
+                      setNotificationsForm({ ...notificationsForm, birthday_reminder: checked })
+                    }
+                  />
                 </div>
-                <Switch />
+                <div className="flex items-center justify-between p-4 border border-border rounded-xl">
+                  <div>
+                    <p className="font-medium text-foreground">每日銷售報告</p>
+                    <p className="text-sm text-muted-foreground">每日發送銷售匯總郵件</p>
+                  </div>
+                  <Switch
+                    checked={notificationsForm.daily_report}
+                    onCheckedChange={(checked) =>
+                      setNotificationsForm({ ...notificationsForm, daily_report: checked })
+                    }
+                  />
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </div>
