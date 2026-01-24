@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useCreatePrescription, PrescriptionInsert } from '@/hooks/usePrescriptions';
-import { useMembers } from '@/hooks/useMembers';
+import { useMembers, useUpdateMember, Member } from '@/hooks/useMembers';
 import {
   Dialog,
   DialogContent,
@@ -22,6 +22,8 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { MemberBadge } from '@/components/members/MemberBadge';
+import { Wallet } from 'lucide-react';
 
 interface AddPrescriptionDialogProps {
   open: boolean;
@@ -31,6 +33,7 @@ interface AddPrescriptionDialogProps {
 export function AddPrescriptionDialog({ open, onOpenChange }: AddPrescriptionDialogProps) {
   const { data: members } = useMembers();
   const createPrescription = useCreatePrescription();
+  const updateMember = useUpdateMember();
 
   const [formData, setFormData] = useState({
     member_id: '',
@@ -70,13 +73,28 @@ export function AddPrescriptionDialog({ open, onOpenChange }: AddPrescriptionDia
     left_pd: '',
     // 其他
     amount: '',
+    credit_used: '',
     examiner: '',
     notes: '',
   });
 
+  // 選中的會員
+  const selectedMember = members?.find(m => m.id === formData.member_id) || null;
+  const availableCredit = Number(selectedMember?.shopping_credit || 0);
+  const creditUsed = Number(formData.credit_used || 0);
+  const creditRemaining = availableCredit - creditUsed;
+
+  // 當會員變更時，重置購物金折抵
+  useEffect(() => {
+    setFormData(prev => ({ ...prev, credit_used: '' }));
+  }, [formData.member_id]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    const finalCreditUsed = Math.min(creditUsed, availableCredit);
+    const finalCreditRemaining = availableCredit - finalCreditUsed;
+
     const prescription: PrescriptionInsert = {
       member_id: formData.member_id,
       exam_date: formData.exam_date,
@@ -112,11 +130,21 @@ export function AddPrescriptionDialog({ open, onOpenChange }: AddPrescriptionDia
       left_add: formData.left_add ? Number(formData.left_add) : null,
       left_pd: formData.left_pd ? Number(formData.left_pd) : null,
       amount: formData.amount ? Number(formData.amount) : null,
+      credit_used: finalCreditUsed,
+      credit_remaining: finalCreditRemaining,
       examiner: formData.examiner || null,
       notes: formData.notes || null,
     };
 
     await createPrescription.mutateAsync(prescription);
+
+    // 同步更新會員購物金餘額
+    if (selectedMember && finalCreditUsed > 0) {
+      await updateMember.mutateAsync({
+        id: selectedMember.id,
+        shopping_credit: finalCreditRemaining,
+      });
+    }
 
     // Reset form
     setFormData({
@@ -154,6 +182,7 @@ export function AddPrescriptionDialog({ open, onOpenChange }: AddPrescriptionDia
       left_add: '',
       left_pd: '',
       amount: '',
+      credit_used: '',
       examiner: '',
       notes: '',
     });
@@ -380,6 +409,46 @@ export function AddPrescriptionDialog({ open, onOpenChange }: AddPrescriptionDia
                 />
               </div>
             </div>
+
+            {/* 會員等級與購物金資訊 */}
+            {selectedMember && (
+              <div className="p-4 bg-muted/50 rounded-lg border space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm text-muted-foreground">會員等級：</span>
+                    <MemberBadge level={selectedMember.level} size="sm" />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Wallet className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-sm text-muted-foreground">購物金餘額：</span>
+                    <span className="font-semibold text-primary">NT${availableCredit.toLocaleString()}</span>
+                  </div>
+                </div>
+
+                {availableCredit > 0 && (
+                  <div className="pt-3 border-t space-y-2">
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="credit_used">本次折抵購物金</Label>
+                      <span className="text-xs text-muted-foreground">
+                        折抵後剩餘: NT${creditRemaining >= 0 ? creditRemaining.toLocaleString() : 0}
+                      </span>
+                    </div>
+                    <Input
+                      id="credit_used"
+                      type="number"
+                      min="0"
+                      max={availableCredit}
+                      placeholder={`最多可折抵 ${availableCredit}`}
+                      value={formData.credit_used}
+                      onChange={(e) => {
+                        const value = Math.min(Number(e.target.value), availableCredit);
+                        setFormData({ ...formData, credit_used: value > 0 ? String(value) : e.target.value });
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* 服務項目 */}
             <div className="space-y-2">

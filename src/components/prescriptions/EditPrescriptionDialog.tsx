@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useUpdatePrescription, Prescription } from '@/hooks/usePrescriptions';
 import { useTransactions } from '@/hooks/useTransactions';
+import { useMembers, useUpdateMember } from '@/hooks/useMembers';
 import {
   Dialog,
   DialogContent,
@@ -16,7 +17,15 @@ import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Link2 } from 'lucide-react';
+import { Link2, Wallet } from 'lucide-react';
+import { MemberBadge } from '@/components/members/MemberBadge';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 interface EditPrescriptionDialogProps {
   open: boolean;
@@ -26,10 +35,13 @@ interface EditPrescriptionDialogProps {
 
 export function EditPrescriptionDialog({ open, onOpenChange, prescription }: EditPrescriptionDialogProps) {
   const updatePrescription = useUpdatePrescription();
+  const updateMember = useUpdateMember();
   const { data: transactions } = useTransactions();
+  const { data: members } = useMembers();
 
   const [formData, setFormData] = useState({
     exam_date: '',
+    service_type: '驗光',
     right_sc: '',
     right_cc: '',
     right_best_s: '',
@@ -61,17 +73,28 @@ export function EditPrescriptionDialog({ open, onOpenChange, prescription }: Edi
     left_add: '',
     left_pd: '',
     amount: '',
+    credit_used: '',
     examiner: '',
     notes: '',
   });
 
-  // 找到關聯的交易記錄
+  // 找到關聯的交易記錄和會員資訊
   const linkedTransaction = transactions?.find(t => t.prescription_id === prescription?.id);
+  const prescriptionMember = members?.find(m => m.id === prescription?.member_id) || null;
+
+  // 計算可用購物金：會員當前餘額 + 原本已折抵的金額
+  const originalCreditUsed = Number((prescription as any)?.credit_used || 0);
+  const memberCurrentCredit = Number(prescriptionMember?.shopping_credit || 0);
+  const totalAvailableCredit = memberCurrentCredit + originalCreditUsed;
+  const newCreditUsed = Number(formData.credit_used || 0);
+  const creditDifference = newCreditUsed - originalCreditUsed;
+  const creditRemaining = totalAvailableCredit - newCreditUsed;
 
   useEffect(() => {
     if (prescription) {
       setFormData({
         exam_date: prescription.exam_date || '',
+        service_type: (prescription as any).service_type || '驗光',
         right_sc: prescription.right_sc || '',
         right_cc: prescription.right_cc || '',
         right_best_s: prescription.right_best_s?.toString() || '',
@@ -103,6 +126,7 @@ export function EditPrescriptionDialog({ open, onOpenChange, prescription }: Edi
         left_add: prescription.left_add?.toString() || '',
         left_pd: prescription.left_pd?.toString() || '',
         amount: prescription.amount?.toString() || '',
+        credit_used: ((prescription as any).credit_used || 0).toString(),
         examiner: prescription.examiner || '',
         notes: prescription.notes || '',
       });
@@ -113,9 +137,13 @@ export function EditPrescriptionDialog({ open, onOpenChange, prescription }: Edi
     e.preventDefault();
     if (!prescription) return;
 
+    const finalCreditUsed = Math.min(newCreditUsed, totalAvailableCredit);
+    const finalCreditRemaining = totalAvailableCredit - finalCreditUsed;
+
     await updatePrescription.mutateAsync({
       id: prescription.id,
       exam_date: formData.exam_date,
+      service_type: formData.service_type,
       right_sc: formData.right_sc || null,
       right_cc: formData.right_cc || null,
       right_best_s: formData.right_best_s ? Number(formData.right_best_s) : null,
@@ -147,9 +175,19 @@ export function EditPrescriptionDialog({ open, onOpenChange, prescription }: Edi
       left_add: formData.left_add ? Number(formData.left_add) : null,
       left_pd: formData.left_pd ? Number(formData.left_pd) : null,
       amount: formData.amount ? Number(formData.amount) : null,
+      credit_used: finalCreditUsed,
+      credit_remaining: finalCreditRemaining,
       examiner: formData.examiner || null,
       notes: formData.notes || null,
     });
+
+    // 同步更新會員購物金餘額
+    if (prescriptionMember && creditDifference !== 0) {
+      await updateMember.mutateAsync({
+        id: prescriptionMember.id,
+        shopping_credit: memberCurrentCredit - creditDifference,
+      });
+    }
 
     onOpenChange(false);
   };
@@ -351,15 +389,74 @@ export function EditPrescriptionDialog({ open, onOpenChange, prescription }: Edi
               </div>
             )}
 
-            {/* 檢查日期 */}
-            <div className="space-y-2">
-              <Label htmlFor="exam_date">檢查日期</Label>
-              <Input
-                id="exam_date"
-                type="date"
-                value={formData.exam_date}
-                onChange={(e) => setFormData({ ...formData, exam_date: e.target.value })}
-              />
+            {/* 會員等級與購物金資訊 */}
+            {prescriptionMember && (
+              <div className="p-4 bg-muted/50 rounded-lg border space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm text-muted-foreground">會員等級：</span>
+                    <MemberBadge level={prescriptionMember.level} size="sm" />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Wallet className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-sm text-muted-foreground">可用購物金：</span>
+                    <span className="font-semibold text-primary">NT${totalAvailableCredit.toLocaleString()}</span>
+                  </div>
+                </div>
+
+                {totalAvailableCredit > 0 && (
+                  <div className="pt-3 border-t space-y-2">
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="credit_used">折抵購物金</Label>
+                      <span className="text-xs text-muted-foreground">
+                        折抵後剩餘: NT${creditRemaining >= 0 ? creditRemaining.toLocaleString() : 0}
+                      </span>
+                    </div>
+                    <Input
+                      id="credit_used"
+                      type="number"
+                      min="0"
+                      max={totalAvailableCredit}
+                      placeholder={`最多可折抵 ${totalAvailableCredit}`}
+                      value={formData.credit_used}
+                      onChange={(e) => {
+                        const value = Math.min(Number(e.target.value), totalAvailableCredit);
+                        setFormData({ ...formData, credit_used: value >= 0 ? String(value) : e.target.value });
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* 檢查日期與服務項目 */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="exam_date">檢查日期</Label>
+                <Input
+                  id="exam_date"
+                  type="date"
+                  value={formData.exam_date}
+                  onChange={(e) => setFormData({ ...formData, exam_date: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>服務項目</Label>
+                <Select
+                  value={formData.service_type}
+                  onValueChange={(value) => setFormData({ ...formData, service_type: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="選擇服務項目" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="驗光">驗光</SelectItem>
+                    <SelectItem value="配鏡">配鏡</SelectItem>
+                    <SelectItem value="鏡架">鏡架</SelectItem>
+                    <SelectItem value="維護">維護</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
             {/* 左右眼 Tabs */}

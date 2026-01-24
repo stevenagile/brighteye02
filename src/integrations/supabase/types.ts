@@ -87,6 +87,8 @@ export type Database = {
         Row: {
           amount: number | null
           created_at: string
+          credit_remaining: number | null
+          credit_used: number | null
           exam_date: string
           examiner: string | null
           id: string
@@ -128,6 +130,8 @@ export type Database = {
         Insert: {
           amount?: number | null
           created_at?: string
+          credit_remaining?: number | null
+          credit_used?: number | null
           exam_date?: string
           examiner?: string | null
           id?: string
@@ -169,6 +173,8 @@ export type Database = {
         Update: {
           amount?: number | null
           created_at?: string
+          credit_remaining?: number | null
+          credit_used?: number | null
           exam_date?: string
           examiner?: string | null
           id?: string
