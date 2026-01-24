@@ -85,6 +85,16 @@ export default function Settings() {
     return num / 10;
   };
 
+  // 金額格式化：顯示千分位
+  const formatAmount = (value: number): string => {
+    return value.toLocaleString('zh-TW');
+  };
+
+  // 金額解析：移除千分位符號
+  const parseAmount = (value: string): number => {
+    return parseInt(value.replace(/,/g, '')) || 0;
+  };
+
   return (
     <MainLayout>
       <div className="space-y-8 animate-fade-in">
@@ -194,15 +204,15 @@ export default function Settings() {
                     <div className="space-y-2">
                       <Label className="text-sm text-muted-foreground">VIP 金額</Label>
                       <Input
-                        type="number"
-                        min="0"
-                        value={levelsForm.gold.vip_amount}
+                        type="text"
+                        inputMode="numeric"
+                        value={formatAmount(levelsForm.gold.vip_amount)}
                         onChange={(e) =>
                           setLevelsForm({
                             ...levelsForm,
                             gold: {
                               ...levelsForm.gold,
-                              vip_amount: parseInt(e.target.value) || 0,
+                              vip_amount: parseAmount(e.target.value),
                             },
                           })
                         }
@@ -252,15 +262,15 @@ export default function Settings() {
                     <div className="space-y-2">
                       <Label className="text-sm text-muted-foreground">VIP 金額</Label>
                       <Input
-                        type="number"
-                        min="0"
-                        value={levelsForm.silver.vip_amount}
+                        type="text"
+                        inputMode="numeric"
+                        value={formatAmount(levelsForm.silver.vip_amount)}
                         onChange={(e) =>
                           setLevelsForm({
                             ...levelsForm,
                             silver: {
                               ...levelsForm.silver,
-                              vip_amount: parseInt(e.target.value) || 0,
+                              vip_amount: parseAmount(e.target.value),
                             },
                           })
                         }
@@ -310,15 +320,15 @@ export default function Settings() {
                     <div className="space-y-2">
                       <Label className="text-sm text-muted-foreground">VIP 金額</Label>
                       <Input
-                        type="number"
-                        min="0"
-                        value={levelsForm.black.vip_amount}
+                        type="text"
+                        inputMode="numeric"
+                        value={formatAmount(levelsForm.black.vip_amount)}
                         onChange={(e) =>
                           setLevelsForm({
                             ...levelsForm,
                             black: {
                               ...levelsForm.black,
-                              vip_amount: parseInt(e.target.value) || 0,
+                              vip_amount: parseAmount(e.target.value),
                             },
                           })
                         }
