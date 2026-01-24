@@ -18,25 +18,23 @@ export default function Login() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Disable public registration - accounts must be created by admin
+    if (isSignUp) {
+      toast.error('帳號註冊已關閉。請聯繫管理員。');
+      return;
+    }
+    
     setIsLoading(true);
 
     try {
-      if (isSignUp) {
-        const { error } = await signUp(email, password);
-        if (error) {
-          toast.error('註冊失敗：' + error.message);
-        } else {
-          toast.success('註冊成功！');
-          navigate('/');
-        }
+      const { error } = await signIn(email, password);
+      if (error) {
+        // Use generic error message to prevent information leakage
+        toast.error('登入失敗。請檢查您的電子郵件和密碼。');
       } else {
-        const { error } = await signIn(email, password);
-        if (error) {
-          toast.error('登入失敗：' + error.message);
-        } else {
-          toast.success('登入成功！');
-          navigate('/');
-        }
+        toast.success('登入成功！');
+        navigate('/');
       }
     } finally {
       setIsLoading(false);
