@@ -1,11 +1,12 @@
 import { useMembers, MemberLevel } from '@/hooks/useMembers';
-import { Crown, Medal, Star } from 'lucide-react';
+import { Crown, Medal, Star, User } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const levelConfig: Record<MemberLevel, {
   icon: typeof Crown;
   label: string;
 }> = {
+  regular: { icon: User, label: '一般客戶' },
   gold: { icon: Crown, label: '金卡會員' },
   silver: { icon: Medal, label: '銀卡會員' },
   black: { icon: Star, label: '黑卡會員' },
@@ -55,7 +56,8 @@ export function MemberLevelStats() {
                   <config.icon className="w-4 h-4" style={{
                     color: level === 'gold' ? 'hsl(45 93% 47%)' : 
                            level === 'silver' ? 'hsl(210 10% 60%)' : 
-                           'hsl(0 0% 15%)'
+                           level === 'black' ? 'hsl(0 0% 15%)' :
+                           'hsl(210 10% 40%)'
                   }} />
                   <span className="text-sm font-medium text-foreground">
                     {config.label}
@@ -74,7 +76,9 @@ export function MemberLevelStats() {
                       ? 'linear-gradient(90deg, hsl(38 92% 55%), hsl(45 90% 60%))' 
                       : level === 'silver'
                       ? 'linear-gradient(90deg, hsl(210 10% 55%), hsl(210 10% 70%))'
-                      : 'linear-gradient(90deg, hsl(0 0% 20%), hsl(0 0% 35%))'
+                      : level === 'black'
+                      ? 'linear-gradient(90deg, hsl(0 0% 20%), hsl(0 0% 35%))'
+                      : 'linear-gradient(90deg, hsl(210 10% 50%), hsl(210 10% 65%))'
                   }}
                 />
               </div>

@@ -62,7 +62,7 @@ export function AddMemberDialog({ open, onOpenChange }: AddMemberDialogProps) {
     name: '',
     phone: '',
     email: '',
-    level: 'silver' as MemberLevel,
+    level: 'regular' as MemberLevel,
     shopping_credit: 0,
     coupon_count: 0,
     vip_amount: 0,
@@ -116,7 +116,7 @@ export function AddMemberDialog({ open, onOpenChange }: AddMemberDialogProps) {
       name: '',
       phone: '',
       email: '',
-      level: 'silver',
+      level: 'regular',
       shopping_credit: 0,
       coupon_count: 0,
       vip_amount: 0,
@@ -255,13 +255,14 @@ export function AddMemberDialog({ open, onOpenChange }: AddMemberDialogProps) {
                 <div className="space-y-2">
                   <Label htmlFor="level">VIP 等級</Label>
                   <Select
-                    value={(formData.level || 'silver') as MemberLevel}
+                    value={(formData.level || 'regular') as MemberLevel}
                     onValueChange={(value: MemberLevel) => handleLevelChange(value)}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="VIP 銀卡" />
+                      <SelectValue placeholder="一般客戶" />
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem value="regular">一般客戶</SelectItem>
                       <SelectItem value="silver">VIP 銀卡</SelectItem>
                       <SelectItem value="gold">VIP 金卡</SelectItem>
                       <SelectItem value="black">VIP 黑卡</SelectItem>
