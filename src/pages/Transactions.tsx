@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { usePrescriptionsWithTransactions, Prescription } from '@/hooks/usePrescriptions';
-import { useMembers } from '@/hooks/useMembers';
-import { Eye, Plus, Link2, Edit } from 'lucide-react';
+import { useMembers, Member } from '@/hooks/useMembers';
+import { Eye, Plus, Link2, Edit, Wallet } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { AddPrescriptionDialog } from '@/components/prescriptions/AddPrescriptionDialog';
 import { EditPrescriptionDialog } from '@/components/prescriptions/EditPrescriptionDialog';
+import { MemberBadge } from '@/components/members/MemberBadge';
 import {
   Table,
   TableBody,
@@ -32,10 +33,14 @@ export default function Transactions() {
 
   const totalPrescriptionAmount = prescriptions?.reduce((sum, p) => sum + Number(p.amount || 0), 0) || 0;
 
+  const getMember = (memberId: string | null): Member | null => {
+    if (!memberId) return null;
+    return members?.find(m => m.id === memberId) || null;
+  };
+
   const getMemberName = (memberId: string | null) => {
-    if (!memberId) return '非會員';
-    const member = members?.find(m => m.id === memberId);
-    return member?.name || '未知會員';
+    const member = getMember(memberId);
+    return member?.name || '非會員';
   };
 
   if (isLoading) {
@@ -97,17 +102,19 @@ export default function Transactions() {
               <Table>
                 <TableHeader>
                   <TableRow className="bg-muted/50">
-                    <TableHead className="font-semibold">會員 / 日期</TableHead>
+                    <TableHead className="font-semibold">會員 / 等級</TableHead>
                     <TableHead className="font-semibold">服務項目</TableHead>
                     <TableHead className="font-semibold">右眼 (OD)</TableHead>
                     <TableHead className="font-semibold">左眼 (OS)</TableHead>
                     <TableHead className="font-semibold">驗光師</TableHead>
+                    <TableHead className="font-semibold text-right">購物金折抵</TableHead>
                     <TableHead className="font-semibold text-right">金額</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {prescriptions?.map((prescription) => {
                     const linkedTransaction = prescription.transactions?.[0];
+                    const member = getMember(prescription.member_id);
                     
                     return (
                       <TableRow 
@@ -116,7 +123,7 @@ export default function Transactions() {
                         onClick={() => setSelectedPrescription(prescription)}
                       >
                         <TableCell>
-                          <div>
+                          <div className="space-y-1">
                             <div className="flex items-center gap-2">
                               <p className="font-medium text-foreground">
                                 {getMemberName(prescription.member_id)}
@@ -128,6 +135,9 @@ export default function Transactions() {
                                 </Badge>
                               )}
                             </div>
+                            {member && (
+                              <MemberBadge level={member.level} size="sm" />
+                            )}
                             <p className="text-sm text-muted-foreground">{prescription.exam_date}</p>
                           </div>
                         </TableCell>
@@ -164,6 +174,16 @@ export default function Transactions() {
                         </TableCell>
                         <TableCell className="text-muted-foreground">
                           {prescription.examiner || '-'}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {Number((prescription as any).credit_used || 0) > 0 ? (
+                            <div className="flex items-center justify-end gap-1 text-primary">
+                              <Wallet className="w-3 h-3" />
+                              <span>-${Number((prescription as any).credit_used).toLocaleString()}</span>
+                            </div>
+                          ) : (
+                            <span className="text-muted-foreground">-</span>
+                          )}
                         </TableCell>
                         <TableCell className="text-right">
                           <p className="font-semibold text-foreground">
@@ -208,13 +228,23 @@ export default function Transactions() {
               </DialogTitle>
             </DialogHeader>
 
-            {selectedPrescription && (
+            {selectedPrescription && (() => {
+              const selectedMember = getMember(selectedPrescription.member_id);
+              return (
               <div className="space-y-6">
                 {/* Basic Info */}
                 <div className="grid grid-cols-2 gap-4 p-4 bg-muted/50 rounded-lg">
                   <div>
                     <p className="text-sm text-muted-foreground">會員</p>
                     <p className="font-medium">{getMemberName(selectedPrescription.member_id)}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">會員等級</p>
+                    {selectedMember ? (
+                      <MemberBadge level={selectedMember.level} size="sm" />
+                    ) : (
+                      <p className="text-muted-foreground">-</p>
+                    )}
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">驗光日期</p>
@@ -233,6 +263,26 @@ export default function Transactions() {
                     <p className="font-bold text-primary">NT${Number(selectedPrescription.amount || 0).toLocaleString()}</p>
                   </div>
                 </div>
+
+                {/* 購物金折抵 */}
+                {Number((selectedPrescription as any).credit_used || 0) > 0 && (
+                  <div className="p-4 bg-accent/50 rounded-lg border border-accent">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Wallet className="w-4 h-4 text-primary" />
+                      <span className="font-medium">購物金折抵明細</span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <p className="text-muted-foreground">本次折抵</p>
+                        <p className="font-semibold text-primary">-NT${Number((selectedPrescription as any).credit_used || 0).toLocaleString()}</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">折抵後剩餘</p>
+                        <p className="font-semibold">NT${Number((selectedPrescription as any).credit_remaining || 0).toLocaleString()}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {/* Right Eye (OD) */}
                 <div className="space-y-3">
@@ -328,7 +378,7 @@ export default function Transactions() {
                   </div>
                 )}
               </div>
-            )}
+            );})()}
           </DialogContent>
         </Dialog>
 
