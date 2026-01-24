@@ -11,6 +11,7 @@ export interface StoreInfo {
 export interface MemberLevelConfig {
   discount: number;
   points_multiplier: number;
+  vip_amount: number;
 }
 
 export interface MemberLevels {

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useUpdateMember, Member, MemberLevel } from '@/hooks/useMembers';
+import { useMemberLevels } from '@/hooks/useSettings';
 import {
   Dialog,
   DialogContent,
@@ -75,7 +76,16 @@ export function EditMemberDialog({ member, open, onOpenChange }: EditMemberDialo
   });
 
   const updateMember = useUpdateMember();
+  const { data: memberLevels } = useMemberLevels();
 
+  const handleLevelChange = (level: MemberLevel) => {
+    const vipAmount = memberLevels?.[level]?.vip_amount ?? formData.vip_amount;
+    setFormData({ 
+      ...formData, 
+      level, 
+      vip_amount: vipAmount 
+    });
+  };
   useEffect(() => {
     if (member) {
       setFormData({
@@ -250,7 +260,7 @@ export function EditMemberDialog({ member, open, onOpenChange }: EditMemberDialo
                   <Label htmlFor="edit-level">VIP 等級</Label>
                   <Select
                     value={formData.level}
-                    onValueChange={(value: MemberLevel) => setFormData({ ...formData, level: value })}
+                    onValueChange={(value: MemberLevel) => handleLevelChange(value)}
                   >
                     <SelectTrigger>
                       <SelectValue />
