@@ -31,9 +31,9 @@ export default function Settings() {
   const { data: memberLevels, isLoading: loadingLevels } = useMemberLevels();
   const updateMemberLevels = useUpdateMemberLevels();
   const [levelsForm, setLevelsForm] = useState<MemberLevels>({
-    gold: { discount: 0.9, points_multiplier: 2, vip_amount: 30000 },
-    silver: { discount: 0.95, points_multiplier: 1.5, vip_amount: 10000 },
-    black: { discount: 0.85, points_multiplier: 3, vip_amount: 50000 },
+    gold: { discount: 0.9, points_multiplier: 2, vip_amount: 30000, shopping_credit: 3000 },
+    silver: { discount: 0.95, points_multiplier: 1.5, vip_amount: 10000, shopping_credit: 1000 },
+    black: { discount: 0.85, points_multiplier: 3, vip_amount: 50000, shopping_credit: 5000 },
   });
 
   // Notification State
@@ -219,6 +219,23 @@ export default function Settings() {
                       />
                     </div>
                     <div className="space-y-2">
+                      <Label className="text-sm text-muted-foreground">購物金</Label>
+                      <Input
+                        type="text"
+                        inputMode="numeric"
+                        value={formatAmount(levelsForm.gold.shopping_credit ?? 0)}
+                        onChange={(e) =>
+                          setLevelsForm({
+                            ...levelsForm,
+                            gold: {
+                              ...levelsForm.gold,
+                              shopping_credit: parseAmount(e.target.value),
+                            },
+                          })
+                        }
+                      />
+                    </div>
+                    <div className="space-y-2">
                       <Label className="text-sm text-muted-foreground">消費折扣</Label>
                       <Input
                         value={discountToDisplay(levelsForm.gold.discount)}
@@ -277,6 +294,23 @@ export default function Settings() {
                       />
                     </div>
                     <div className="space-y-2">
+                      <Label className="text-sm text-muted-foreground">購物金</Label>
+                      <Input
+                        type="text"
+                        inputMode="numeric"
+                        value={formatAmount(levelsForm.silver.shopping_credit ?? 0)}
+                        onChange={(e) =>
+                          setLevelsForm({
+                            ...levelsForm,
+                            silver: {
+                              ...levelsForm.silver,
+                              shopping_credit: parseAmount(e.target.value),
+                            },
+                          })
+                        }
+                      />
+                    </div>
+                    <div className="space-y-2">
                       <Label className="text-sm text-muted-foreground">消費折扣</Label>
                       <Input
                         value={discountToDisplay(levelsForm.silver.discount)}
@@ -329,6 +363,23 @@ export default function Settings() {
                             black: {
                               ...levelsForm.black,
                               vip_amount: parseAmount(e.target.value),
+                            },
+                          })
+                        }
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-sm text-muted-foreground">購物金</Label>
+                      <Input
+                        type="text"
+                        inputMode="numeric"
+                        value={formatAmount(levelsForm.black.shopping_credit ?? 0)}
+                        onChange={(e) =>
+                          setLevelsForm({
+                            ...levelsForm,
+                            black: {
+                              ...levelsForm.black,
+                              shopping_credit: parseAmount(e.target.value),
                             },
                           })
                         }
