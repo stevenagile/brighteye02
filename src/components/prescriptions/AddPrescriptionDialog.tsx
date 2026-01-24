@@ -35,6 +35,7 @@ export function AddPrescriptionDialog({ open, onOpenChange }: AddPrescriptionDia
   const [formData, setFormData] = useState({
     member_id: '',
     exam_date: new Date().toISOString().split('T')[0],
+    service_type: '驗光',
     // 右眼
     right_sc: '',
     right_cc: '',
@@ -79,6 +80,7 @@ export function AddPrescriptionDialog({ open, onOpenChange }: AddPrescriptionDia
     const prescription: PrescriptionInsert = {
       member_id: formData.member_id,
       exam_date: formData.exam_date,
+      service_type: formData.service_type,
       right_sc: formData.right_sc || null,
       right_cc: formData.right_cc || null,
       right_best_s: formData.right_best_s ? Number(formData.right_best_s) : null,
@@ -120,6 +122,7 @@ export function AddPrescriptionDialog({ open, onOpenChange }: AddPrescriptionDia
     setFormData({
       member_id: '',
       exam_date: new Date().toISOString().split('T')[0],
+      service_type: '驗光',
       right_sc: '',
       right_cc: '',
       right_best_s: '',
@@ -376,6 +379,25 @@ export function AddPrescriptionDialog({ open, onOpenChange }: AddPrescriptionDia
                   onChange={(e) => setFormData({ ...formData, exam_date: e.target.value })}
                 />
               </div>
+            </div>
+
+            {/* 服務項目 */}
+            <div className="space-y-2">
+              <Label>服務項目</Label>
+              <Select
+                value={formData.service_type}
+                onValueChange={(value) => setFormData({ ...formData, service_type: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="選擇服務項目" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="驗光">驗光</SelectItem>
+                  <SelectItem value="配鏡">配鏡</SelectItem>
+                  <SelectItem value="鏡架">鏡架</SelectItem>
+                  <SelectItem value="維護">維護</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             {/* 左右眼 Tabs */}

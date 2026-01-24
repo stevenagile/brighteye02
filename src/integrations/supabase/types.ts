@@ -122,6 +122,7 @@ export type Database = {
           right_old_year: number | null
           right_pd: number | null
           right_sc: string | null
+          service_type: string | null
           updated_at: string
         }
         Insert: {
@@ -162,6 +163,7 @@ export type Database = {
           right_old_year?: number | null
           right_pd?: number | null
           right_sc?: string | null
+          service_type?: string | null
           updated_at?: string
         }
         Update: {
@@ -202,6 +204,7 @@ export type Database = {
           right_old_year?: number | null
           right_pd?: number | null
           right_sc?: string | null
+          service_type?: string | null
           updated_at?: string
         }
         Relationships: [
