@@ -82,11 +82,14 @@ export function AddMemberDialog({ open, onOpenChange }: AddMemberDialogProps) {
   const { data: memberLevels } = useMemberLevels();
 
   const handleLevelChange = (level: MemberLevel) => {
-    const vipAmount = memberLevels?.[level]?.vip_amount ?? 0;
+    const levelConfig = memberLevels?.[level];
+    const vipAmount = levelConfig?.vip_amount ?? 0;
+    const shoppingCredit = levelConfig?.shopping_credit ?? 0;
     setFormData({ 
       ...formData, 
       level, 
-      vip_amount: vipAmount 
+      vip_amount: vipAmount,
+      shopping_credit: shoppingCredit
     });
   };
   const handleSubmit = async (e: React.FormEvent) => {
