@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { MainLayout } from '@/components/layout/MainLayout';
-import { usePrescriptionsWithTransactions, Prescription } from '@/hooks/usePrescriptions';
+import { usePrescriptionsWithTransactions, Prescription, useDeletePrescription } from '@/hooks/usePrescriptions';
 import { useMembers, Member } from '@/hooks/useMembers';
-import { Eye, Plus, Link2, Edit, Wallet } from 'lucide-react';
+import { Eye, Plus, Link2, Edit, Wallet, Trash2 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -23,6 +23,17 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 export default function Transactions() {
   const { data: prescriptions, isLoading } = usePrescriptionsWithTransactions();
@@ -30,6 +41,15 @@ export default function Transactions() {
   const [showAddPrescription, setShowAddPrescription] = useState(false);
   const [selectedPrescription, setSelectedPrescription] = useState<Prescription | null>(null);
   const [editPrescription, setEditPrescription] = useState<Prescription | null>(null);
+  const deletePrescription = useDeletePrescription();
+
+  const handleDelete = (id: string) => {
+    deletePrescription.mutate(id, {
+      onSuccess: () => {
+        setSelectedPrescription(null);
+      },
+    });
+  };
 
   const totalPrescriptionAmount = prescriptions?.reduce((sum, p) => sum + Number(p.amount || 0), 0) || 0;
 
@@ -214,17 +234,44 @@ export default function Transactions() {
                   <Eye className="w-5 h-5" />
                   服務紀錄詳情
                 </span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    setEditPrescription(selectedPrescription);
-                    setSelectedPrescription(null);
-                  }}
-                >
-                  <Edit className="w-4 h-4 mr-1" />
-                  編輯
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setEditPrescription(selectedPrescription);
+                      setSelectedPrescription(null);
+                    }}
+                  >
+                    <Edit className="w-4 h-4 mr-1" />
+                    編輯
+                  </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="destructive" size="sm">
+                        <Trash2 className="w-4 h-4 mr-1" />
+                        刪除
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>確認刪除</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          確定要刪除此服務紀錄嗎？此操作無法復原。
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>取消</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => selectedPrescription && handleDelete(selectedPrescription.id)}
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                          確認刪除
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
               </DialogTitle>
             </DialogHeader>
 
