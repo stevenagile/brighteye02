@@ -1,0 +1,179 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 伯洸眼镜行管理系统设计系统 */
+
+@layer base {
+  :root {
+    /* 主背景 - 柔和灰白 */
+    --background: 210 20% 98%;
+    --foreground: 215 25% 15%;
+
+    /* 卡片 - 纯白带微妙阴影 */
+    --card: 0 0% 100%;
+    --card-foreground: 215 25% 15%;
+
+    /* 弹出层 */
+    --popover: 0 0% 100%;
+    --popover-foreground: 215 25% 15%;
+
+    /* 主色调 - 深青蓝 (专业医疗感) */
+    --primary: 195 70% 35%;
+    --primary-foreground: 0 0% 100%;
+
+    /* 次要色 - 浅青蓝 */
+    --secondary: 195 40% 95%;
+    --secondary-foreground: 195 70% 30%;
+
+    /* 柔和色调 */
+    --muted: 210 15% 94%;
+    --muted-foreground: 215 15% 50%;
+
+    /* 强调色 - 金色 (会员等级) */
+    --accent: 38 92% 50%;
+    --accent-foreground: 0 0% 100%;
+
+    /* 危险色 */
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* 边框和输入 */
+    --border: 210 20% 90%;
+    --input: 210 20% 90%;
+    --ring: 195 70% 45%;
+
+    --radius: 0.75rem;
+
+    /* 侧边栏 - 深色专业风格 */
+    --sidebar-background: 200 25% 18%;
+    --sidebar-foreground: 210 20% 90%;
+    --sidebar-primary: 195 70% 50%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 200 25% 25%;
+    --sidebar-accent-foreground: 210 20% 95%;
+    --sidebar-border: 200 20% 25%;
+    --sidebar-ring: 195 70% 50%;
+
+    /* 会员等级颜色 */
+    --member-gold: 45 93% 47%;
+    --member-gold-bg: 45 93% 95%;
+    --member-silver: 210 10% 60%;
+    --member-silver-bg: 210 10% 95%;
+    --member-black: 0 0% 15%;
+    --member-black-bg: 0 0% 92%;
+
+    /* 图表颜色 */
+    --chart-primary: 195 70% 45%;
+    --chart-secondary: 38 92% 55%;
+    --chart-success: 152 60% 45%;
+
+    /* 渐变 */
+    --gradient-primary: linear-gradient(135deg, hsl(195 70% 40%) 0%, hsl(200 60% 50%) 100%);
+    --gradient-gold: linear-gradient(135deg, hsl(38 92% 55%) 0%, hsl(45 90% 60%) 100%);
+    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(210 20% 99%) 100%);
+
+    /* 阴影 */
+    --shadow-sm: 0 1px 2px 0 hsl(215 25% 15% / 0.05);
+    --shadow-md: 0 4px 6px -1px hsl(215 25% 15% / 0.08), 0 2px 4px -2px hsl(215 25% 15% / 0.05);
+    --shadow-lg: 0 10px 15px -3px hsl(215 25% 15% / 0.08), 0 4px 6px -4px hsl(215 25% 15% / 0.05);
+    --shadow-card: 0 1px 3px hsl(215 25% 15% / 0.06), 0 4px 12px hsl(215 25% 15% / 0.04);
+  }
+
+  .dark {
+    --background: 215 25% 10%;
+    --foreground: 210 20% 95%;
+
+    --card: 215 25% 14%;
+    --card-foreground: 210 20% 95%;
+
+    --popover: 215 25% 14%;
+    --popover-foreground: 210 20% 95%;
+
+    --primary: 195 65% 50%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 215 25% 20%;
+    --secondary-foreground: 195 65% 60%;
+
+    --muted: 215 25% 18%;
+    --muted-foreground: 215 15% 60%;
+
+    --accent: 38 92% 55%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 72% 45%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 215 25% 20%;
+    --input: 215 25% 20%;
+    --ring: 195 65% 50%;
+
+    --sidebar-background: 215 30% 8%;
+    --sidebar-foreground: 210 20% 90%;
+    --sidebar-primary: 195 65% 55%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 215 30% 15%;
+    --sidebar-accent-foreground: 210 20% 95%;
+    --sidebar-border: 215 25% 15%;
+    --sidebar-ring: 195 65% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family: 'Noto Sans SC', system-ui, sans-serif;
+  }
+}
+
+@layer components {
+  .stat-card {
+    @apply bg-card rounded-xl p-6 border border-border;
+    box-shadow: var(--shadow-card);
+  }
+
+  .member-badge-gold {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium;
+    background: hsl(var(--member-gold-bg));
+    color: hsl(var(--member-gold));
+  }
+
+  .member-badge-silver {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium;
+    background: hsl(var(--member-silver-bg));
+    color: hsl(var(--member-silver));
+  }
+
+  .member-badge-black {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium;
+    background: hsl(var(--member-black-bg));
+    color: hsl(var(--member-black));
+  }
+
+  .gradient-primary {
+    background: var(--gradient-primary);
+  }
+
+  .gradient-gold {
+    background: var(--gradient-gold);
+  }
+
+  .sidebar-nav-item {
+    @apply flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/80 transition-all duration-200;
+  }
+
+  .sidebar-nav-item:hover {
+    @apply bg-sidebar-accent text-sidebar-foreground;
+  }
+
+  .sidebar-nav-item.active {
+    @apply bg-sidebar-primary text-sidebar-primary-foreground;
+  }
+}
