@@ -98,6 +98,7 @@ export default function Transactions() {
                 <TableHeader>
                   <TableRow className="bg-muted/50">
                     <TableHead className="font-semibold">會員 / 日期</TableHead>
+                    <TableHead className="font-semibold">服務項目</TableHead>
                     <TableHead className="font-semibold">右眼 (OD)</TableHead>
                     <TableHead className="font-semibold">左眼 (OS)</TableHead>
                     <TableHead className="font-semibold">驗光師</TableHead>
@@ -129,6 +130,11 @@ export default function Transactions() {
                             </div>
                             <p className="text-sm text-muted-foreground">{prescription.exam_date}</p>
                           </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="secondary">
+                            {(prescription as any).service_type || '驗光'}
+                          </Badge>
                         </TableCell>
                         <TableCell>
                           <div className="text-sm">
@@ -213,6 +219,10 @@ export default function Transactions() {
                   <div>
                     <p className="text-sm text-muted-foreground">驗光日期</p>
                     <p className="font-medium">{selectedPrescription.exam_date}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">服務項目</p>
+                    <Badge variant="secondary">{(selectedPrescription as any).service_type || '驗光'}</Badge>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">驗光師</p>
