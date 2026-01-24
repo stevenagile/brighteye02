@@ -255,11 +255,11 @@ export function AddMemberDialog({ open, onOpenChange }: AddMemberDialogProps) {
                 <div className="space-y-2">
                   <Label htmlFor="level">VIP 等級</Label>
                   <Select
-                    value={formData.level}
+                    value={(formData.level || 'silver') as MemberLevel}
                     onValueChange={(value: MemberLevel) => handleLevelChange(value)}
                   >
                     <SelectTrigger>
-                      <SelectValue />
+                      <SelectValue placeholder="VIP 銀卡" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="silver">VIP 銀卡</SelectItem>
