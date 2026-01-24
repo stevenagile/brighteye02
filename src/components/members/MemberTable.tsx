@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useMembers, Member } from '@/hooks/useMembers';
 import { MemberBadge } from './MemberBadge';
 import { EditMemberDialog } from './EditMemberDialog';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, Wallet, Ticket, Phone, Mail, Users, Calendar, MapPin, Briefcase, AlertCircle, Edit, CreditCard } from 'lucide-react';
+import { Search, Wallet, Phone, Mail, Users, Calendar, MapPin, Briefcase, AlertCircle, Edit, CreditCard, TrendingDown } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -21,12 +21,37 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
 export function MemberTable() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedMember, setSelectedMember] = useState<Member | null>(null);
   const [editMember, setEditMember] = useState<Member | null>(null);
   const { data: members, isLoading } = useMembers();
+
+  // Fetch all prescriptions to calculate total credit used per member
+  const { data: prescriptions } = useQuery({
+    queryKey: ['prescriptions-credit-summary'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('prescriptions')
+        .select('member_id, credit_used');
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Calculate total credit used per member
+  const memberCreditUsed = useMemo(() => {
+    const creditMap: Record<string, number> = {};
+    prescriptions?.forEach((p) => {
+      if (p.member_id && p.credit_used) {
+        creditMap[p.member_id] = (creditMap[p.member_id] || 0) + Number(p.credit_used);
+      }
+    });
+    return creditMap;
+  }, [prescriptions]);
 
   const filteredMembers = (members || []).filter(member =>
     member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -95,7 +120,8 @@ export function MemberTable() {
                   <TableHead className="font-semibold">會員資訊</TableHead>
                   <TableHead className="font-semibold">VIP 等級</TableHead>
                   <TableHead className="font-semibold">VIP 金額</TableHead>
-                  <TableHead className="font-semibold">購物金</TableHead>
+                  <TableHead className="font-semibold">已消費金額</TableHead>
+                  <TableHead className="font-semibold">剩餘購物金</TableHead>
                   <TableHead className="font-semibold">入會日期</TableHead>
                 </TableRow>
               </TableHeader>
@@ -145,9 +171,15 @@ export function MemberTable() {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <div className="flex items-center gap-1.5 text-foreground">
-                        <Wallet className="w-4 h-4 text-primary" />
-                        <span className="font-medium">NT${Number(member.shopping_credit).toLocaleString()}</span>
+                      <div className="flex items-center gap-1.5 text-destructive">
+                        <TrendingDown className="w-4 h-4" />
+                        <span className="font-medium">NT${(memberCreditUsed[member.id] || 0).toLocaleString()}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1.5 text-primary">
+                        <Wallet className="w-4 h-4" />
+                        <span className="font-medium">NT${(Number(member.shopping_credit) - (memberCreditUsed[member.id] || 0)).toLocaleString()}</span>
                       </div>
                     </TableCell>
                     <TableCell className="text-muted-foreground">
@@ -210,19 +242,28 @@ export function MemberTable() {
                 </div>
 
                 {/* VIP 資訊 */}
-                <div className="grid grid-cols-3 gap-4 p-4 bg-muted/50 rounded-lg">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-muted/50 rounded-lg">
                   <div className="text-center">
                     <p className="text-xs text-muted-foreground mb-1">VIP 金額</p>
                     <p className="font-bold text-accent">NT${Number(selectedMember.vip_amount || 0).toLocaleString()}</p>
                   </div>
                   <div className="text-center">
                     <p className="text-xs text-muted-foreground mb-1">購物金</p>
-                    <p className="font-bold text-primary">NT${Number(selectedMember.shopping_credit).toLocaleString()}</p>
+                    <p className="font-bold text-foreground">NT${Number(selectedMember.shopping_credit).toLocaleString()}</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-xs text-muted-foreground mb-1">購物券</p>
-                    <p className="font-bold text-foreground">{selectedMember.coupon_count} 張</p>
+                    <p className="text-xs text-muted-foreground mb-1">已消費金額</p>
+                    <p className="font-bold text-destructive">NT${(memberCreditUsed[selectedMember.id] || 0).toLocaleString()}</p>
                   </div>
+                  <div className="text-center">
+                    <p className="text-xs text-muted-foreground mb-1">剩餘購物金</p>
+                    <p className="font-bold text-primary">NT${(Number(selectedMember.shopping_credit) - (memberCreditUsed[selectedMember.id] || 0)).toLocaleString()}</p>
+                  </div>
+                </div>
+                
+                {/* 購物券 */}
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <span>購物券: <span className="font-medium text-foreground">{selectedMember.coupon_count} 張</span></span>
                 </div>
 
                 {/* 入會日期 */}
