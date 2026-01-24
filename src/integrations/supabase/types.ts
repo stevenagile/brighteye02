@@ -34,6 +34,8 @@ export type Database = {
           phone: string
           shopping_credit: number
           updated_at: string
+          vip_amount: number | null
+          vip_start_date: string | null
         }
         Insert: {
           address?: string | null
@@ -54,6 +56,8 @@ export type Database = {
           phone: string
           shopping_credit?: number
           updated_at?: string
+          vip_amount?: number | null
+          vip_start_date?: string | null
         }
         Update: {
           address?: string | null
@@ -74,6 +78,8 @@ export type Database = {
           phone?: string
           shopping_credit?: number
           updated_at?: string
+          vip_amount?: number | null
+          vip_start_date?: string | null
         }
         Relationships: []
       }

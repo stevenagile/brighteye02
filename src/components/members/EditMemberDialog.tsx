@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useCreateMember, MemberLevel } from '@/hooks/useMembers';
+import { useState, useEffect } from 'react';
+import { useUpdateMember, Member, MemberLevel } from '@/hooks/useMembers';
 import {
   Dialog,
   DialogContent,
@@ -22,7 +22,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
-interface AddMemberDialogProps {
+interface EditMemberDialogProps {
+  member: Member | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
@@ -52,7 +53,7 @@ const EYE_SURGERIES = [
   { id: 'lasik', label: '近視/遠視/散光手術' },
 ];
 
-export function AddMemberDialog({ open, onOpenChange }: AddMemberDialogProps) {
+export function EditMemberDialog({ member, open, onOpenChange }: EditMemberDialogProps) {
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -73,50 +74,57 @@ export function AddMemberDialog({ open, onOpenChange }: AddMemberDialogProps) {
     eye_surgeries: [] as string[],
   });
 
-  const createMember = useCreateMember();
+  const updateMember = useUpdateMember();
+
+  useEffect(() => {
+    if (member) {
+      setFormData({
+        name: member.name || '',
+        phone: member.phone || '',
+        email: member.email || '',
+        level: member.level as MemberLevel,
+        shopping_credit: Number(member.shopping_credit) || 0,
+        coupon_count: member.coupon_count || 0,
+        vip_amount: Number(member.vip_amount) || 0,
+        vip_start_date: member.vip_start_date || '',
+        notes: member.notes || '',
+        gender: member.gender || '',
+        birthday: member.birthday || '',
+        address: member.address || '',
+        occupation: member.occupation || '',
+        home_phone: member.home_phone || '',
+        health_conditions: member.health_conditions || [],
+        eye_conditions: member.eye_conditions || [],
+        eye_surgeries: member.eye_surgeries || [],
+      });
+    }
+  }, [member]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!member) return;
     
-    await createMember.mutateAsync({
+    await updateMember.mutateAsync({
+      id: member.id,
       name: formData.name,
       phone: formData.phone,
-      email: formData.email || undefined,
+      email: formData.email || null,
       level: formData.level,
       shopping_credit: formData.shopping_credit,
       coupon_count: formData.coupon_count,
       vip_amount: formData.vip_amount,
-      vip_start_date: formData.vip_start_date || undefined,
-      notes: formData.notes || undefined,
-      gender: formData.gender || undefined,
-      birthday: formData.birthday || undefined,
-      address: formData.address || undefined,
-      occupation: formData.occupation || undefined,
-      home_phone: formData.home_phone || undefined,
+      vip_start_date: formData.vip_start_date || null,
+      notes: formData.notes || null,
+      gender: formData.gender || null,
+      birthday: formData.birthday || null,
+      address: formData.address || null,
+      occupation: formData.occupation || null,
+      home_phone: formData.home_phone || null,
       health_conditions: formData.health_conditions,
       eye_conditions: formData.eye_conditions,
       eye_surgeries: formData.eye_surgeries,
     });
 
-    setFormData({
-      name: '',
-      phone: '',
-      email: '',
-      level: 'silver',
-      shopping_credit: 0,
-      coupon_count: 0,
-      vip_amount: 0,
-      vip_start_date: '',
-      notes: '',
-      gender: '',
-      birthday: '',
-      address: '',
-      occupation: '',
-      home_phone: '',
-      health_conditions: [],
-      eye_conditions: [],
-      eye_surgeries: [],
-    });
     onOpenChange(false);
   };
 
@@ -136,9 +144,9 @@ export function AddMemberDialog({ open, onOpenChange }: AddMemberDialogProps) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-2xl max-h-[90vh]">
         <DialogHeader>
-          <DialogTitle>新增會員</DialogTitle>
+          <DialogTitle>編輯會員</DialogTitle>
           <DialogDescription>
-            填寫會員基本資料與健康狀況
+            修改會員基本資料與 VIP 權益
           </DialogDescription>
         </DialogHeader>
 
@@ -149,16 +157,16 @@ export function AddMemberDialog({ open, onOpenChange }: AddMemberDialogProps) {
               <h4 className="font-medium text-foreground">基本資料</h4>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="name">姓名 *</Label>
+                  <Label htmlFor="edit-name">姓名 *</Label>
                   <Input
-                    id="name"
+                    id="edit-name"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="gender">性別</Label>
+                  <Label htmlFor="edit-gender">性別</Label>
                   <Select
                     value={formData.gender}
                     onValueChange={(value) => setFormData({ ...formData, gender: value })}
@@ -176,18 +184,18 @@ export function AddMemberDialog({ open, onOpenChange }: AddMemberDialogProps) {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="birthday">出生日期</Label>
+                  <Label htmlFor="edit-birthday">出生日期</Label>
                   <Input
-                    id="birthday"
+                    id="edit-birthday"
                     type="date"
                     value={formData.birthday}
                     onChange={(e) => setFormData({ ...formData, birthday: e.target.value })}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="occupation">職業</Label>
+                  <Label htmlFor="edit-occupation">職業</Label>
                   <Input
-                    id="occupation"
+                    id="edit-occupation"
                     value={formData.occupation}
                     onChange={(e) => setFormData({ ...formData, occupation: e.target.value })}
                   />
@@ -196,18 +204,18 @@ export function AddMemberDialog({ open, onOpenChange }: AddMemberDialogProps) {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="phone">手機 *</Label>
+                  <Label htmlFor="edit-phone">手機 *</Label>
                   <Input
-                    id="phone"
+                    id="edit-phone"
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="home_phone">住家電話</Label>
+                  <Label htmlFor="edit-home_phone">住家電話</Label>
                   <Input
-                    id="home_phone"
+                    id="edit-home_phone"
                     value={formData.home_phone}
                     onChange={(e) => setFormData({ ...formData, home_phone: e.target.value })}
                   />
@@ -215,9 +223,9 @@ export function AddMemberDialog({ open, onOpenChange }: AddMemberDialogProps) {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="email">電子郵件</Label>
+                <Label htmlFor="edit-email">電子郵件</Label>
                 <Input
-                  id="email"
+                  id="edit-email"
                   type="email"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
@@ -225,9 +233,9 @@ export function AddMemberDialog({ open, onOpenChange }: AddMemberDialogProps) {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="address">住址</Label>
+                <Label htmlFor="edit-address">住址</Label>
                 <Input
-                  id="address"
+                  id="edit-address"
                   value={formData.address}
                   onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                 />
@@ -239,7 +247,7 @@ export function AddMemberDialog({ open, onOpenChange }: AddMemberDialogProps) {
               <h4 className="font-medium text-foreground">VIP 會員權益</h4>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="level">VIP 等級</Label>
+                  <Label htmlFor="edit-level">VIP 等級</Label>
                   <Select
                     value={formData.level}
                     onValueChange={(value: MemberLevel) => setFormData({ ...formData, level: value })}
@@ -255,9 +263,9 @@ export function AddMemberDialog({ open, onOpenChange }: AddMemberDialogProps) {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="vip_start_date">入會起始日期</Label>
+                  <Label htmlFor="edit-vip_start_date">入會起始日期</Label>
                   <Input
-                    id="vip_start_date"
+                    id="edit-vip_start_date"
                     type="date"
                     value={formData.vip_start_date}
                     onChange={(e) => setFormData({ ...formData, vip_start_date: e.target.value })}
@@ -266,9 +274,9 @@ export function AddMemberDialog({ open, onOpenChange }: AddMemberDialogProps) {
               </div>
               <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="vip_amount">VIP 金額</Label>
+                  <Label htmlFor="edit-vip_amount">VIP 金額</Label>
                   <Input
-                    id="vip_amount"
+                    id="edit-vip_amount"
                     type="number"
                     min="0"
                     value={formData.vip_amount}
@@ -276,9 +284,9 @@ export function AddMemberDialog({ open, onOpenChange }: AddMemberDialogProps) {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="shopping_credit">購物金</Label>
+                  <Label htmlFor="edit-shopping_credit">購物金</Label>
                   <Input
-                    id="shopping_credit"
+                    id="edit-shopping_credit"
                     type="number"
                     min="0"
                     value={formData.shopping_credit}
@@ -286,9 +294,9 @@ export function AddMemberDialog({ open, onOpenChange }: AddMemberDialogProps) {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="coupon_count">購物券</Label>
+                  <Label htmlFor="edit-coupon_count">購物券</Label>
                   <Input
-                    id="coupon_count"
+                    id="edit-coupon_count"
                     type="number"
                     min="0"
                     value={formData.coupon_count}
@@ -305,11 +313,11 @@ export function AddMemberDialog({ open, onOpenChange }: AddMemberDialogProps) {
                 {HEALTH_CONDITIONS.map((condition) => (
                   <div key={condition.id} className="flex items-center space-x-2">
                     <Checkbox
-                      id={`health-${condition.id}`}
+                      id={`edit-health-${condition.id}`}
                       checked={formData.health_conditions.includes(condition.label)}
                       onCheckedChange={() => toggleArrayItem('health_conditions', condition.label)}
                     />
-                    <Label htmlFor={`health-${condition.id}`} className="text-sm">
+                    <Label htmlFor={`edit-health-${condition.id}`} className="text-sm">
                       {condition.label}
                     </Label>
                   </div>
@@ -324,11 +332,11 @@ export function AddMemberDialog({ open, onOpenChange }: AddMemberDialogProps) {
                 {EYE_CONDITIONS.map((condition) => (
                   <div key={condition.id} className="flex items-center space-x-2">
                     <Checkbox
-                      id={`eye-${condition.id}`}
+                      id={`edit-eye-${condition.id}`}
                       checked={formData.eye_conditions.includes(condition.label)}
                       onCheckedChange={() => toggleArrayItem('eye_conditions', condition.label)}
                     />
-                    <Label htmlFor={`eye-${condition.id}`} className="text-sm">
+                    <Label htmlFor={`edit-eye-${condition.id}`} className="text-sm">
                       {condition.label}
                     </Label>
                   </div>
@@ -343,11 +351,11 @@ export function AddMemberDialog({ open, onOpenChange }: AddMemberDialogProps) {
                 {EYE_SURGERIES.map((surgery) => (
                   <div key={surgery.id} className="flex items-center space-x-2">
                     <Checkbox
-                      id={`surgery-${surgery.id}`}
+                      id={`edit-surgery-${surgery.id}`}
                       checked={formData.eye_surgeries.includes(surgery.label)}
                       onCheckedChange={() => toggleArrayItem('eye_surgeries', surgery.label)}
                     />
-                    <Label htmlFor={`surgery-${surgery.id}`} className="text-sm">
+                    <Label htmlFor={`edit-surgery-${surgery.id}`} className="text-sm">
                       {surgery.label}
                     </Label>
                   </div>
@@ -357,9 +365,9 @@ export function AddMemberDialog({ open, onOpenChange }: AddMemberDialogProps) {
 
             {/* 備註 */}
             <div className="space-y-2">
-              <Label htmlFor="notes">備註</Label>
+              <Label htmlFor="edit-notes">備註</Label>
               <Textarea
-                id="notes"
+                id="edit-notes"
                 value={formData.notes}
                 onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                 rows={3}
@@ -374,10 +382,10 @@ export function AddMemberDialog({ open, onOpenChange }: AddMemberDialogProps) {
           </Button>
           <Button 
             onClick={handleSubmit} 
-            disabled={createMember.isPending} 
+            disabled={updateMember.isPending} 
             className="gradient-primary text-primary-foreground"
           >
-            {createMember.isPending ? '新增中...' : '新增會員'}
+            {updateMember.isPending ? '儲存中...' : '儲存變更'}
           </Button>
         </DialogFooter>
       </DialogContent>

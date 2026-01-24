@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { useMembers, Member } from '@/hooks/useMembers';
 import { MemberBadge } from './MemberBadge';
+import { EditMemberDialog } from './EditMemberDialog';
 import { Input } from '@/components/ui/input';
-import { Search, Wallet, Ticket, Phone, Mail, Users, Calendar, MapPin, Briefcase, AlertCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Search, Wallet, Ticket, Phone, Mail, Users, Calendar, MapPin, Briefcase, AlertCircle, Edit, CreditCard } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -23,6 +25,7 @@ import {
 export function MemberTable() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedMember, setSelectedMember] = useState<Member | null>(null);
+  const [editMember, setEditMember] = useState<Member | null>(null);
   const { data: members, isLoading } = useMembers();
 
   const filteredMembers = (members || []).filter(member =>
@@ -90,10 +93,10 @@ export function MemberTable() {
               <TableHeader>
                 <TableRow className="bg-muted/50">
                   <TableHead className="font-semibold">會員資訊</TableHead>
-                  <TableHead className="font-semibold">等級</TableHead>
+                  <TableHead className="font-semibold">VIP 等級</TableHead>
+                  <TableHead className="font-semibold">VIP 金額</TableHead>
                   <TableHead className="font-semibold">購物金</TableHead>
-                  <TableHead className="font-semibold">購物券</TableHead>
-                  <TableHead className="font-semibold">加入日期</TableHead>
+                  <TableHead className="font-semibold">入會日期</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -137,18 +140,21 @@ export function MemberTable() {
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1.5 text-foreground">
-                        <Wallet className="w-4 h-4 text-primary" />
-                        <span className="font-medium">NT${Number(member.shopping_credit).toLocaleString()}</span>
+                        <CreditCard className="w-4 h-4 text-accent" />
+                        <span className="font-medium">NT${Number(member.vip_amount || 0).toLocaleString()}</span>
                       </div>
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1.5 text-foreground">
-                        <Ticket className="w-4 h-4 text-accent" />
-                        <span className="font-medium">{member.coupon_count} 張</span>
+                        <Wallet className="w-4 h-4 text-primary" />
+                        <span className="font-medium">NT${Number(member.shopping_credit).toLocaleString()}</span>
                       </div>
                     </TableCell>
                     <TableCell className="text-muted-foreground">
-                      {new Date(member.created_at).toLocaleDateString('zh-TW')}
+                      {member.vip_start_date 
+                        ? new Date(member.vip_start_date).toLocaleDateString('zh-TW')
+                        : new Date(member.created_at).toLocaleDateString('zh-TW')
+                      }
                     </TableCell>
                   </TableRow>
                 ))}
@@ -162,9 +168,23 @@ export function MemberTable() {
       <Dialog open={!!selectedMember} onOpenChange={() => setSelectedMember(null)}>
         <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Users className="w-5 h-5" />
-              會員資料
+            <DialogTitle className="flex items-center justify-between">
+              <span className="flex items-center gap-2">
+                <Users className="w-5 h-5" />
+                會員資料
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setEditMember(selectedMember);
+                  setSelectedMember(null);
+                }}
+              >
+                <Edit className="w-4 h-4 mr-1" />
+                編輯
+              </Button>
             </DialogTitle>
           </DialogHeader>
 
@@ -187,17 +207,31 @@ export function MemberTable() {
                       )}
                     </div>
                   </div>
-                  <div className="text-right">
-                    <div className="flex items-center gap-1.5 text-primary">
-                      <Wallet className="w-4 h-4" />
-                      <span className="font-bold">NT${Number(selectedMember.shopping_credit).toLocaleString()}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 text-accent mt-1">
-                      <Ticket className="w-4 h-4" />
-                      <span className="font-medium">{selectedMember.coupon_count} 張購物券</span>
-                    </div>
+                </div>
+
+                {/* VIP 資訊 */}
+                <div className="grid grid-cols-3 gap-4 p-4 bg-muted/50 rounded-lg">
+                  <div className="text-center">
+                    <p className="text-xs text-muted-foreground mb-1">VIP 金額</p>
+                    <p className="font-bold text-accent">NT${Number(selectedMember.vip_amount || 0).toLocaleString()}</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-xs text-muted-foreground mb-1">購物金</p>
+                    <p className="font-bold text-primary">NT${Number(selectedMember.shopping_credit).toLocaleString()}</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-xs text-muted-foreground mb-1">購物券</p>
+                    <p className="font-bold text-foreground">{selectedMember.coupon_count} 張</p>
                   </div>
                 </div>
+
+                {/* 入會日期 */}
+                {selectedMember.vip_start_date && (
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Calendar className="w-4 h-4" />
+                    <span>入會日期: {new Date(selectedMember.vip_start_date).toLocaleDateString('zh-TW')}</span>
+                  </div>
+                )}
               </div>
 
               {/* 聯絡資訊 */}
@@ -302,12 +336,19 @@ export function MemberTable() {
 
               {/* 加入時間 */}
               <div className="text-xs text-muted-foreground text-center">
-                加入時間: {new Date(selectedMember.created_at).toLocaleString('zh-TW')}
+                建立時間: {new Date(selectedMember.created_at).toLocaleString('zh-TW')}
               </div>
             </div>
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Edit Member Dialog */}
+      <EditMemberDialog
+        member={editMember}
+        open={!!editMember}
+        onOpenChange={(open) => !open && setEditMember(null)}
+      />
     </>
   );
 }

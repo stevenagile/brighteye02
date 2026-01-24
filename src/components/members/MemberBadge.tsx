@@ -14,17 +14,17 @@ const levelConfig: Record<MemberLevel, {
 }> = {
   gold: { 
     icon: Crown, 
-    label: '金卡',
+    label: 'VIP 金卡',
     className: 'member-badge-gold'
   },
   silver: { 
     icon: Medal, 
-    label: '銀卡',
+    label: 'VIP 銀卡',
     className: 'member-badge-silver'
   },
   black: { 
     icon: Star, 
-    label: '黑卡',
+    label: 'VIP 黑卡',
     className: 'member-badge-black'
   },
 };

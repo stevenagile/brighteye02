@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useUpdatePrescription, PrescriptionWithMember } from '@/hooks/usePrescriptions';
+import { useUpdatePrescription, Prescription } from '@/hooks/usePrescriptions';
 import { useTransactions } from '@/hooks/useTransactions';
 import {
   Dialog,
@@ -21,7 +21,7 @@ import { Link2 } from 'lucide-react';
 interface EditPrescriptionDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  prescription: PrescriptionWithMember | null;
+  prescription: Prescription | null;
 }
 
 export function EditPrescriptionDialog({ open, onOpenChange, prescription }: EditPrescriptionDialogProps) {
@@ -332,7 +332,7 @@ export function EditPrescriptionDialog({ open, onOpenChange, prescription }: Edi
         <DialogHeader>
           <DialogTitle>編輯驗光記錄</DialogTitle>
           <DialogDescription>
-            修改驗光處方資料 - 會員：{prescription?.members?.name}
+            修改驗光處方資料
           </DialogDescription>
         </DialogHeader>
 
