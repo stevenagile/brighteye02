@@ -5,7 +5,7 @@ import type { Tables, TablesInsert } from '@/integrations/supabase/types';
 
 export type Member = Tables<'members'>;
 export type MemberInsert = TablesInsert<'members'>;
-export type MemberLevel = 'gold' | 'silver' | 'black';
+export type MemberLevel = 'regular' | 'gold' | 'silver' | 'black';
 
 export function useMembers() {
   return useQuery({

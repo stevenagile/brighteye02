@@ -1,5 +1,5 @@
 import { MemberLevel } from '@/hooks/useMembers';
-import { Crown, Medal, Star } from 'lucide-react';
+import { Crown, Medal, Star, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface MemberBadgeProps {
@@ -12,6 +12,11 @@ const levelConfig: Record<MemberLevel, {
   label: string;
   className: string;
 }> = {
+  regular: {
+    icon: User,
+    label: '一般客戶',
+    className: 'member-badge-regular'
+  },
   gold: { 
     icon: Crown, 
     label: 'VIP 金卡',

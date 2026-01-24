@@ -143,6 +143,12 @@
     @apply bg-sidebar-accent text-sidebar-foreground font-medium;
   }
 
+  .member-badge-regular {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium;
+    background: linear-gradient(135deg, hsl(210 10% 85%), hsl(210 10% 90%));
+    color: hsl(222 47% 11%);
+  }
+
   .member-badge-gold {
     @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium;
     background: linear-gradient(135deg, hsl(45 93% 47%), hsl(38 92% 55%));
