@@ -30,27 +30,27 @@ export function MemberTable() {
   const [editMember, setEditMember] = useState<Member | null>(null);
   const { data: members, isLoading } = useMembers();
 
-  // Fetch all prescriptions to calculate total spent amount per member
+  // Fetch all prescriptions to calculate total credit used per member
   const { data: prescriptions } = useQuery({
-    queryKey: ['prescriptions-amount-summary'],
+    queryKey: ['prescriptions-credit-summary'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('prescriptions')
-        .select('member_id, amount');
+        .select('member_id, credit_used');
       if (error) throw error;
       return data;
     },
   });
 
-  // Calculate total spent amount per member (sum of prescription amounts)
-  const memberSpentAmount = useMemo(() => {
-    const spentMap: Record<string, number> = {};
+  // Calculate total credit used per member (sum of credit_used from prescriptions)
+  const memberCreditUsed = useMemo(() => {
+    const creditMap: Record<string, number> = {};
     prescriptions?.forEach((p) => {
-      if (p.member_id && p.amount) {
-        spentMap[p.member_id] = (spentMap[p.member_id] || 0) + Number(p.amount);
+      if (p.member_id && p.credit_used) {
+        creditMap[p.member_id] = (creditMap[p.member_id] || 0) + Number(p.credit_used);
       }
     });
-    return spentMap;
+    return creditMap;
   }, [prescriptions]);
 
   const filteredMembers = (members || []).filter(member =>
@@ -120,7 +120,7 @@ export function MemberTable() {
                   <TableHead className="font-semibold">會員資訊</TableHead>
                   <TableHead className="font-semibold">VIP 等級</TableHead>
                   <TableHead className="font-semibold">VIP 金額</TableHead>
-                  <TableHead className="font-semibold">已消費金額</TableHead>
+                  <TableHead className="font-semibold">已折抵購物金額</TableHead>
                   <TableHead className="font-semibold">剩餘購物金</TableHead>
                   <TableHead className="font-semibold">入會日期</TableHead>
                 </TableRow>
@@ -173,13 +173,13 @@ export function MemberTable() {
                     <TableCell>
                       <div className="flex items-center gap-1.5 text-destructive">
                         <TrendingDown className="w-4 h-4" />
-                        <span className="font-medium">NT${(memberSpentAmount[member.id] || 0).toLocaleString()}</span>
+                        <span className="font-medium">NT${(memberCreditUsed[member.id] || 0).toLocaleString()}</span>
                       </div>
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1.5 text-primary">
                         <Wallet className="w-4 h-4" />
-                        <span className="font-medium">NT${(Number(member.shopping_credit) - (memberSpentAmount[member.id] || 0)).toLocaleString()}</span>
+                        <span className="font-medium">NT${(Number(member.shopping_credit) - (memberCreditUsed[member.id] || 0)).toLocaleString()}</span>
                       </div>
                     </TableCell>
                     <TableCell className="text-muted-foreground">
@@ -252,12 +252,12 @@ export function MemberTable() {
                     <p className="font-bold text-foreground">NT${Number(selectedMember.shopping_credit).toLocaleString()}</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-xs text-muted-foreground mb-1">已消費金額</p>
-                    <p className="font-bold text-destructive">NT${(memberSpentAmount[selectedMember.id] || 0).toLocaleString()}</p>
+                    <p className="text-xs text-muted-foreground mb-1">已折抵購物金額</p>
+                    <p className="font-bold text-destructive">NT${(memberCreditUsed[selectedMember.id] || 0).toLocaleString()}</p>
                   </div>
                   <div className="text-center">
                     <p className="text-xs text-muted-foreground mb-1">剩餘購物金</p>
-                    <p className="font-bold text-primary">NT${(Number(selectedMember.shopping_credit) - (memberSpentAmount[selectedMember.id] || 0)).toLocaleString()}</p>
+                    <p className="font-bold text-primary">NT${(Number(selectedMember.shopping_credit) - (memberCreditUsed[selectedMember.id] || 0)).toLocaleString()}</p>
                   </div>
                 </div>
                 
