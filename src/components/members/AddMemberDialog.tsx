@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useCreateMember, MemberLevel } from '@/hooks/useMembers';
+import { useMemberLevels } from '@/hooks/useSettings';
 import {
   Dialog,
   DialogContent,
@@ -74,7 +75,16 @@ export function AddMemberDialog({ open, onOpenChange }: AddMemberDialogProps) {
   });
 
   const createMember = useCreateMember();
+  const { data: memberLevels } = useMemberLevels();
 
+  const handleLevelChange = (level: MemberLevel) => {
+    const vipAmount = memberLevels?.[level]?.vip_amount ?? 0;
+    setFormData({ 
+      ...formData, 
+      level, 
+      vip_amount: vipAmount 
+    });
+  };
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -242,7 +252,7 @@ export function AddMemberDialog({ open, onOpenChange }: AddMemberDialogProps) {
                   <Label htmlFor="level">VIP 等級</Label>
                   <Select
                     value={formData.level}
-                    onValueChange={(value: MemberLevel) => setFormData({ ...formData, level: value })}
+                    onValueChange={(value: MemberLevel) => handleLevelChange(value)}
                   >
                     <SelectTrigger>
                       <SelectValue />

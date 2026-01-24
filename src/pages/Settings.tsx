@@ -31,9 +31,9 @@ export default function Settings() {
   const { data: memberLevels, isLoading: loadingLevels } = useMemberLevels();
   const updateMemberLevels = useUpdateMemberLevels();
   const [levelsForm, setLevelsForm] = useState<MemberLevels>({
-    gold: { discount: 0.9, points_multiplier: 2 },
-    silver: { discount: 0.95, points_multiplier: 1.5 },
-    black: { discount: 0.85, points_multiplier: 3 },
+    gold: { discount: 0.9, points_multiplier: 2, vip_amount: 30000 },
+    silver: { discount: 0.95, points_multiplier: 1.5, vip_amount: 10000 },
+    black: { discount: 0.85, points_multiplier: 3, vip_amount: 50000 },
   });
 
   // Notification State
@@ -192,6 +192,23 @@ export default function Settings() {
                   <div className="member-badge-gold mb-4">金卡會員</div>
                   <div className="space-y-4">
                     <div className="space-y-2">
+                      <Label className="text-sm text-muted-foreground">VIP 金額</Label>
+                      <Input
+                        type="number"
+                        min="0"
+                        value={levelsForm.gold.vip_amount}
+                        onChange={(e) =>
+                          setLevelsForm({
+                            ...levelsForm,
+                            gold: {
+                              ...levelsForm.gold,
+                              vip_amount: parseInt(e.target.value) || 0,
+                            },
+                          })
+                        }
+                      />
+                    </div>
+                    <div className="space-y-2">
                       <Label className="text-sm text-muted-foreground">消費折扣</Label>
                       <Input
                         value={discountToDisplay(levelsForm.gold.discount)}
@@ -233,6 +250,23 @@ export default function Settings() {
                   <div className="member-badge-silver mb-4">銀卡會員</div>
                   <div className="space-y-4">
                     <div className="space-y-2">
+                      <Label className="text-sm text-muted-foreground">VIP 金額</Label>
+                      <Input
+                        type="number"
+                        min="0"
+                        value={levelsForm.silver.vip_amount}
+                        onChange={(e) =>
+                          setLevelsForm({
+                            ...levelsForm,
+                            silver: {
+                              ...levelsForm.silver,
+                              vip_amount: parseInt(e.target.value) || 0,
+                            },
+                          })
+                        }
+                      />
+                    </div>
+                    <div className="space-y-2">
                       <Label className="text-sm text-muted-foreground">消費折扣</Label>
                       <Input
                         value={discountToDisplay(levelsForm.silver.discount)}
@@ -273,6 +307,23 @@ export default function Settings() {
                 <div className="p-4 border border-border rounded-xl">
                   <div className="member-badge-black mb-4">黑卡會員</div>
                   <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label className="text-sm text-muted-foreground">VIP 金額</Label>
+                      <Input
+                        type="number"
+                        min="0"
+                        value={levelsForm.black.vip_amount}
+                        onChange={(e) =>
+                          setLevelsForm({
+                            ...levelsForm,
+                            black: {
+                              ...levelsForm.black,
+                              vip_amount: parseInt(e.target.value) || 0,
+                            },
+                          })
+                        }
+                      />
+                    </div>
                     <div className="space-y-2">
                       <Label className="text-sm text-muted-foreground">消費折扣</Label>
                       <Input
