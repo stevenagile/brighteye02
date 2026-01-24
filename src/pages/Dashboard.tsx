@@ -5,32 +5,28 @@ import { RecentTransactions } from '@/components/dashboard/RecentTransactions';
 import { MemberLevelStats } from '@/components/dashboard/MemberLevelStats';
 import { Users, TrendingUp, Receipt, Eye } from 'lucide-react';
 import { useMembers } from '@/hooks/useMembers';
-import { useTransactions } from '@/hooks/useTransactions';
 import { usePrescriptions } from '@/hooks/usePrescriptions';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function Dashboard() {
   const { data: members, isLoading: membersLoading } = useMembers();
-  const { data: transactions, isLoading: transactionsLoading } = useTransactions();
   const { data: prescriptions, isLoading: prescriptionsLoading } = usePrescriptions();
 
-  const isLoading = membersLoading || transactionsLoading || prescriptionsLoading;
+  const isLoading = membersLoading || prescriptionsLoading;
 
   const totalMembers = members?.length || 0;
   
-  // 計算本週收入
+  // 計算本週收入（來自驗光服務金額）
   const now = new Date();
   const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-  const weeklyTransactions = transactions?.filter(t => 
-    new Date(t.transaction_date) >= weekAgo
-  ) || [];
-  const weeklyIncome = weeklyTransactions.reduce((sum, t) => sum + Number(t.total), 0);
-  const weeklyCount = weeklyTransactions.length;
-
-  // 計算本週驗光次數
-  const weeklyExams = prescriptions?.filter(p => 
+  const weeklyPrescriptions = prescriptions?.filter(p => 
     new Date(p.exam_date) >= weekAgo
-  ).length || 0;
+  ) || [];
+  const weeklyIncome = weeklyPrescriptions.reduce((sum, p) => sum + Number(p.amount || 0), 0);
+  const weeklyCount = weeklyPrescriptions.length;
+
+  // 計算總收入
+  const totalIncome = prescriptions?.reduce((sum, p) => sum + Number(p.amount || 0), 0) || 0;
   
   return (
     <MainLayout>
@@ -60,20 +56,20 @@ export default function Dashboard() {
             <StatCard
               title="本週收入"
               value={`NT$${weeklyIncome.toLocaleString()}`}
-              subtitle={`共 ${weeklyCount} 筆交易`}
+              subtitle={`共 ${weeklyCount} 筆服務`}
               icon={TrendingUp}
               variant="accent"
             />
             <StatCard
-              title="本週交易"
-              value={weeklyCount}
-              subtitle="筆交易"
+              title="總收入"
+              value={`NT$${totalIncome.toLocaleString()}`}
+              subtitle="服務總額"
               icon={Receipt}
             />
             <StatCard
-              title="本週驗光"
-              value={weeklyExams}
-              subtitle="次服務"
+              title="本週服務"
+              value={weeklyCount}
+              subtitle="次驗光服務"
               icon={Eye}
             />
           </div>
