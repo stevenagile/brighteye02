@@ -53,6 +53,10 @@ const EYE_SURGERIES = [
   { id: 'lasik', label: '近視/遠視/散光手術' },
 ];
 
+// 金額格式化輔助函數
+const formatAmount = (value: number): string => value.toLocaleString('zh-TW');
+const parseAmount = (value: string): number => parseInt(value.replace(/,/g, '')) || 0;
+
 export function AddMemberDialog({ open, onOpenChange }: AddMemberDialogProps) {
   const [formData, setFormData] = useState({
     name: '',
@@ -279,20 +283,20 @@ export function AddMemberDialog({ open, onOpenChange }: AddMemberDialogProps) {
                   <Label htmlFor="vip_amount">VIP 金額</Label>
                   <Input
                     id="vip_amount"
-                    type="number"
-                    min="0"
-                    value={formData.vip_amount}
-                    onChange={(e) => setFormData({ ...formData, vip_amount: Number(e.target.value) })}
+                    type="text"
+                    inputMode="numeric"
+                    value={formatAmount(formData.vip_amount)}
+                    onChange={(e) => setFormData({ ...formData, vip_amount: parseAmount(e.target.value) })}
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="shopping_credit">購物金</Label>
                   <Input
                     id="shopping_credit"
-                    type="number"
-                    min="0"
-                    value={formData.shopping_credit}
-                    onChange={(e) => setFormData({ ...formData, shopping_credit: Number(e.target.value) })}
+                    type="text"
+                    inputMode="numeric"
+                    value={formatAmount(formData.shopping_credit)}
+                    onChange={(e) => setFormData({ ...formData, shopping_credit: parseAmount(e.target.value) })}
                   />
                 </div>
                 <div className="space-y-2">
