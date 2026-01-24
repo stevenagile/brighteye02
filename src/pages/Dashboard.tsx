@@ -3,7 +3,7 @@ import { StatCard } from '@/components/dashboard/StatCard';
 import { IncomeChart } from '@/components/dashboard/IncomeChart';
 import { RecentTransactions } from '@/components/dashboard/RecentTransactions';
 import { MemberLevelStats } from '@/components/dashboard/MemberLevelStats';
-import { Users, TrendingUp, Receipt, Eye } from 'lucide-react';
+import { Users, TrendingUp, Receipt, Eye, Wallet, CreditCard } from 'lucide-react';
 import { useMembers } from '@/hooks/useMembers';
 import { usePrescriptions } from '@/hooks/usePrescriptions';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -25,8 +25,14 @@ export default function Dashboard() {
   const weeklyIncome = weeklyPrescriptions.reduce((sum, p) => sum + Number(p.amount || 0), 0);
   const weeklyCount = weeklyPrescriptions.length;
 
-  // 計算總收入
+  // 計算總收入（服務總額）
   const totalIncome = prescriptions?.reduce((sum, p) => sum + Number(p.amount || 0), 0) || 0;
+
+  // 計算購物金折抵金額
+  const totalCreditUsed = prescriptions?.reduce((sum, p) => sum + Number(p.credit_used || 0), 0) || 0;
+
+  // 實收金額 = 總收入 - 購物金折抵金額
+  const actualIncome = totalIncome - totalCreditUsed;
   
   return (
     <MainLayout>
@@ -39,13 +45,13 @@ export default function Dashboard() {
 
         {/* Stats Grid */}
         {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[...Array(4)].map((_, i) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[...Array(6)].map((_, i) => (
               <Skeleton key={i} className="h-32 rounded-xl" />
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <StatCard
               title="總會員數"
               value={totalMembers}
@@ -61,16 +67,29 @@ export default function Dashboard() {
               variant="accent"
             />
             <StatCard
-              title="總收入"
-              value={`NT$${totalIncome.toLocaleString()}`}
-              subtitle="服務總額"
-              icon={Receipt}
-            />
-            <StatCard
               title="本週服務"
               value={weeklyCount}
               subtitle="次驗光服務"
               icon={Eye}
+            />
+            <StatCard
+              title="服務總額"
+              value={`NT$${totalIncome.toLocaleString()}`}
+              subtitle="所有服務金額"
+              icon={Receipt}
+            />
+            <StatCard
+              title="購物金折抵"
+              value={`NT$${totalCreditUsed.toLocaleString()}`}
+              subtitle="已折抵金額"
+              icon={Wallet}
+            />
+            <StatCard
+              title="實收金額"
+              value={`NT$${actualIncome.toLocaleString()}`}
+              subtitle="服務總額 - 折抵金額"
+              icon={CreditCard}
+              variant="primary"
             />
           </div>
         )}
