@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useCreatePrescription } from '@/hooks/usePrescriptions';
+import { useCreatePrescription, PrescriptionInsert } from '@/hooks/usePrescriptions';
 import { useMembers } from '@/hooks/useMembers';
 import {
   Dialog,
@@ -35,41 +35,38 @@ export function AddPrescriptionDialog({ open, onOpenChange }: AddPrescriptionDia
   const [formData, setFormData] = useState({
     member_id: '',
     exam_date: new Date().toISOString().split('T')[0],
-    
     // 右眼
-    right_sc_naked: '',
-    right_cc_best: '',
-    right_best_sphere: '',
-    right_best_cylinder: '',
-    right_best_axis: '',
-    right_auto_sphere: '',
-    right_auto_cylinder: '',
-    right_auto_axis: '',
-    right_old_sphere: '',
-    right_old_cylinder: '',
-    right_old_axis: '',
-    right_old_vision: '',
-    right_old_years: '',
+    right_sc: '',
+    right_cc: '',
+    right_best_s: '',
+    right_best_c: '',
+    right_best_a: '',
+    right_auto_s: '',
+    right_auto_c: '',
+    right_auto_a: '',
+    right_old_s: '',
+    right_old_c: '',
+    right_old_a: '',
+    right_old_va: '',
+    right_old_year: '',
     right_add: '',
     right_pd: '',
-    
     // 左眼
-    left_sc_naked: '',
-    left_cc_best: '',
-    left_best_sphere: '',
-    left_best_cylinder: '',
-    left_best_axis: '',
-    left_auto_sphere: '',
-    left_auto_cylinder: '',
-    left_auto_axis: '',
-    left_old_sphere: '',
-    left_old_cylinder: '',
-    left_old_axis: '',
-    left_old_vision: '',
-    left_old_years: '',
+    left_sc: '',
+    left_cc: '',
+    left_best_s: '',
+    left_best_c: '',
+    left_best_a: '',
+    left_auto_s: '',
+    left_auto_c: '',
+    left_auto_a: '',
+    left_old_s: '',
+    left_old_c: '',
+    left_old_a: '',
+    left_old_va: '',
+    left_old_year: '',
     left_add: '',
     left_pd: '',
-    
     // 其他
     amount: '',
     examiner: '',
@@ -79,79 +76,78 @@ export function AddPrescriptionDialog({ open, onOpenChange }: AddPrescriptionDia
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    await createPrescription.mutateAsync({
+    const prescription: PrescriptionInsert = {
       member_id: formData.member_id,
       exam_date: formData.exam_date,
-      
-      right_sc_naked: formData.right_sc_naked || undefined,
-      right_cc_best: formData.right_cc_best || undefined,
-      right_best_sphere: formData.right_best_sphere ? Number(formData.right_best_sphere) : undefined,
-      right_best_cylinder: formData.right_best_cylinder ? Number(formData.right_best_cylinder) : undefined,
-      right_best_axis: formData.right_best_axis ? Number(formData.right_best_axis) : undefined,
-      right_auto_sphere: formData.right_auto_sphere ? Number(formData.right_auto_sphere) : undefined,
-      right_auto_cylinder: formData.right_auto_cylinder ? Number(formData.right_auto_cylinder) : undefined,
-      right_auto_axis: formData.right_auto_axis ? Number(formData.right_auto_axis) : undefined,
-      right_old_sphere: formData.right_old_sphere ? Number(formData.right_old_sphere) : undefined,
-      right_old_cylinder: formData.right_old_cylinder ? Number(formData.right_old_cylinder) : undefined,
-      right_old_axis: formData.right_old_axis ? Number(formData.right_old_axis) : undefined,
-      right_old_vision: formData.right_old_vision || undefined,
-      right_old_years: formData.right_old_years ? Number(formData.right_old_years) : undefined,
-      right_add: formData.right_add ? Number(formData.right_add) : undefined,
-      right_pd: formData.right_pd ? Number(formData.right_pd) : undefined,
-      
-      left_sc_naked: formData.left_sc_naked || undefined,
-      left_cc_best: formData.left_cc_best || undefined,
-      left_best_sphere: formData.left_best_sphere ? Number(formData.left_best_sphere) : undefined,
-      left_best_cylinder: formData.left_best_cylinder ? Number(formData.left_best_cylinder) : undefined,
-      left_best_axis: formData.left_best_axis ? Number(formData.left_best_axis) : undefined,
-      left_auto_sphere: formData.left_auto_sphere ? Number(formData.left_auto_sphere) : undefined,
-      left_auto_cylinder: formData.left_auto_cylinder ? Number(formData.left_auto_cylinder) : undefined,
-      left_auto_axis: formData.left_auto_axis ? Number(formData.left_auto_axis) : undefined,
-      left_old_sphere: formData.left_old_sphere ? Number(formData.left_old_sphere) : undefined,
-      left_old_cylinder: formData.left_old_cylinder ? Number(formData.left_old_cylinder) : undefined,
-      left_old_axis: formData.left_old_axis ? Number(formData.left_old_axis) : undefined,
-      left_old_vision: formData.left_old_vision || undefined,
-      left_old_years: formData.left_old_years ? Number(formData.left_old_years) : undefined,
-      left_add: formData.left_add ? Number(formData.left_add) : undefined,
-      left_pd: formData.left_pd ? Number(formData.left_pd) : undefined,
-      
-      amount: formData.amount ? Number(formData.amount) : undefined,
-      examiner: formData.examiner || undefined,
-      notes: formData.notes || undefined,
-    });
+      right_sc: formData.right_sc || null,
+      right_cc: formData.right_cc || null,
+      right_best_s: formData.right_best_s ? Number(formData.right_best_s) : null,
+      right_best_c: formData.right_best_c ? Number(formData.right_best_c) : null,
+      right_best_a: formData.right_best_a ? Number(formData.right_best_a) : null,
+      right_auto_s: formData.right_auto_s ? Number(formData.right_auto_s) : null,
+      right_auto_c: formData.right_auto_c ? Number(formData.right_auto_c) : null,
+      right_auto_a: formData.right_auto_a ? Number(formData.right_auto_a) : null,
+      right_old_s: formData.right_old_s ? Number(formData.right_old_s) : null,
+      right_old_c: formData.right_old_c ? Number(formData.right_old_c) : null,
+      right_old_a: formData.right_old_a ? Number(formData.right_old_a) : null,
+      right_old_va: formData.right_old_va || null,
+      right_old_year: formData.right_old_year ? Number(formData.right_old_year) : null,
+      right_add: formData.right_add ? Number(formData.right_add) : null,
+      right_pd: formData.right_pd ? Number(formData.right_pd) : null,
+      left_sc: formData.left_sc || null,
+      left_cc: formData.left_cc || null,
+      left_best_s: formData.left_best_s ? Number(formData.left_best_s) : null,
+      left_best_c: formData.left_best_c ? Number(formData.left_best_c) : null,
+      left_best_a: formData.left_best_a ? Number(formData.left_best_a) : null,
+      left_auto_s: formData.left_auto_s ? Number(formData.left_auto_s) : null,
+      left_auto_c: formData.left_auto_c ? Number(formData.left_auto_c) : null,
+      left_auto_a: formData.left_auto_a ? Number(formData.left_auto_a) : null,
+      left_old_s: formData.left_old_s ? Number(formData.left_old_s) : null,
+      left_old_c: formData.left_old_c ? Number(formData.left_old_c) : null,
+      left_old_a: formData.left_old_a ? Number(formData.left_old_a) : null,
+      left_old_va: formData.left_old_va || null,
+      left_old_year: formData.left_old_year ? Number(formData.left_old_year) : null,
+      left_add: formData.left_add ? Number(formData.left_add) : null,
+      left_pd: formData.left_pd ? Number(formData.left_pd) : null,
+      amount: formData.amount ? Number(formData.amount) : null,
+      examiner: formData.examiner || null,
+      notes: formData.notes || null,
+    };
+
+    await createPrescription.mutateAsync(prescription);
 
     // Reset form
     setFormData({
       member_id: '',
       exam_date: new Date().toISOString().split('T')[0],
-      right_sc_naked: '',
-      right_cc_best: '',
-      right_best_sphere: '',
-      right_best_cylinder: '',
-      right_best_axis: '',
-      right_auto_sphere: '',
-      right_auto_cylinder: '',
-      right_auto_axis: '',
-      right_old_sphere: '',
-      right_old_cylinder: '',
-      right_old_axis: '',
-      right_old_vision: '',
-      right_old_years: '',
+      right_sc: '',
+      right_cc: '',
+      right_best_s: '',
+      right_best_c: '',
+      right_best_a: '',
+      right_auto_s: '',
+      right_auto_c: '',
+      right_auto_a: '',
+      right_old_s: '',
+      right_old_c: '',
+      right_old_a: '',
+      right_old_va: '',
+      right_old_year: '',
       right_add: '',
       right_pd: '',
-      left_sc_naked: '',
-      left_cc_best: '',
-      left_best_sphere: '',
-      left_best_cylinder: '',
-      left_best_axis: '',
-      left_auto_sphere: '',
-      left_auto_cylinder: '',
-      left_auto_axis: '',
-      left_old_sphere: '',
-      left_old_cylinder: '',
-      left_old_axis: '',
-      left_old_vision: '',
-      left_old_years: '',
+      left_sc: '',
+      left_cc: '',
+      left_best_s: '',
+      left_best_c: '',
+      left_best_a: '',
+      left_auto_s: '',
+      left_auto_c: '',
+      left_auto_a: '',
+      left_old_s: '',
+      left_old_c: '',
+      left_old_a: '',
+      left_old_va: '',
+      left_old_year: '',
       left_add: '',
       left_pd: '',
       amount: '',
@@ -161,7 +157,7 @@ export function AddPrescriptionDialog({ open, onOpenChange }: AddPrescriptionDia
     onOpenChange(false);
   };
 
-  const EyeSection = ({ eye, prefix }: { eye: '右眼' | '左眼'; prefix: 'right' | 'left' }) => (
+  const EyeSection = ({ prefix }: { prefix: 'right' | 'left' }) => (
     <div className="space-y-4">
       {/* 視力 */}
       <div className="grid grid-cols-2 gap-4">
@@ -169,16 +165,16 @@ export function AddPrescriptionDialog({ open, onOpenChange }: AddPrescriptionDia
           <Label className="text-xs text-muted-foreground">SC 裸視</Label>
           <Input
             placeholder="0.5"
-            value={(formData as any)[`${prefix}_sc_naked`]}
-            onChange={(e) => setFormData({ ...formData, [`${prefix}_sc_naked`]: e.target.value })}
+            value={(formData as any)[`${prefix}_sc`]}
+            onChange={(e) => setFormData({ ...formData, [`${prefix}_sc`]: e.target.value })}
           />
         </div>
         <div className="space-y-1">
           <Label className="text-xs text-muted-foreground">CC 最佳視力</Label>
           <Input
             placeholder="1.0"
-            value={(formData as any)[`${prefix}_cc_best`]}
-            onChange={(e) => setFormData({ ...formData, [`${prefix}_cc_best`]: e.target.value })}
+            value={(formData as any)[`${prefix}_cc`]}
+            onChange={(e) => setFormData({ ...formData, [`${prefix}_cc`]: e.target.value })}
           />
         </div>
       </div>
@@ -193,8 +189,8 @@ export function AddPrescriptionDialog({ open, onOpenChange }: AddPrescriptionDia
               type="number"
               step="0.25"
               placeholder="-2.50"
-              value={(formData as any)[`${prefix}_best_sphere`]}
-              onChange={(e) => setFormData({ ...formData, [`${prefix}_best_sphere`]: e.target.value })}
+              value={(formData as any)[`${prefix}_best_s`]}
+              onChange={(e) => setFormData({ ...formData, [`${prefix}_best_s`]: e.target.value })}
             />
           </div>
           <div className="space-y-1">
@@ -203,8 +199,8 @@ export function AddPrescriptionDialog({ open, onOpenChange }: AddPrescriptionDia
               type="number"
               step="0.25"
               placeholder="-0.50"
-              value={(formData as any)[`${prefix}_best_cylinder`]}
-              onChange={(e) => setFormData({ ...formData, [`${prefix}_best_cylinder`]: e.target.value })}
+              value={(formData as any)[`${prefix}_best_c`]}
+              onChange={(e) => setFormData({ ...formData, [`${prefix}_best_c`]: e.target.value })}
             />
           </div>
           <div className="space-y-1">
@@ -214,8 +210,8 @@ export function AddPrescriptionDialog({ open, onOpenChange }: AddPrescriptionDia
               min="0"
               max="180"
               placeholder="180"
-              value={(formData as any)[`${prefix}_best_axis`]}
-              onChange={(e) => setFormData({ ...formData, [`${prefix}_best_axis`]: e.target.value })}
+              value={(formData as any)[`${prefix}_best_a`]}
+              onChange={(e) => setFormData({ ...formData, [`${prefix}_best_a`]: e.target.value })}
             />
           </div>
         </div>
@@ -230,8 +226,8 @@ export function AddPrescriptionDialog({ open, onOpenChange }: AddPrescriptionDia
             <Input
               type="number"
               step="0.25"
-              value={(formData as any)[`${prefix}_auto_sphere`]}
-              onChange={(e) => setFormData({ ...formData, [`${prefix}_auto_sphere`]: e.target.value })}
+              value={(formData as any)[`${prefix}_auto_s`]}
+              onChange={(e) => setFormData({ ...formData, [`${prefix}_auto_s`]: e.target.value })}
             />
           </div>
           <div className="space-y-1">
@@ -239,8 +235,8 @@ export function AddPrescriptionDialog({ open, onOpenChange }: AddPrescriptionDia
             <Input
               type="number"
               step="0.25"
-              value={(formData as any)[`${prefix}_auto_cylinder`]}
-              onChange={(e) => setFormData({ ...formData, [`${prefix}_auto_cylinder`]: e.target.value })}
+              value={(formData as any)[`${prefix}_auto_c`]}
+              onChange={(e) => setFormData({ ...formData, [`${prefix}_auto_c`]: e.target.value })}
             />
           </div>
           <div className="space-y-1">
@@ -249,8 +245,8 @@ export function AddPrescriptionDialog({ open, onOpenChange }: AddPrescriptionDia
               type="number"
               min="0"
               max="180"
-              value={(formData as any)[`${prefix}_auto_axis`]}
-              onChange={(e) => setFormData({ ...formData, [`${prefix}_auto_axis`]: e.target.value })}
+              value={(formData as any)[`${prefix}_auto_a`]}
+              onChange={(e) => setFormData({ ...formData, [`${prefix}_auto_a`]: e.target.value })}
             />
           </div>
         </div>
@@ -265,8 +261,8 @@ export function AddPrescriptionDialog({ open, onOpenChange }: AddPrescriptionDia
             <Input
               type="number"
               step="0.25"
-              value={(formData as any)[`${prefix}_old_sphere`]}
-              onChange={(e) => setFormData({ ...formData, [`${prefix}_old_sphere`]: e.target.value })}
+              value={(formData as any)[`${prefix}_old_s`]}
+              onChange={(e) => setFormData({ ...formData, [`${prefix}_old_s`]: e.target.value })}
             />
           </div>
           <div className="space-y-1">
@@ -274,8 +270,8 @@ export function AddPrescriptionDialog({ open, onOpenChange }: AddPrescriptionDia
             <Input
               type="number"
               step="0.25"
-              value={(formData as any)[`${prefix}_old_cylinder`]}
-              onChange={(e) => setFormData({ ...formData, [`${prefix}_old_cylinder`]: e.target.value })}
+              value={(formData as any)[`${prefix}_old_c`]}
+              onChange={(e) => setFormData({ ...formData, [`${prefix}_old_c`]: e.target.value })}
             />
           </div>
           <div className="space-y-1">
@@ -284,8 +280,8 @@ export function AddPrescriptionDialog({ open, onOpenChange }: AddPrescriptionDia
               type="number"
               min="0"
               max="180"
-              value={(formData as any)[`${prefix}_old_axis`]}
-              onChange={(e) => setFormData({ ...formData, [`${prefix}_old_axis`]: e.target.value })}
+              value={(formData as any)[`${prefix}_old_a`]}
+              onChange={(e) => setFormData({ ...formData, [`${prefix}_old_a`]: e.target.value })}
             />
           </div>
         </div>
@@ -297,8 +293,8 @@ export function AddPrescriptionDialog({ open, onOpenChange }: AddPrescriptionDia
           <Label className="text-xs text-muted-foreground">原眼鏡視力</Label>
           <Input
             placeholder="0.8"
-            value={(formData as any)[`${prefix}_old_vision`]}
-            onChange={(e) => setFormData({ ...formData, [`${prefix}_old_vision`]: e.target.value })}
+            value={(formData as any)[`${prefix}_old_va`]}
+            onChange={(e) => setFormData({ ...formData, [`${prefix}_old_va`]: e.target.value })}
           />
         </div>
         <div className="space-y-1">
@@ -307,8 +303,8 @@ export function AddPrescriptionDialog({ open, onOpenChange }: AddPrescriptionDia
             type="number"
             min="0"
             placeholder="2"
-            value={(formData as any)[`${prefix}_old_years`]}
-            onChange={(e) => setFormData({ ...formData, [`${prefix}_old_years`]: e.target.value })}
+            value={(formData as any)[`${prefix}_old_year`]}
+            onChange={(e) => setFormData({ ...formData, [`${prefix}_old_year`]: e.target.value })}
           />
         </div>
       </div>
@@ -389,10 +385,10 @@ export function AddPrescriptionDialog({ open, onOpenChange }: AddPrescriptionDia
                 <TabsTrigger value="left">左眼 (OS)</TabsTrigger>
               </TabsList>
               <TabsContent value="right" className="mt-4">
-                <EyeSection eye="右眼" prefix="right" />
+                <EyeSection prefix="right" />
               </TabsContent>
               <TabsContent value="left" className="mt-4">
-                <EyeSection eye="左眼" prefix="left" />
+                <EyeSection prefix="left" />
               </TabsContent>
             </Tabs>
 
