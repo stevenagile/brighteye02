@@ -1,23 +1,18 @@
-import { useTransactions } from '@/hooks/useTransactions';
-import { CreditCard, Banknote, Building2, Receipt } from 'lucide-react';
+import { usePrescriptions } from '@/hooks/usePrescriptions';
+import { useMembers } from '@/hooks/useMembers';
+import { Eye, Receipt } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
-const paymentIcons = {
-  card: CreditCard,
-  cash: Banknote,
-  transfer: Building2,
-};
-
-const paymentLabels = {
-  card: '刷卡',
-  cash: '現金',
-  transfer: '轉帳',
-};
-
 export function RecentTransactions() {
-  const { data: transactions, isLoading } = useTransactions();
+  const { data: prescriptions, isLoading } = usePrescriptions();
+  const { data: members } = useMembers();
 
-  const recentTransactions = transactions?.slice(0, 5) || [];
+  const recentPrescriptions = prescriptions?.slice(0, 5) || [];
+
+  const getMemberName = (memberId: string) => {
+    const member = members?.find(m => m.id === memberId);
+    return member?.name || '未知會員';
+  };
 
   if (isLoading) {
     return (
@@ -37,48 +32,43 @@ export function RecentTransactions() {
     <div className="stat-card">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h3 className="text-lg font-semibold text-foreground">最近交易</h3>
-          <p className="text-sm text-muted-foreground">最新的銷售記錄</p>
+          <h3 className="text-lg font-semibold text-foreground">最近服務</h3>
+          <p className="text-sm text-muted-foreground">最新的驗光服務記錄</p>
         </div>
       </div>
 
-      {recentTransactions.length === 0 ? (
+      {recentPrescriptions.length === 0 ? (
         <div className="text-center py-12 text-muted-foreground">
           <Receipt className="w-12 h-12 mx-auto mb-4 opacity-50" />
-          <p>尚無交易記錄</p>
+          <p>尚無服務記錄</p>
         </div>
       ) : (
         <div className="space-y-4">
-          {recentTransactions.map((transaction) => {
-            const PaymentIcon = paymentIcons[transaction.payment_method];
-            const items = transaction.transaction_items || [];
+          {recentPrescriptions.map((prescription) => {
             return (
               <div 
-                key={transaction.id}
+                key={prescription.id}
                 className="flex items-center justify-between p-4 rounded-xl bg-muted/50 hover:bg-muted transition-colors"
               >
                 <div className="flex items-center gap-4">
                   <div className="flex items-center justify-center w-10 h-10 rounded-full bg-secondary">
-                    <PaymentIcon className="w-5 h-5 text-primary" />
+                    <Eye className="w-5 h-5 text-primary" />
                   </div>
                   <div>
                     <p className="font-medium text-foreground">
-                      {transaction.members?.name || '非會員'}
+                      {getMemberName(prescription.member_id)}
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      {items.length > 0 
-                        ? items.map(i => i.name).join('、')
-                        : '無明細'
-                      }
+                      {prescription.examiner ? `驗光師：${prescription.examiner}` : '驗光服務'}
                     </p>
                   </div>
                 </div>
                 <div className="text-right">
                   <p className="font-semibold text-foreground">
-                    NT${Number(transaction.total).toLocaleString()}
+                    NT${Number(prescription.amount || 0).toLocaleString()}
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    {paymentLabels[transaction.payment_method]} · {transaction.transaction_date}
+                    {prescription.exam_date}
                   </p>
                 </div>
               </div>

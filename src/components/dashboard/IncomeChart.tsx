@@ -8,7 +8,7 @@ import {
   Tooltip, 
   ResponsiveContainer 
 } from 'recharts';
-import { useTransactions } from '@/hooks/useTransactions';
+import { usePrescriptions } from '@/hooks/usePrescriptions';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -19,28 +19,28 @@ const months = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', 
 
 export function IncomeChart() {
   const [period, setPeriod] = useState<Period>('weekly');
-  const { data: transactions, isLoading } = useTransactions();
+  const { data: prescriptions, isLoading } = usePrescriptions();
 
   const chartData = useMemo(() => {
-    if (!transactions) return [];
+    if (!prescriptions) return [];
 
     const now = new Date();
     
     if (period === 'weekly') {
       // 最近 7 天
-      const data = weekDays.map((day, i) => ({
+      const data = weekDays.map((day) => ({
         period: day,
         income: 0,
-        transactions: 0,
+        services: 0,
       }));
 
-      transactions.forEach(t => {
-        const date = new Date(t.transaction_date);
+      prescriptions.forEach(p => {
+        const date = new Date(p.exam_date);
         const dayDiff = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
         if (dayDiff >= 0 && dayDiff < 7) {
           const dayIndex = date.getDay();
-          data[dayIndex].income += Number(t.total);
-          data[dayIndex].transactions += 1;
+          data[dayIndex].income += Number(p.amount || 0);
+          data[dayIndex].services += 1;
         }
       });
 
@@ -50,21 +50,21 @@ export function IncomeChart() {
       const data = months.map((month) => ({
         period: month,
         income: 0,
-        transactions: 0,
+        services: 0,
       }));
 
-      transactions.forEach(t => {
-        const date = new Date(t.transaction_date);
+      prescriptions.forEach(p => {
+        const date = new Date(p.exam_date);
         if (date.getFullYear() === now.getFullYear()) {
           const monthIndex = date.getMonth();
-          data[monthIndex].income += Number(t.total);
-          data[monthIndex].transactions += 1;
+          data[monthIndex].income += Number(p.amount || 0);
+          data[monthIndex].services += 1;
         }
       });
 
       return data;
     }
-  }, [transactions, period]);
+  }, [prescriptions, period]);
 
   const formatCurrency = (value: number) => {
     return `NT$${value.toLocaleString()}`;
