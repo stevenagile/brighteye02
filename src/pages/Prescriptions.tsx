@@ -122,14 +122,14 @@ export default function Prescriptions() {
                       <TableCell>
                         <div className="text-sm">
                           <span className="font-medium">
-                            {formatDiopter(rx.right_best_sphere)} / {rx.right_best_cylinder ?? '-'} × {rx.right_best_axis ?? '-'}°
+                            {formatDiopter(rx.right_best_s)} / {rx.right_best_c ?? '-'} × {rx.right_best_a ?? '-'}°
                           </span>
                         </div>
                       </TableCell>
                       <TableCell>
                         <div className="text-sm">
                           <span className="font-medium">
-                            {formatDiopter(rx.left_best_sphere)} / {rx.left_best_cylinder ?? '-'} × {rx.left_best_axis ?? '-'}°
+                            {formatDiopter(rx.left_best_s)} / {rx.left_best_c ?? '-'} × {rx.left_best_a ?? '-'}°
                           </span>
                         </div>
                       </TableCell>
@@ -208,38 +208,38 @@ export default function Prescriptions() {
                     <div className="space-y-3 text-sm">
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">裸視 SC</span>
-                        <span className="font-medium">{selectedPrescription.right_sc_naked || '-'}</span>
+                        <span className="font-medium">{selectedPrescription.right_sc || '-'}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">最佳視力 CC</span>
-                        <span className="font-medium">{selectedPrescription.right_cc_best || '-'}</span>
+                        <span className="font-medium">{selectedPrescription.right_cc || '-'}</span>
                       </div>
                       <div className="pt-2 border-t">
                         <p className="text-muted-foreground mb-1">最佳矯正度數</p>
                         <p className="font-medium">
-                          S: {formatDiopter(selectedPrescription.right_best_sphere)} / 
-                          C: {selectedPrescription.right_best_cylinder ?? '-'} / 
-                          A: {selectedPrescription.right_best_axis ?? '-'}°
+                          S: {formatDiopter(selectedPrescription.right_best_s)} / 
+                          C: {selectedPrescription.right_best_c ?? '-'} / 
+                          A: {selectedPrescription.right_best_a ?? '-'}°
                         </p>
                       </div>
                       <div>
                         <p className="text-muted-foreground mb-1">電腦驗光</p>
                         <p className="font-medium">
-                          S: {formatDiopter(selectedPrescription.right_auto_sphere)} / 
-                          C: {selectedPrescription.right_auto_cylinder ?? '-'} / 
-                          A: {selectedPrescription.right_auto_axis ?? '-'}°
+                          S: {formatDiopter(selectedPrescription.right_auto_s)} / 
+                          C: {selectedPrescription.right_auto_c ?? '-'} / 
+                          A: {selectedPrescription.right_auto_a ?? '-'}°
                         </p>
                       </div>
                       <div>
                         <p className="text-muted-foreground mb-1">原戴眼鏡</p>
                         <p className="font-medium">
-                          S: {formatDiopter(selectedPrescription.right_old_sphere)} / 
-                          C: {selectedPrescription.right_old_cylinder ?? '-'} / 
-                          A: {selectedPrescription.right_old_axis ?? '-'}°
+                          S: {formatDiopter(selectedPrescription.right_old_s)} / 
+                          C: {selectedPrescription.right_old_c ?? '-'} / 
+                          A: {selectedPrescription.right_old_a ?? '-'}°
                         </p>
                         <p className="text-xs text-muted-foreground mt-1">
-                          視力: {selectedPrescription.right_old_vision || '-'}, 
-                          配戴: {selectedPrescription.right_old_years ? `${selectedPrescription.right_old_years}年` : '-'}
+                          視力: {selectedPrescription.right_old_va || '-'}, 
+                          配戴: {selectedPrescription.right_old_year ? `${selectedPrescription.right_old_year}年` : '-'}
                         </p>
                       </div>
                       <div className="flex justify-between pt-2 border-t">
@@ -259,38 +259,38 @@ export default function Prescriptions() {
                     <div className="space-y-3 text-sm">
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">裸視 SC</span>
-                        <span className="font-medium">{selectedPrescription.left_sc_naked || '-'}</span>
+                        <span className="font-medium">{selectedPrescription.left_sc || '-'}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">最佳視力 CC</span>
-                        <span className="font-medium">{selectedPrescription.left_cc_best || '-'}</span>
+                        <span className="font-medium">{selectedPrescription.left_cc || '-'}</span>
                       </div>
                       <div className="pt-2 border-t">
                         <p className="text-muted-foreground mb-1">最佳矯正度數</p>
                         <p className="font-medium">
-                          S: {formatDiopter(selectedPrescription.left_best_sphere)} / 
-                          C: {selectedPrescription.left_best_cylinder ?? '-'} / 
-                          A: {selectedPrescription.left_best_axis ?? '-'}°
+                          S: {formatDiopter(selectedPrescription.left_best_s)} / 
+                          C: {selectedPrescription.left_best_c ?? '-'} / 
+                          A: {selectedPrescription.left_best_a ?? '-'}°
                         </p>
                       </div>
                       <div>
                         <p className="text-muted-foreground mb-1">電腦驗光</p>
                         <p className="font-medium">
-                          S: {formatDiopter(selectedPrescription.left_auto_sphere)} / 
-                          C: {selectedPrescription.left_auto_cylinder ?? '-'} / 
-                          A: {selectedPrescription.left_auto_axis ?? '-'}°
+                          S: {formatDiopter(selectedPrescription.left_auto_s)} / 
+                          C: {selectedPrescription.left_auto_c ?? '-'} / 
+                          A: {selectedPrescription.left_auto_a ?? '-'}°
                         </p>
                       </div>
                       <div>
                         <p className="text-muted-foreground mb-1">原戴眼鏡</p>
                         <p className="font-medium">
-                          S: {formatDiopter(selectedPrescription.left_old_sphere)} / 
-                          C: {selectedPrescription.left_old_cylinder ?? '-'} / 
-                          A: {selectedPrescription.left_old_axis ?? '-'}°
+                          S: {formatDiopter(selectedPrescription.left_old_s)} / 
+                          C: {selectedPrescription.left_old_c ?? '-'} / 
+                          A: {selectedPrescription.left_old_a ?? '-'}°
                         </p>
                         <p className="text-xs text-muted-foreground mt-1">
-                          視力: {selectedPrescription.left_old_vision || '-'}, 
-                          配戴: {selectedPrescription.left_old_years ? `${selectedPrescription.left_old_years}年` : '-'}
+                          視力: {selectedPrescription.left_old_va || '-'}, 
+                          配戴: {selectedPrescription.left_old_year ? `${selectedPrescription.left_old_year}年` : '-'}
                         </p>
                       </div>
                       <div className="flex justify-between pt-2 border-t">

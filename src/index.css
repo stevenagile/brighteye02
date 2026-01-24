@@ -1,124 +1,102 @@
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* 伯洸眼镜行管理系统设计系统 */
+/* 伯洸眼鏡管理系統設計系統 - 專業眼鏡店風格 */
 
 @layer base {
   :root {
-    /* 主背景 - 柔和灰白 */
-    --background: 210 20% 98%;
-    --foreground: 215 25% 15%;
+    --background: 220 20% 97%;
+    --foreground: 222 47% 11%;
 
-    /* 卡片 - 纯白带微妙阴影 */
     --card: 0 0% 100%;
-    --card-foreground: 215 25% 15%;
+    --card-foreground: 222 47% 11%;
 
-    /* 弹出层 */
     --popover: 0 0% 100%;
-    --popover-foreground: 215 25% 15%;
+    --popover-foreground: 222 47% 11%;
 
-    /* 主色调 - 深青蓝 (专业医疗感) */
-    --primary: 195 70% 35%;
+    --primary: 215 80% 50%;
     --primary-foreground: 0 0% 100%;
 
-    /* 次要色 - 浅青蓝 */
-    --secondary: 195 40% 95%;
-    --secondary-foreground: 195 70% 30%;
+    --secondary: 220 14% 96%;
+    --secondary-foreground: 222 47% 11%;
 
-    /* 柔和色调 */
-    --muted: 210 15% 94%;
-    --muted-foreground: 215 15% 50%;
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 9% 46%;
 
-    /* 强调色 - 金色 (会员等级) */
     --accent: 38 92% 50%;
     --accent-foreground: 0 0% 100%;
 
-    /* 危险色 */
-    --destructive: 0 72% 51%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    /* 边框和输入 */
-    --border: 210 20% 90%;
-    --input: 210 20% 90%;
-    --ring: 195 70% 45%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 215 80% 50%;
 
     --radius: 0.75rem;
 
-    /* 侧边栏 - 深色专业风格 */
-    --sidebar-background: 200 25% 18%;
-    --sidebar-foreground: 210 20% 90%;
-    --sidebar-primary: 195 70% 50%;
+    /* 會員等級顏色 */
+    --gold: 45 93% 47%;
+    --gold-foreground: 0 0% 100%;
+    --silver: 210 11% 71%;
+    --silver-foreground: 222 47% 11%;
+    --black-card: 0 0% 15%;
+    --black-card-foreground: 0 0% 100%;
+
+    /* 成功和警告 */
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+
+    --sidebar-background: 222 47% 11%;
+    --sidebar-foreground: 220 14% 96%;
+    --sidebar-primary: 215 80% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 200 25% 25%;
-    --sidebar-accent-foreground: 210 20% 95%;
-    --sidebar-border: 200 20% 25%;
-    --sidebar-ring: 195 70% 50%;
-
-    /* 会员等级颜色 */
-    --member-gold: 45 93% 47%;
-    --member-gold-bg: 45 93% 95%;
-    --member-silver: 210 10% 60%;
-    --member-silver-bg: 210 10% 95%;
-    --member-black: 0 0% 15%;
-    --member-black-bg: 0 0% 92%;
-
-    /* 图表颜色 */
-    --chart-primary: 195 70% 45%;
-    --chart-secondary: 38 92% 55%;
-    --chart-success: 152 60% 45%;
-
-    /* 渐变 */
-    --gradient-primary: linear-gradient(135deg, hsl(195 70% 40%) 0%, hsl(200 60% 50%) 100%);
-    --gradient-gold: linear-gradient(135deg, hsl(38 92% 55%) 0%, hsl(45 90% 60%) 100%);
-    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(210 20% 99%) 100%);
-
-    /* 阴影 */
-    --shadow-sm: 0 1px 2px 0 hsl(215 25% 15% / 0.05);
-    --shadow-md: 0 4px 6px -1px hsl(215 25% 15% / 0.08), 0 2px 4px -2px hsl(215 25% 15% / 0.05);
-    --shadow-lg: 0 10px 15px -3px hsl(215 25% 15% / 0.08), 0 4px 6px -4px hsl(215 25% 15% / 0.05);
-    --shadow-card: 0 1px 3px hsl(215 25% 15% / 0.06), 0 4px 12px hsl(215 25% 15% / 0.04);
+    --sidebar-accent: 217 33% 17%;
+    --sidebar-accent-foreground: 220 14% 96%;
+    --sidebar-border: 217 33% 17%;
+    --sidebar-ring: 215 80% 50%;
   }
 
   .dark {
-    --background: 215 25% 10%;
-    --foreground: 210 20% 95%;
+    --background: 222 47% 8%;
+    --foreground: 220 14% 96%;
 
-    --card: 215 25% 14%;
-    --card-foreground: 210 20% 95%;
+    --card: 222 47% 11%;
+    --card-foreground: 220 14% 96%;
 
-    --popover: 215 25% 14%;
-    --popover-foreground: 210 20% 95%;
+    --popover: 222 47% 11%;
+    --popover-foreground: 220 14% 96%;
 
-    --primary: 195 65% 50%;
+    --primary: 215 80% 55%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 215 25% 20%;
-    --secondary-foreground: 195 65% 60%;
+    --secondary: 217 33% 17%;
+    --secondary-foreground: 220 14% 96%;
 
-    --muted: 215 25% 18%;
-    --muted-foreground: 215 15% 60%;
+    --muted: 217 33% 17%;
+    --muted-foreground: 220 9% 65%;
 
-    --accent: 38 92% 55%;
+    --accent: 38 92% 50%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 72% 45%;
+    --destructive: 0 62% 30%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 215 25% 20%;
-    --input: 215 25% 20%;
-    --ring: 195 65% 50%;
+    --border: 217 33% 17%;
+    --input: 217 33% 17%;
+    --ring: 215 80% 55%;
 
-    --sidebar-background: 215 30% 8%;
-    --sidebar-foreground: 210 20% 90%;
-    --sidebar-primary: 195 65% 55%;
+    --sidebar-background: 222 47% 6%;
+    --sidebar-foreground: 220 14% 96%;
+    --sidebar-primary: 215 80% 55%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 215 30% 15%;
-    --sidebar-accent-foreground: 210 20% 95%;
-    --sidebar-border: 215 25% 15%;
-    --sidebar-ring: 195 65% 55%;
+    --sidebar-accent: 217 33% 12%;
+    --sidebar-accent-foreground: 220 14% 96%;
+    --sidebar-border: 217 33% 12%;
+    --sidebar-ring: 215 80% 55%;
   }
 }
 
@@ -128,52 +106,37 @@
   }
 
   body {
-    @apply bg-background text-foreground font-sans antialiased;
-    font-family: 'Noto Sans SC', system-ui, sans-serif;
+    @apply bg-background text-foreground antialiased;
   }
 }
 
 @layer components {
   .stat-card {
-    @apply bg-card rounded-xl p-6 border border-border;
-    box-shadow: var(--shadow-card);
-  }
-
-  .member-badge-gold {
-    @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium;
-    background: hsl(var(--member-gold-bg));
-    color: hsl(var(--member-gold));
-  }
-
-  .member-badge-silver {
-    @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium;
-    background: hsl(var(--member-silver-bg));
-    color: hsl(var(--member-silver));
-  }
-
-  .member-badge-black {
-    @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium;
-    background: hsl(var(--member-black-bg));
-    color: hsl(var(--member-black));
+    @apply rounded-xl bg-card p-6 shadow-sm border border-border transition-all duration-200 hover:shadow-md;
   }
 
   .gradient-primary {
-    background: var(--gradient-primary);
+    @apply bg-gradient-to-r from-primary to-primary/80;
   }
 
-  .gradient-gold {
-    background: var(--gradient-gold);
+  .gradient-accent {
+    @apply bg-gradient-to-r from-accent to-accent/80;
+  }
+}
+
+@layer utilities {
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-in-out;
   }
 
-  .sidebar-nav-item {
-    @apply flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/80 transition-all duration-200;
-  }
-
-  .sidebar-nav-item:hover {
-    @apply bg-sidebar-accent text-sidebar-foreground;
-  }
-
-  .sidebar-nav-item.active {
-    @apply bg-sidebar-primary text-sidebar-primary-foreground;
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 }

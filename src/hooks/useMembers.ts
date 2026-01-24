@@ -1,48 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import type { Tables, TablesInsert } from '@/integrations/supabase/types';
 
+export type Member = Tables<'members'>;
+export type MemberInsert = TablesInsert<'members'>;
 export type MemberLevel = 'gold' | 'silver' | 'black';
-
-export interface Member {
-  id: string;
-  name: string;
-  phone: string;
-  email: string | null;
-  level: MemberLevel;
-  shopping_credit: number;
-  coupon_count: number;
-  notes: string | null;
-  created_at: string;
-  updated_at: string;
-  // 新增欄位
-  gender: string | null;
-  birthday: string | null;
-  address: string | null;
-  occupation: string | null;
-  home_phone: string | null;
-  health_conditions: string[];
-  eye_conditions: string[];
-  eye_surgeries: string[];
-}
-
-export interface CreateMemberData {
-  name: string;
-  phone: string;
-  email?: string;
-  level?: MemberLevel;
-  shopping_credit?: number;
-  coupon_count?: number;
-  notes?: string;
-  gender?: string;
-  birthday?: string;
-  address?: string;
-  occupation?: string;
-  home_phone?: string;
-  health_conditions?: string[];
-  eye_conditions?: string[];
-  eye_surgeries?: string[];
-}
 
 export function useMembers() {
   return useQuery({
@@ -80,7 +43,7 @@ export function useCreateMember() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (member: CreateMemberData) => {
+    mutationFn: async (member: MemberInsert) => {
       const { data, error } = await supabase
         .from('members')
         .insert(member)

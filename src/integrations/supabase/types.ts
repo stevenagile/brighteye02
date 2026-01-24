@@ -14,7 +14,298 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      members: {
+        Row: {
+          address: string | null
+          birthday: string | null
+          coupon_count: number
+          created_at: string
+          email: string | null
+          eye_conditions: string[] | null
+          eye_surgeries: string[] | null
+          gender: string | null
+          health_conditions: string[] | null
+          home_phone: string | null
+          id: string
+          level: Database["public"]["Enums"]["member_level"]
+          name: string
+          notes: string | null
+          occupation: string | null
+          phone: string
+          shopping_credit: number
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          birthday?: string | null
+          coupon_count?: number
+          created_at?: string
+          email?: string | null
+          eye_conditions?: string[] | null
+          eye_surgeries?: string[] | null
+          gender?: string | null
+          health_conditions?: string[] | null
+          home_phone?: string | null
+          id?: string
+          level?: Database["public"]["Enums"]["member_level"]
+          name: string
+          notes?: string | null
+          occupation?: string | null
+          phone: string
+          shopping_credit?: number
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          birthday?: string | null
+          coupon_count?: number
+          created_at?: string
+          email?: string | null
+          eye_conditions?: string[] | null
+          eye_surgeries?: string[] | null
+          gender?: string | null
+          health_conditions?: string[] | null
+          home_phone?: string | null
+          id?: string
+          level?: Database["public"]["Enums"]["member_level"]
+          name?: string
+          notes?: string | null
+          occupation?: string | null
+          phone?: string
+          shopping_credit?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      prescriptions: {
+        Row: {
+          amount: number | null
+          created_at: string
+          exam_date: string
+          examiner: string | null
+          id: string
+          left_add: number | null
+          left_auto_a: number | null
+          left_auto_c: number | null
+          left_auto_s: number | null
+          left_best_a: number | null
+          left_best_c: number | null
+          left_best_s: number | null
+          left_cc: string | null
+          left_old_a: number | null
+          left_old_c: number | null
+          left_old_s: number | null
+          left_old_va: string | null
+          left_old_year: number | null
+          left_pd: number | null
+          left_sc: string | null
+          member_id: string
+          notes: string | null
+          right_add: number | null
+          right_auto_a: number | null
+          right_auto_c: number | null
+          right_auto_s: number | null
+          right_best_a: number | null
+          right_best_c: number | null
+          right_best_s: number | null
+          right_cc: string | null
+          right_old_a: number | null
+          right_old_c: number | null
+          right_old_s: number | null
+          right_old_va: string | null
+          right_old_year: number | null
+          right_pd: number | null
+          right_sc: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount?: number | null
+          created_at?: string
+          exam_date?: string
+          examiner?: string | null
+          id?: string
+          left_add?: number | null
+          left_auto_a?: number | null
+          left_auto_c?: number | null
+          left_auto_s?: number | null
+          left_best_a?: number | null
+          left_best_c?: number | null
+          left_best_s?: number | null
+          left_cc?: string | null
+          left_old_a?: number | null
+          left_old_c?: number | null
+          left_old_s?: number | null
+          left_old_va?: string | null
+          left_old_year?: number | null
+          left_pd?: number | null
+          left_sc?: string | null
+          member_id: string
+          notes?: string | null
+          right_add?: number | null
+          right_auto_a?: number | null
+          right_auto_c?: number | null
+          right_auto_s?: number | null
+          right_best_a?: number | null
+          right_best_c?: number | null
+          right_best_s?: number | null
+          right_cc?: string | null
+          right_old_a?: number | null
+          right_old_c?: number | null
+          right_old_s?: number | null
+          right_old_va?: string | null
+          right_old_year?: number | null
+          right_pd?: number | null
+          right_sc?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount?: number | null
+          created_at?: string
+          exam_date?: string
+          examiner?: string | null
+          id?: string
+          left_add?: number | null
+          left_auto_a?: number | null
+          left_auto_c?: number | null
+          left_auto_s?: number | null
+          left_best_a?: number | null
+          left_best_c?: number | null
+          left_best_s?: number | null
+          left_cc?: string | null
+          left_old_a?: number | null
+          left_old_c?: number | null
+          left_old_s?: number | null
+          left_old_va?: string | null
+          left_old_year?: number | null
+          left_pd?: number | null
+          left_sc?: string | null
+          member_id?: string
+          notes?: string | null
+          right_add?: number | null
+          right_auto_a?: number | null
+          right_auto_c?: number | null
+          right_auto_s?: number | null
+          right_best_a?: number | null
+          right_best_c?: number | null
+          right_best_s?: number | null
+          right_cc?: string | null
+          right_old_a?: number | null
+          right_old_c?: number | null
+          right_old_s?: number | null
+          right_old_va?: string | null
+          right_old_year?: number | null
+          right_pd?: number | null
+          right_sc?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prescriptions_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      transaction_items: {
+        Row: {
+          created_at: string
+          id: string
+          item_type: Database["public"]["Enums"]["item_type"]
+          name: string
+          price: number
+          quantity: number
+          transaction_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          item_type?: Database["public"]["Enums"]["item_type"]
+          name: string
+          price?: number
+          quantity?: number
+          transaction_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          item_type?: Database["public"]["Enums"]["item_type"]
+          name?: string
+          price?: number
+          quantity?: number
+          transaction_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transaction_items_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      transactions: {
+        Row: {
+          coupon_used: number
+          created_at: string
+          credit_used: number
+          discount: number
+          id: string
+          member_id: string | null
+          notes: string | null
+          payment_method: Database["public"]["Enums"]["payment_method"]
+          prescription_id: string | null
+          subtotal: number
+          total: number
+          transaction_date: string
+        }
+        Insert: {
+          coupon_used?: number
+          created_at?: string
+          credit_used?: number
+          discount?: number
+          id?: string
+          member_id?: string | null
+          notes?: string | null
+          payment_method?: Database["public"]["Enums"]["payment_method"]
+          prescription_id?: string | null
+          subtotal?: number
+          total?: number
+          transaction_date?: string
+        }
+        Update: {
+          coupon_used?: number
+          created_at?: string
+          credit_used?: number
+          discount?: number
+          id?: string
+          member_id?: string | null
+          notes?: string | null
+          payment_method?: Database["public"]["Enums"]["payment_method"]
+          prescription_id?: string | null
+          subtotal?: number
+          total?: number
+          transaction_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_transactions_prescription"
+            columns: ["prescription_id"]
+            isOneToOne: false
+            referencedRelation: "prescriptions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +314,9 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      item_type: "frame" | "lens" | "exam" | "accessory" | "other"
+      member_level: "gold" | "silver" | "black"
+      payment_method: "cash" | "card" | "transfer"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +443,10 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      item_type: ["frame", "lens", "exam", "accessory", "other"],
+      member_level: ["gold", "silver", "black"],
+      payment_method: ["cash", "card", "transfer"],
+    },
   },
 } as const

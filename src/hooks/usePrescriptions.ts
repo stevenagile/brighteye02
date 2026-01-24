@@ -1,52 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import type { Tables, TablesInsert } from '@/integrations/supabase/types';
 
-export interface Prescription {
-  id: string;
-  member_id: string;
-  exam_date: string;
-  
-  // 右眼
-  right_sc_naked: string | null;
-  right_cc_best: string | null;
-  right_best_sphere: number | null;
-  right_best_cylinder: number | null;
-  right_best_axis: number | null;
-  right_auto_sphere: number | null;
-  right_auto_cylinder: number | null;
-  right_auto_axis: number | null;
-  right_old_sphere: number | null;
-  right_old_cylinder: number | null;
-  right_old_axis: number | null;
-  right_old_vision: string | null;
-  right_old_years: number | null;
-  right_add: number | null;
-  right_pd: number | null;
-  
-  // 左眼
-  left_sc_naked: string | null;
-  left_cc_best: string | null;
-  left_best_sphere: number | null;
-  left_best_cylinder: number | null;
-  left_best_axis: number | null;
-  left_auto_sphere: number | null;
-  left_auto_cylinder: number | null;
-  left_auto_axis: number | null;
-  left_old_sphere: number | null;
-  left_old_cylinder: number | null;
-  left_old_axis: number | null;
-  left_old_vision: string | null;
-  left_old_years: number | null;
-  left_add: number | null;
-  left_pd: number | null;
-  
-  // 其他
-  amount: number | null;
-  examiner: string | null;
-  notes: string | null;
-  created_at: string;
-}
+export type Prescription = Tables<'prescriptions'>;
+export type PrescriptionInsert = TablesInsert<'prescriptions'>;
 
 export interface PrescriptionWithMember extends Prescription {
   members: {
@@ -54,47 +12,6 @@ export interface PrescriptionWithMember extends Prescription {
     name: string;
     phone: string;
   } | null;
-}
-
-export interface CreatePrescriptionData {
-  member_id: string;
-  exam_date?: string;
-  
-  right_sc_naked?: string;
-  right_cc_best?: string;
-  right_best_sphere?: number;
-  right_best_cylinder?: number;
-  right_best_axis?: number;
-  right_auto_sphere?: number;
-  right_auto_cylinder?: number;
-  right_auto_axis?: number;
-  right_old_sphere?: number;
-  right_old_cylinder?: number;
-  right_old_axis?: number;
-  right_old_vision?: string;
-  right_old_years?: number;
-  right_add?: number;
-  right_pd?: number;
-  
-  left_sc_naked?: string;
-  left_cc_best?: string;
-  left_best_sphere?: number;
-  left_best_cylinder?: number;
-  left_best_axis?: number;
-  left_auto_sphere?: number;
-  left_auto_cylinder?: number;
-  left_auto_axis?: number;
-  left_old_sphere?: number;
-  left_old_cylinder?: number;
-  left_old_axis?: number;
-  left_old_vision?: string;
-  left_old_years?: number;
-  left_add?: number;
-  left_pd?: number;
-  
-  amount?: number;
-  examiner?: string;
-  notes?: string;
 }
 
 export function usePrescriptions() {
@@ -136,7 +53,7 @@ export function useCreatePrescription() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (prescription: CreatePrescriptionData) => {
+    mutationFn: async (prescription: PrescriptionInsert) => {
       const { data, error } = await supabase
         .from('prescriptions')
         .insert(prescription)
