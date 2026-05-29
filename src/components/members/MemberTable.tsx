@@ -24,7 +24,6 @@ import { supabase } from '@/integrations/supabase/client';
 export function MemberTable() {
   const [searchTerm, setSearchTerm] = useState('');
   const [levelFilter, setLevelFilter] = useState<MemberLevel | 'all'>('all');
-  const [editMember, setEditMember] = useState<Member | null>(null);
   const { data: members, isLoading } = useMembers();
 
   const { data: prescriptions } = useQuery({
