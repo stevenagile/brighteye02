@@ -23,10 +23,12 @@ import {
 import {
   ArrowLeft, Pencil, Save, X, Trash2, Phone, Mail, MapPin, Calendar,
   Briefcase, MessageCircle, UserPlus, CreditCard, Wallet, TrendingDown,
-  Receipt, AlertCircle, Loader2,
+  Receipt, AlertCircle, Loader2, ChevronRight,
 } from 'lucide-react';
 import { useMember, useUpdateMember, useDeleteMember, MemberLevel } from '@/hooks/useMembers';
 import { useMemberLevels } from '@/hooks/useSettings';
+import { EditPrescriptionDialog } from '@/components/prescriptions/EditPrescriptionDialog';
+import type { Prescription } from '@/hooks/usePrescriptions';
 
 const HEALTH_CONDITIONS = ['糖尿病', '高血壓', '甲狀腺疾病', '懷孕'];
 const EYE_CONDITIONS = ['青光眼', '白內障', '圓錐角膜', '眼球受傷', '角膜炎', '結膜炎', '乾眼症'];
