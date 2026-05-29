@@ -1,6 +1,5 @@
 import { useState, useMemo } from 'react';
-import { useMembers, Member, MemberLevel } from '@/hooks/useMembers';
-import { EditMemberDialog } from './EditMemberDialog';
+import { useMembers, MemberLevel } from '@/hooks/useMembers';
 import { MemberRow } from './MemberRow';
 import { Input } from '@/components/ui/input';
 import { Search, Users } from 'lucide-react';
