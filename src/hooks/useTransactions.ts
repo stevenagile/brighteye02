@@ -85,7 +85,7 @@ export function useCreateTransaction() {
           .insert(items.map(item => ({
             ...item,
             transaction_id: txData.id,
-          })));
+          })) as any);
 
         if (itemsError) throw itemsError;
       }
