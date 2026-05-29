@@ -83,7 +83,7 @@ export function useCreatePrescription() {
     mutationFn: async (prescription: PrescriptionInsert) => {
       const parsed = prescriptionInputSchema.safeParse(prescription);
       if (!parsed.success) throw new Error(formatZodError(parsed.error));
-      const { data, error } = await supabase
+        .insert(parsed.data as any)
         .from('prescriptions')
         .insert(parsed.data as PrescriptionInsert)
         .select()
@@ -107,7 +107,7 @@ export function useUpdatePrescription() {
 
   return useMutation({
     mutationFn: async ({ id, ...updates }: Partial<Prescription> & { id: string }) => {
-      const parsed = prescriptionUpdateSchema.safeParse(updates);
+        .update(parsed.data as any)
       if (!parsed.success) throw new Error(formatZodError(parsed.error));
       const { data, error } = await supabase
         .from('prescriptions')

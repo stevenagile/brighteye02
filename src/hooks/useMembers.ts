@@ -46,7 +46,7 @@ export function useCreateMember() {
   return useMutation({
     mutationFn: async (member: MemberInsert) => {
       const parsed = memberInputSchema.safeParse(member);
-      if (!parsed.success) throw new Error(formatZodError(parsed.error));
+        .insert(parsed.data as any)
       const { data, error } = await supabase
         .from('members')
         .insert(parsed.data as MemberInsert)
@@ -71,12 +71,11 @@ export function useUpdateMember() {
 
   return useMutation({
     mutationFn: async ({ id, ...updates }: Partial<Member> & { id: string }) => {
-    mutationFn: async ({ id, ...updates }: Partial<Member> & { id: string }) => {
       const parsed = memberUpdateSchema.safeParse(updates);
       if (!parsed.success) throw new Error(formatZodError(parsed.error));
       const { data, error } = await supabase
         .from('members')
-        .update(parsed.data)
+        .update(parsed.data as any)
         .eq('id', id)
         .select()
         .single();
@@ -84,6 +83,7 @@ export function useUpdateMember() {
       if (error) throw error;
       return data;
     },
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['members'] });
       toast.success('會員更新成功');
     },
@@ -91,6 +91,7 @@ export function useUpdateMember() {
       toast.error('更新會員失敗：' + error.message);
     },
   });
+}
 }
 
 export function useDeleteMember() {
