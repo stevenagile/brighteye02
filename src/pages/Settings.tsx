@@ -205,19 +205,111 @@ export default function Settings() {
               </Button>
             </div>
 
-            {loadingLevels ? (
-              <div className="flex items-center justify-center py-8">
-                <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {/* Regular Member */}
-                <div className="p-4 border border-border rounded-xl">
-                  <div className="member-badge-regular mb-4">一般客戶</div>
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <Label className="text-sm text-muted-foreground">VIP 金額</Label>
-                      <Input
+            {(() => {
+              const renderLevelCard = (
+                key: keyof MemberLevels,
+                badgeClass: string,
+                label: string,
+                discountPlaceholder: string
+              ) => {
+                const cfg = levelsForm[key];
+                const isSaving = savingLevel === key;
+                const disabled = updateMemberLevels.isPending;
+                return (
+                  <div key={key} className="p-4 border border-border rounded-xl flex flex-col">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className={badgeClass}>{label}</div>
+                      <Button
+                        onClick={() => handleSaveSingleLevel(key)}
+                        disabled={disabled || loadingLevels}
+                        size="sm"
+                        variant="outline"
+                      >
+                        {isSaving ? (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        ) : (
+                          <Save className="w-3.5 h-3.5" />
+                        )}
+                      </Button>
+                    </div>
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label className="text-sm text-muted-foreground">VIP 金額</Label>
+                        <Input
+                          type="text"
+                          inputMode="numeric"
+                          value={formatAmount(cfg.vip_amount)}
+                          onChange={(e) =>
+                            setLevelsForm({
+                              ...levelsForm,
+                              [key]: { ...cfg, vip_amount: parseAmount(e.target.value) },
+                            })
+                          }
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-sm text-muted-foreground">購物金</Label>
+                        <Input
+                          type="text"
+                          inputMode="numeric"
+                          value={formatAmount(cfg.shopping_credit ?? 0)}
+                          onChange={(e) =>
+                            setLevelsForm({
+                              ...levelsForm,
+                              [key]: { ...cfg, shopping_credit: parseAmount(e.target.value) },
+                            })
+                          }
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-sm text-muted-foreground">消費折扣</Label>
+                        <Input
+                          value={discountToDisplay(cfg.discount)}
+                          onChange={(e) =>
+                            setLevelsForm({
+                              ...levelsForm,
+                              [key]: {
+                                ...cfg,
+                                discount: displayToDiscount(e.target.value) || cfg.discount,
+                              },
+                            })
+                          }
+                          placeholder={discountPlaceholder}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-sm text-muted-foreground">積分倍率</Label>
+                        <Input
+                          type="number"
+                          step="0.5"
+                          min="1"
+                          value={cfg.points_multiplier}
+                          onChange={(e) =>
+                            setLevelsForm({
+                              ...levelsForm,
+                              [key]: {
+                                ...cfg,
+                                points_multiplier: parseFloat(e.target.value) || 1,
+                              },
+                            })
+                          }
+                        />
+                      </div>
+                    </div>
+                  </div>
+                );
+              };
+
+              return (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {renderLevelCard('regular', 'member-badge-regular', '一般客戶', '無折扣')}
+                  {renderLevelCard('gold', 'member-badge-gold', '金卡會員', '9折')}
+                  {renderLevelCard('silver', 'member-badge-silver', '銀卡會員', '95折')}
+                  {renderLevelCard('black', 'member-badge-black', '黑卡會員', '85折')}
+                </div>
+              );
+            })()}
+
                         type="text"
                         inputMode="numeric"
                         value={formatAmount(levelsForm.regular.vip_amount)}
