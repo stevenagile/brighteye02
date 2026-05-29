@@ -121,7 +121,6 @@ export function MemberTable() {
             <Table>
               <TableHeader>
                 <TableRow className="bg-muted/50">
-                  <TableHead className="w-10"></TableHead>
                   <TableHead className="font-semibold">客戶資訊</TableHead>
                   <TableHead className="font-semibold">等級</TableHead>
                   <TableHead className="font-semibold">VIP 金額</TableHead>
@@ -131,7 +130,6 @@ export function MemberTable() {
                   <TableHead className="text-right"></TableHead>
                 </TableRow>
               </TableHeader>
-              <TableBody>
               <TableBody>
                 {filteredMembers.map((member) => (
                   <MemberRow
