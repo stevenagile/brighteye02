@@ -18,13 +18,11 @@ import {
   CreditCard,
   Wallet,
   TrendingDown,
-  Eye,
   Receipt,
   AlertCircle,
   MessageCircle,
   UserPlus,
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
 
 interface MemberRowProps {
   member: Member;
@@ -59,7 +57,6 @@ export function MemberRow({ member, creditUsed, onEdit }: MemberRowProps) {
 
   // Lazy-load 客戶服務紀錄 when row expands
   const { data: serviceRecords, isLoading } = useQuery({
-  const { data: serviceRecords, isLoading } = useQuery({
     queryKey: ['member-service-records', member.id],
     enabled: open,
     queryFn: async () => {
@@ -72,6 +69,7 @@ export function MemberRow({ member, creditUsed, onEdit }: MemberRowProps) {
       return data || [];
     },
   });
+
   const address = formatAddress(member);
 
   return (
@@ -205,6 +203,28 @@ export function MemberRow({ member, creditUsed, onEdit }: MemberRowProps) {
                     )}
                     {member.eye_surgeries && member.eye_surgeries.length > 0 && (
                       <div>
+                        <p className="text-xs text-muted-foreground mb-1">眼科手術史</p>
+                        <div className="flex flex-wrap gap-1">
+                          {member.eye_surgeries.map((c, i) => (
+                            <Badge key={i} variant="outline">{c}</Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {(!member.health_conditions?.length && !member.eye_conditions?.length && !member.eye_surgeries?.length) && (
+                      <p className="text-muted-foreground italic">尚未填寫</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {member.notes && (
+                <div className="rounded-lg border border-border bg-card p-4">
+                  <p className="text-xs text-muted-foreground mb-1">備註</p>
+                  <p className="text-sm text-foreground whitespace-pre-wrap">{member.notes}</p>
+                </div>
+              )}
+
               {/* 客戶服務紀錄 */}
               <div className="rounded-lg border border-border bg-card p-4 space-y-3">
                 <div className="flex items-center justify-between">
@@ -253,33 +273,6 @@ export function MemberRow({ member, creditUsed, onEdit }: MemberRowProps) {
                 ) : (
                   <p className="text-sm text-muted-foreground italic">尚無紀錄</p>
                 )}
-              </div>
-            </div>
-          </TableCell>
-        </TableRow>
-      )}
-    </>
-  );
-}
-                          </div>
-                          {t.transaction_items?.length > 0 && (
-                            <div className="text-xs text-muted-foreground truncate">
-                              {t.transaction_items.map((i: any) => i.name).join('、')}
-                            </div>
-                          )}
-                          <div className="flex items-center justify-between text-xs text-muted-foreground">
-                            <span>付款：{t.payment_method}</span>
-                            {Number(t.credit_used || 0) > 0 && (
-                              <span className="text-destructive">折抵：NT${Number(t.credit_used).toLocaleString()}</span>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-sm text-muted-foreground italic">尚無紀錄</p>
-                  )}
-                </div>
               </div>
             </div>
           </TableCell>
