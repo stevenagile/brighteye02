@@ -46,10 +46,10 @@ export function useCreateMember() {
   return useMutation({
     mutationFn: async (member: MemberInsert) => {
       const parsed = memberInputSchema.safeParse(member);
-        .insert(parsed.data as any)
+      if (!parsed.success) throw new Error(formatZodError(parsed.error));
       const { data, error } = await supabase
         .from('members')
-        .insert(parsed.data as MemberInsert)
+        .insert(parsed.data as any)
         .select()
         .single();
 
