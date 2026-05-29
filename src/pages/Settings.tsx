@@ -70,6 +70,7 @@ export default function Settings() {
   };
 
   const [savingLevel, setSavingLevel] = useState<keyof MemberLevels | 'all' | null>(null);
+  const [editingLevel, setEditingLevel] = useState<keyof MemberLevels | null>(null);
 
   const handleSaveLevels = () => {
     setSavingLevel('all');
@@ -81,9 +82,20 @@ export default function Settings() {
   const handleSaveSingleLevel = (key: keyof MemberLevels) => {
     setSavingLevel(key);
     updateMemberLevels.mutate(levelsForm, {
-      onSettled: () => setSavingLevel(null),
+      onSettled: () => {
+        setSavingLevel(null);
+        setEditingLevel(null);
+      },
     });
   };
+
+  const handleCancelEdit = (key: keyof MemberLevels) => {
+    if (memberLevels) {
+      setLevelsForm({ ...levelsForm, [key]: memberLevels[key] });
+    }
+    setEditingLevel(null);
+  };
+
 
 
   const handleSaveNotifications = () => {
