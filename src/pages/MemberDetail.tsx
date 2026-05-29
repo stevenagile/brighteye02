@@ -150,8 +150,7 @@ export default function MemberDetail() {
   };
 
   const handleSave = async () => {
-    await updateMember.mutateAsync({
-      id: member.id,
+    const payload = {
       name: form.name,
       phone: form.phone,
       email: form.email || null,
@@ -174,8 +173,19 @@ export default function MemberDetail() {
       health_conditions: form.health_conditions,
       eye_conditions: form.eye_conditions,
       eye_surgeries: form.eye_surgeries,
-    } as any);
-    setEditing(false);
+    };
+    const parsed = memberUpdateSchema.safeParse(payload);
+    if (!parsed.success) {
+      setErrors(zodErrorsToMap(parsed.error));
+      return;
+    }
+    setErrors({});
+    try {
+      await updateMember.mutateAsync({ id: member.id, ...payload } as any);
+      setEditing(false);
+    } catch {
+      // 後端錯誤已在 hook 以 toast 顯示
+    }
   };
 
   const handleDelete = async () => {
