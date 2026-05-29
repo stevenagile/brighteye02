@@ -205,7 +205,11 @@ export default function Settings() {
               </Button>
             </div>
 
-            {(() => {
+            {loadingLevels ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+              </div>
+            ) : (() => {
               const renderLevelCard = (
                 key: keyof MemberLevels,
                 badgeClass: string,
