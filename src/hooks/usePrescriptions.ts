@@ -104,7 +104,7 @@ export function useCreatePrescription() {
 
 export function useUpdatePrescription() {
   const queryClient = useQueryClient();
-
+  return useMutation({
     mutationFn: async ({ id, ...updates }: Partial<Prescription> & { id: string }) => {
       const parsed = prescriptionUpdateSchema.safeParse(updates);
       if (!parsed.success) throw new Error(formatZodError(parsed.error));
