@@ -69,9 +69,22 @@ export default function Settings() {
     updateStoreInfo.mutate(storeForm);
   };
 
+  const [savingLevel, setSavingLevel] = useState<keyof MemberLevels | 'all' | null>(null);
+
   const handleSaveLevels = () => {
-    updateMemberLevels.mutate(levelsForm);
+    setSavingLevel('all');
+    updateMemberLevels.mutate(levelsForm, {
+      onSettled: () => setSavingLevel(null),
+    });
   };
+
+  const handleSaveSingleLevel = (key: keyof MemberLevels) => {
+    setSavingLevel(key);
+    updateMemberLevels.mutate(levelsForm, {
+      onSettled: () => setSavingLevel(null),
+    });
+  };
+
 
   const handleSaveNotifications = () => {
     updateNotifications.mutate(notificationsForm);
