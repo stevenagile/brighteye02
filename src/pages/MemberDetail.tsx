@@ -23,10 +23,12 @@ import {
 import {
   ArrowLeft, Pencil, Save, X, Trash2, Phone, Mail, MapPin, Calendar,
   Briefcase, MessageCircle, UserPlus, CreditCard, Wallet, TrendingDown,
-  Receipt, AlertCircle, Loader2,
+  Receipt, AlertCircle, Loader2, ChevronRight,
 } from 'lucide-react';
 import { useMember, useUpdateMember, useDeleteMember, MemberLevel } from '@/hooks/useMembers';
 import { useMemberLevels } from '@/hooks/useSettings';
+import { EditPrescriptionDialog } from '@/components/prescriptions/EditPrescriptionDialog';
+import type { Prescription } from '@/hooks/usePrescriptions';
 
 const HEALTH_CONDITIONS = ['糖尿病', '高血壓', '甲狀腺疾病', '懷孕'];
 const EYE_CONDITIONS = ['青光眼', '白內障', '圓錐角膜', '眼球受傷', '角膜炎', '結膜炎', '乾眼症'];
@@ -61,6 +63,7 @@ export default function MemberDetail() {
 
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState<any>(null);
+  const [viewPrescription, setViewPrescription] = useState<Prescription | null>(null);
 
   const { data: serviceRecords, isLoading: loadingRecords } = useQuery({
     queryKey: ['member-service-records', id],
@@ -425,7 +428,12 @@ export default function MemberDetail() {
               ) : serviceRecords?.length ? (
                 <div className="space-y-2">
                   {serviceRecords.map((p: any) => (
-                    <div key={p.id} className="rounded-lg border border-border bg-card/50 p-4 space-y-2">
+                    <button
+                      key={p.id}
+                      type="button"
+                      onClick={() => setViewPrescription(p as Prescription)}
+                      className="w-full text-left rounded-lg border border-border bg-card/50 p-4 space-y-2 hover:bg-muted/50 hover:border-primary/40 transition-colors group"
+                    >
                       <div className="flex items-center justify-between flex-wrap gap-2">
                         <div className="flex items-center gap-2">
                           <span className="font-semibold text-foreground">
@@ -433,9 +441,12 @@ export default function MemberDetail() {
                           </span>
                           <Badge variant="outline" className="text-xs">{p.service_type || '驗光'}</Badge>
                         </div>
-                        <span className="text-lg font-bold text-primary">
-                          NT${formatAmount(Number(p.amount || 0))}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-lg font-bold text-primary">
+                            NT${formatAmount(Number(p.amount || 0))}
+                          </span>
+                          <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                        </div>
                       </div>
                       <div className="flex items-center justify-between text-sm text-muted-foreground flex-wrap gap-2">
                         <span>驗光師：{p.examiner || '—'}</span>
@@ -450,7 +461,7 @@ export default function MemberDetail() {
                           {p.notes}
                         </p>
                       )}
-                    </div>
+                    </button>
                   ))}
                 </div>
               ) : (
@@ -463,6 +474,12 @@ export default function MemberDetail() {
           </TabsContent>
         </Tabs>
       </div>
+
+      <EditPrescriptionDialog
+        open={!!viewPrescription}
+        onOpenChange={(o) => !o && setViewPrescription(null)}
+        prescription={viewPrescription}
+      />
     </MainLayout>
   );
 }
