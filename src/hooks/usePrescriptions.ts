@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import type { Tables, TablesInsert } from '@/integrations/supabase/types';
+import { prescriptionInputSchema, prescriptionUpdateSchema, formatZodError } from '@/lib/validation';
 
 export type Prescription = Tables<'prescriptions'>;
 export type PrescriptionInsert = TablesInsert<'prescriptions'>;
@@ -80,12 +81,14 @@ export function useCreatePrescription() {
 
   return useMutation({
     mutationFn: async (prescription: PrescriptionInsert) => {
+      const parsed = prescriptionInputSchema.safeParse(prescription);
+      if (!parsed.success) throw new Error(formatZodError(parsed.error));
       const { data, error } = await supabase
         .from('prescriptions')
-        .insert(prescription)
+        .insert(parsed.data as PrescriptionInsert)
         .select()
         .single();
-      
+
       if (error) throw error;
       return data;
     },
@@ -104,13 +107,15 @@ export function useUpdatePrescription() {
 
   return useMutation({
     mutationFn: async ({ id, ...updates }: Partial<Prescription> & { id: string }) => {
+      const parsed = prescriptionUpdateSchema.safeParse(updates);
+      if (!parsed.success) throw new Error(formatZodError(parsed.error));
       const { data, error } = await supabase
         .from('prescriptions')
-        .update(updates)
+        .update(parsed.data)
         .eq('id', id)
         .select()
         .single();
-      
+
       if (error) throw error;
       return data;
     },

@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import type { Tables, TablesInsert } from '@/integrations/supabase/types';
+import { transactionInputSchema, formatZodError } from '@/lib/validation';
 
 export type Transaction = Tables<'transactions'>;
 export type TransactionItem = Tables<'transaction_items'>;
@@ -65,13 +66,17 @@ export function useCreateTransaction() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ items, ...transaction }: CreateTransactionData) => {
+    mutationFn: async (input: CreateTransactionData) => {
+      const parsed = transactionInputSchema.safeParse(input);
+      if (!parsed.success) throw new Error(formatZodError(parsed.error));
+      const { items, ...transaction } = parsed.data;
+
       const { data: txData, error: txError } = await supabase
         .from('transactions')
-        .insert(transaction)
+        .insert(transaction as TablesInsert<'transactions'>)
         .select()
         .single();
-      
+
       if (txError) throw txError;
 
       if (items.length > 0) {
@@ -81,7 +86,7 @@ export function useCreateTransaction() {
             ...item,
             transaction_id: txData.id,
           })));
-        
+
         if (itemsError) throw itemsError;
       }
 

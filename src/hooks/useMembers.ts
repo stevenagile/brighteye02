@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import type { Tables, TablesInsert } from '@/integrations/supabase/types';
+import { memberInputSchema, memberUpdateSchema, formatZodError } from '@/lib/validation';
 
 export type Member = Tables<'members'>;
 export type MemberInsert = TablesInsert<'members'>;
@@ -44,12 +45,14 @@ export function useCreateMember() {
 
   return useMutation({
     mutationFn: async (member: MemberInsert) => {
+      const parsed = memberInputSchema.safeParse(member);
+      if (!parsed.success) throw new Error(formatZodError(parsed.error));
       const { data, error } = await supabase
         .from('members')
-        .insert(member)
+        .insert(parsed.data as MemberInsert)
         .select()
         .single();
-      
+
       if (error) throw error;
       return data;
     },
@@ -68,17 +71,19 @@ export function useUpdateMember() {
 
   return useMutation({
     mutationFn: async ({ id, ...updates }: Partial<Member> & { id: string }) => {
+    mutationFn: async ({ id, ...updates }: Partial<Member> & { id: string }) => {
+      const parsed = memberUpdateSchema.safeParse(updates);
+      if (!parsed.success) throw new Error(formatZodError(parsed.error));
       const { data, error } = await supabase
         .from('members')
-        .update(updates)
+        .update(parsed.data)
         .eq('id', id)
         .select()
         .single();
-      
+
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['members'] });
       toast.success('會員更新成功');
     },
