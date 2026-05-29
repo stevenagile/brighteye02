@@ -377,18 +377,7 @@ export default function Settings() {
               </div>
             ) : (
               <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 border border-border rounded-xl">
-                  <div>
-                    <p className="font-medium text-foreground">低庫存提醒</p>
-                    <p className="text-sm text-muted-foreground">當商品庫存低於閾值時通知</p>
-                  </div>
-                  <Switch
-                    checked={notificationsForm.low_stock}
-                    onCheckedChange={(checked) =>
-                      setNotificationsForm({ ...notificationsForm, low_stock: checked })
-                    }
-                  />
-                </div>
+                {/* 低庫存提醒：待商品庫存模組上線後再開放 */}
                 <div className="flex items-center justify-between p-4 border border-border rounded-xl">
                   <div>
                     <p className="font-medium text-foreground">會員生日提醒</p>
