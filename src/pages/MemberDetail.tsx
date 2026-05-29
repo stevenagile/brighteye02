@@ -296,9 +296,9 @@ export default function MemberDetail() {
           <TabsContent value="basic" className="space-y-6">
             <Section title="基本資料">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Field label="姓名 *">
-                  <Input readOnly={ro} value={form.name}
-                    onChange={(e) => setForm({ ...form, name: e.target.value })} />
+                <Field label="姓名 *" error={errors.name}>
+                  <Input readOnly={ro} value={form.name} className={cn(errClass('name'))}
+                    onChange={(e) => { setForm({ ...form, name: e.target.value }); clearError('name'); }} />
                 </Field>
                 <Field label="性別">
                   <Select disabled={ro} value={form.gender}
@@ -323,17 +323,17 @@ export default function MemberDetail() {
 
             <Section title="聯絡方式">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Field label="手機 *">
-                  <Input readOnly={ro} value={form.phone}
-                    onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+                <Field label="手機 *" error={errors.phone}>
+                  <Input readOnly={ro} value={form.phone} className={cn(errClass('phone'))}
+                    onChange={(e) => { setForm({ ...form, phone: e.target.value }); clearError('phone'); }} />
                 </Field>
-                <Field label="住家電話">
-                  <Input readOnly={ro} value={form.home_phone}
-                    onChange={(e) => setForm({ ...form, home_phone: e.target.value })} />
+                <Field label="住家電話" error={errors.home_phone}>
+                  <Input readOnly={ro} value={form.home_phone} className={cn(errClass('home_phone'))}
+                    onChange={(e) => { setForm({ ...form, home_phone: e.target.value }); clearError('home_phone'); }} />
                 </Field>
-                <Field label="電子郵件">
-                  <Input type="email" readOnly={ro} value={form.email}
-                    onChange={(e) => setForm({ ...form, email: e.target.value })} />
+                <Field label="電子郵件" error={errors.email}>
+                  <Input type="email" readOnly={ro} value={form.email} className={cn(errClass('email'))}
+                    onChange={(e) => { setForm({ ...form, email: e.target.value }); clearError('email'); }} />
                 </Field>
                 <Field label="LINE ID">
                   <Input readOnly={ro} value={form.line_id}
