@@ -31,6 +31,7 @@ export default function Settings() {
   const { data: memberLevels, isLoading: loadingLevels } = useMemberLevels();
   const updateMemberLevels = useUpdateMemberLevels();
   const [levelsForm, setLevelsForm] = useState<MemberLevels>({
+    regular: { discount: 1, points_multiplier: 1, vip_amount: 0, shopping_credit: 0 },
     gold: { discount: 0.9, points_multiplier: 2, vip_amount: 30000, shopping_credit: 3000 },
     silver: { discount: 0.95, points_multiplier: 1.5, vip_amount: 10000, shopping_credit: 1000 },
     black: { discount: 0.85, points_multiplier: 3, vip_amount: 50000, shopping_credit: 5000 },
