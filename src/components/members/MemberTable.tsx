@@ -1,6 +1,5 @@
 import { useState, useMemo } from 'react';
-import { useMembers, Member, MemberLevel } from '@/hooks/useMembers';
-import { EditMemberDialog } from './EditMemberDialog';
+import { useMembers, MemberLevel } from '@/hooks/useMembers';
 import { MemberRow } from './MemberRow';
 import { Input } from '@/components/ui/input';
 import { Search, Users } from 'lucide-react';
@@ -25,7 +24,6 @@ import { supabase } from '@/integrations/supabase/client';
 export function MemberTable() {
   const [searchTerm, setSearchTerm] = useState('');
   const [levelFilter, setLevelFilter] = useState<MemberLevel | 'all'>('all');
-  const [editMember, setEditMember] = useState<Member | null>(null);
   const { data: members, isLoading } = useMembers();
 
   const { data: prescriptions } = useQuery({
@@ -123,7 +121,6 @@ export function MemberTable() {
             <Table>
               <TableHeader>
                 <TableRow className="bg-muted/50">
-                  <TableHead className="w-10"></TableHead>
                   <TableHead className="font-semibold">客戶資訊</TableHead>
                   <TableHead className="font-semibold">等級</TableHead>
                   <TableHead className="font-semibold">VIP 金額</TableHead>
@@ -139,7 +136,6 @@ export function MemberTable() {
                     key={member.id}
                     member={member}
                     creditUsed={memberCreditUsed[member.id] || 0}
-                    onEdit={setEditMember}
                   />
                 ))}
               </TableBody>
@@ -147,12 +143,6 @@ export function MemberTable() {
           </div>
         )}
       </div>
-
-      <EditMemberDialog
-        member={editMember}
-        open={!!editMember}
-        onOpenChange={(open) => !open && setEditMember(null)}
-      />
     </>
   );
 }
