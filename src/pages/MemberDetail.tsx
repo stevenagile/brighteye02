@@ -43,15 +43,8 @@ const TW_CITIES = [
 const formatAmount = (n: number) => (n || 0).toLocaleString('zh-TW');
 const parseAmount = (s: string) => parseInt(s.replace(/,/g, '')) || 0;
 
-const calculateAge = (birthday: string | null) => {
-  if (!birthday) return null;
-  const today = new Date();
-  const b = new Date(birthday);
-  let age = today.getFullYear() - b.getFullYear();
-  const m = today.getMonth() - b.getMonth();
-  if (m < 0 || (m === 0 && today.getDate() < b.getDate())) age--;
-  return age;
-};
+import { calculateAge } from '@/lib/age';
+
 
 export default function MemberDetail() {
   const { id } = useParams<{ id: string }>();
@@ -242,7 +235,7 @@ export default function MemberDetail() {
               <div className="flex items-center gap-3 flex-wrap">
                 <h1 className="text-3xl font-bold text-foreground">{member.name}</h1>
                 {member.gender && <span className="text-muted-foreground">（{member.gender}）</span>}
-                {age !== null && <span className="text-muted-foreground">{age} 歲</span>}
+                <span className="text-muted-foreground">{age !== null ? `${age} 歲` : '—'}</span>
                 <MemberBadge level={member.level as MemberLevel} />
               </div>
               <div className="flex items-center gap-4 text-sm text-muted-foreground flex-wrap">
