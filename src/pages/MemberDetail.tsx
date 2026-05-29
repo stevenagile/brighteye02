@@ -426,6 +426,7 @@ export default function MemberDetail() {
               {loadingRecords ? (
                 <p className="text-sm text-muted-foreground">載入中…</p>
               ) : serviceRecords?.length ? (
+                <div className="space-y-2">
                   {serviceRecords.map((p: any) => (
                     <button
                       key={p.id}
@@ -461,8 +462,6 @@ export default function MemberDetail() {
                         </p>
                       )}
                     </button>
-                  ))}
-                    </div>
                   ))}
                 </div>
               ) : (
