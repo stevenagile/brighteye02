@@ -109,3 +109,12 @@ export function formatZodError(err: z.ZodError): string {
   const issues = err.errors.slice(0, 3).map((e) => e.message).join('；');
   return issues || '輸入資料格式不正確';
 }
+
+export function zodErrorsToMap(err: z.ZodError): Record<string, string> {
+  const m: Record<string, string> = {};
+  for (const issue of err.errors) {
+    const key = issue.path.join('.') || '_';
+    if (!m[key]) m[key] = issue.message;
+  }
+  return m;
+}

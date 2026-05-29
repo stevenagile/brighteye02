@@ -22,6 +22,8 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { cn } from '@/lib/utils';
+import { memberUpdateSchema, zodErrorsToMap } from '@/lib/validation';
 
 interface EditMemberDialogProps {
   member: Member | null;
@@ -127,12 +129,27 @@ export function EditMemberDialog({ member, open, onOpenChange }: EditMemberDialo
     }
   }, [member]);
 
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const clearError = (field: string) => {
+    if (errors[field]) {
+      setErrors((prev) => {
+        const next = { ...prev };
+        delete next[field];
+        return next;
+      });
+    }
+  };
+  const errClass = (field: string) =>
+    errors[field] ? 'border-destructive focus-visible:ring-destructive' : '';
+  const FieldError = ({ field }: { field: string }) =>
+    errors[field] ? <p className="text-xs text-destructive mt-1">{errors[field]}</p> : null;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!member) return;
 
-    await updateMember.mutateAsync({
-      id: member.id,
+    const payload = {
       name: formData.name,
       phone: formData.phone,
       email: formData.email || null,
@@ -155,9 +172,20 @@ export function EditMemberDialog({ member, open, onOpenChange }: EditMemberDialo
       health_conditions: formData.health_conditions,
       eye_conditions: formData.eye_conditions,
       eye_surgeries: formData.eye_surgeries,
-    } as any);
+    };
 
-    onOpenChange(false);
+    const parsed = memberUpdateSchema.safeParse(payload);
+    if (!parsed.success) {
+      setErrors(zodErrorsToMap(parsed.error));
+      return;
+    }
+    setErrors({});
+    try {
+      await updateMember.mutateAsync({ id: member.id, ...payload } as any);
+      onOpenChange(false);
+    } catch {
+      // 後端錯誤 hook 已 toast
+    }
   };
 
   const toggleArrayItem = (
@@ -188,8 +216,10 @@ export function EditMemberDialog({ member, open, onOpenChange }: EditMemberDialo
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="edit-name">姓名 *</Label>
-                  <Input id="edit-name" value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })} required />
+                  <Input id="edit-name" value={formData.name} aria-invalid={!!errors.name}
+                    className={cn(errClass('name'))}
+                    onChange={(e) => { setFormData({ ...formData, name: e.target.value }); clearError('name'); }} />
+                  <FieldError field="name" />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="edit-gender">性別</Label>
@@ -224,20 +254,26 @@ export function EditMemberDialog({ member, open, onOpenChange }: EditMemberDialo
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="edit-phone">手機 *</Label>
-                  <Input id="edit-phone" value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })} required />
+                  <Input id="edit-phone" value={formData.phone} aria-invalid={!!errors.phone}
+                    className={cn(errClass('phone'))}
+                    onChange={(e) => { setFormData({ ...formData, phone: e.target.value }); clearError('phone'); }} />
+                  <FieldError field="phone" />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="edit-home_phone">住家電話</Label>
-                  <Input id="edit-home_phone" value={formData.home_phone}
-                    onChange={(e) => setFormData({ ...formData, home_phone: e.target.value })} />
+                  <Input id="edit-home_phone" value={formData.home_phone} aria-invalid={!!errors.home_phone}
+                    className={cn(errClass('home_phone'))}
+                    onChange={(e) => { setFormData({ ...formData, home_phone: e.target.value }); clearError('home_phone'); }} />
+                  <FieldError field="home_phone" />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="edit-email">電子郵件</Label>
-                  <Input id="edit-email" type="email" value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })} />
+                  <Input id="edit-email" type="email" value={formData.email} aria-invalid={!!errors.email}
+                    className={cn(errClass('email'))}
+                    onChange={(e) => { setFormData({ ...formData, email: e.target.value }); clearError('email'); }} />
+                  <FieldError field="email" />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="edit-line_id">LINE ID</Label>

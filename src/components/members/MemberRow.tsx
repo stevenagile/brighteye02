@@ -6,21 +6,12 @@ import { TableCell, TableRow } from '@/components/ui/table';
 import {
   Edit, Phone, Mail, CreditCard, Wallet, TrendingDown, ChevronRight,
 } from 'lucide-react';
+import { calculateAge } from '@/lib/age';
 
 interface MemberRowProps {
   member: Member;
   creditUsed: number;
 }
-
-const calculateAge = (birthday: string | null) => {
-  if (!birthday) return null;
-  const today = new Date();
-  const b = new Date(birthday);
-  let age = today.getFullYear() - b.getFullYear();
-  const m = today.getMonth() - b.getMonth();
-  if (m < 0 || (m === 0 && today.getDate() < b.getDate())) age--;
-  return age;
-};
 
 export function MemberRow({ member, creditUsed }: MemberRowProps) {
   const navigate = useNavigate();
@@ -38,7 +29,9 @@ export function MemberRow({ member, creditUsed }: MemberRowProps) {
         <div className="flex items-center gap-2 flex-wrap">
           <p className="font-medium text-foreground">{member.name}</p>
           {member.gender && <span className="text-xs text-muted-foreground">（{member.gender}）</span>}
-          {age !== null && <span className="text-xs text-muted-foreground">{age} 歲</span>}
+          <span className="text-xs text-muted-foreground">
+            {age !== null ? `${age} 歲` : '—'}
+          </span>
         </div>
         <div className="flex items-center gap-3 mt-1 text-sm text-muted-foreground flex-wrap">
           <span className="flex items-center gap-1"><Phone className="w-3 h-3" />{member.phone}</span>

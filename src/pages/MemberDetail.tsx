@@ -29,6 +29,8 @@ import { useMember, useUpdateMember, useDeleteMember, MemberLevel } from '@/hook
 import { useMemberLevels } from '@/hooks/useSettings';
 import { EditPrescriptionDialog } from '@/components/prescriptions/EditPrescriptionDialog';
 import type { Prescription } from '@/hooks/usePrescriptions';
+import { cn } from '@/lib/utils';
+import { memberUpdateSchema, zodErrorsToMap } from '@/lib/validation';
 
 const HEALTH_CONDITIONS = ['糖尿病', '高血壓', '甲狀腺疾病', '懷孕'];
 const EYE_CONDITIONS = ['青光眼', '白內障', '圓錐角膜', '眼球受傷', '角膜炎', '結膜炎', '乾眼症'];
@@ -43,15 +45,8 @@ const TW_CITIES = [
 const formatAmount = (n: number) => (n || 0).toLocaleString('zh-TW');
 const parseAmount = (s: string) => parseInt(s.replace(/,/g, '')) || 0;
 
-const calculateAge = (birthday: string | null) => {
-  if (!birthday) return null;
-  const today = new Date();
-  const b = new Date(birthday);
-  let age = today.getFullYear() - b.getFullYear();
-  const m = today.getMonth() - b.getMonth();
-  if (m < 0 || (m === 0 && today.getDate() < b.getDate())) age--;
-  return age;
-};
+import { calculateAge } from '@/lib/age';
+
 
 export default function MemberDetail() {
   const { id } = useParams<{ id: string }>();
@@ -63,7 +58,16 @@ export default function MemberDetail() {
 
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState<any>(null);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [viewPrescription, setViewPrescription] = useState<Prescription | null>(null);
+
+  const clearError = (field: string) => {
+    if (errors[field]) {
+      setErrors((prev) => { const n = { ...prev }; delete n[field]; return n; });
+    }
+  };
+  const errClass = (f: string) =>
+    errors[f] ? 'border-destructive focus-visible:ring-destructive' : '';
 
   const { data: serviceRecords, isLoading: loadingRecords } = useQuery({
     queryKey: ['member-service-records', id],
@@ -146,8 +150,7 @@ export default function MemberDetail() {
   };
 
   const handleSave = async () => {
-    await updateMember.mutateAsync({
-      id: member.id,
+    const payload = {
       name: form.name,
       phone: form.phone,
       email: form.email || null,
@@ -170,8 +173,19 @@ export default function MemberDetail() {
       health_conditions: form.health_conditions,
       eye_conditions: form.eye_conditions,
       eye_surgeries: form.eye_surgeries,
-    } as any);
-    setEditing(false);
+    };
+    const parsed = memberUpdateSchema.safeParse(payload);
+    if (!parsed.success) {
+      setErrors(zodErrorsToMap(parsed.error));
+      return;
+    }
+    setErrors({});
+    try {
+      await updateMember.mutateAsync({ id: member.id, ...payload } as any);
+      setEditing(false);
+    } catch {
+      // 後端錯誤已在 hook 以 toast 顯示
+    }
   };
 
   const handleDelete = async () => {
@@ -242,7 +256,7 @@ export default function MemberDetail() {
               <div className="flex items-center gap-3 flex-wrap">
                 <h1 className="text-3xl font-bold text-foreground">{member.name}</h1>
                 {member.gender && <span className="text-muted-foreground">（{member.gender}）</span>}
-                {age !== null && <span className="text-muted-foreground">{age} 歲</span>}
+                <span className="text-muted-foreground">{age !== null ? `${age} 歲` : '—'}</span>
                 <MemberBadge level={member.level as MemberLevel} />
               </div>
               <div className="flex items-center gap-4 text-sm text-muted-foreground flex-wrap">
@@ -282,9 +296,9 @@ export default function MemberDetail() {
           <TabsContent value="basic" className="space-y-6">
             <Section title="基本資料">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Field label="姓名 *">
-                  <Input readOnly={ro} value={form.name}
-                    onChange={(e) => setForm({ ...form, name: e.target.value })} />
+                <Field label="姓名 *" error={errors.name}>
+                  <Input readOnly={ro} value={form.name} className={cn(errClass('name'))}
+                    onChange={(e) => { setForm({ ...form, name: e.target.value }); clearError('name'); }} />
                 </Field>
                 <Field label="性別">
                   <Select disabled={ro} value={form.gender}
@@ -309,17 +323,17 @@ export default function MemberDetail() {
 
             <Section title="聯絡方式">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Field label="手機 *">
-                  <Input readOnly={ro} value={form.phone}
-                    onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+                <Field label="手機 *" error={errors.phone}>
+                  <Input readOnly={ro} value={form.phone} className={cn(errClass('phone'))}
+                    onChange={(e) => { setForm({ ...form, phone: e.target.value }); clearError('phone'); }} />
                 </Field>
-                <Field label="住家電話">
-                  <Input readOnly={ro} value={form.home_phone}
-                    onChange={(e) => setForm({ ...form, home_phone: e.target.value })} />
+                <Field label="住家電話" error={errors.home_phone}>
+                  <Input readOnly={ro} value={form.home_phone} className={cn(errClass('home_phone'))}
+                    onChange={(e) => { setForm({ ...form, home_phone: e.target.value }); clearError('home_phone'); }} />
                 </Field>
-                <Field label="電子郵件">
-                  <Input type="email" readOnly={ro} value={form.email}
-                    onChange={(e) => setForm({ ...form, email: e.target.value })} />
+                <Field label="電子郵件" error={errors.email}>
+                  <Input type="email" readOnly={ro} value={form.email} className={cn(errClass('email'))}
+                    onChange={(e) => { setForm({ ...form, email: e.target.value }); clearError('email'); }} />
                 </Field>
                 <Field label="LINE ID">
                   <Input readOnly={ro} value={form.line_id}
@@ -495,11 +509,14 @@ function Section({ title, icon, children }: { title: string; icon?: React.ReactN
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({
+  label, children, error,
+}: { label: string; children: React.ReactNode; error?: string }) {
   return (
     <div className="space-y-2">
       <Label className="text-sm text-muted-foreground">{label}</Label>
       {children}
+      {error ? <p className="text-xs text-destructive">{error}</p> : null}
     </div>
   );
 }
