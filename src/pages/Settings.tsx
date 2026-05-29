@@ -204,18 +204,6 @@ export default function Settings() {
                   <p className="text-sm text-muted-foreground">配置各等級會員的權益</p>
                 </div>
               </div>
-              <Button
-                onClick={handleSaveLevels}
-                disabled={updateMemberLevels.isPending || loadingLevels}
-                size="sm"
-              >
-                {updateMemberLevels.isPending ? (
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                ) : (
-                  <Save className="w-4 h-4 mr-2" />
-                )}
-                儲存
-              </Button>
             </div>
 
             {loadingLevels ? (
