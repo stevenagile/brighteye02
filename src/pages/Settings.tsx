@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { MainLayout } from '@/components/layout/MainLayout';
-import { Store, Users, Bell, Save, Loader2 } from 'lucide-react';
+import { Store, Users, Bell, Save, Loader2, Pencil, X } from 'lucide-react';
+
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
@@ -70,6 +71,7 @@ export default function Settings() {
   };
 
   const [savingLevel, setSavingLevel] = useState<keyof MemberLevels | 'all' | null>(null);
+  const [editingLevel, setEditingLevel] = useState<keyof MemberLevels | null>(null);
 
   const handleSaveLevels = () => {
     setSavingLevel('all');
@@ -81,9 +83,20 @@ export default function Settings() {
   const handleSaveSingleLevel = (key: keyof MemberLevels) => {
     setSavingLevel(key);
     updateMemberLevels.mutate(levelsForm, {
-      onSettled: () => setSavingLevel(null),
+      onSettled: () => {
+        setSavingLevel(null);
+        setEditingLevel(null);
+      },
     });
   };
+
+  const handleCancelEdit = (key: keyof MemberLevels) => {
+    if (memberLevels) {
+      setLevelsForm({ ...levelsForm, [key]: memberLevels[key] });
+    }
+    setEditingLevel(null);
+  };
+
 
 
   const handleSaveNotifications = () => {
@@ -191,18 +204,6 @@ export default function Settings() {
                   <p className="text-sm text-muted-foreground">配置各等級會員的權益</p>
                 </div>
               </div>
-              <Button
-                onClick={handleSaveLevels}
-                disabled={updateMemberLevels.isPending || loadingLevels}
-                size="sm"
-              >
-                {updateMemberLevels.isPending ? (
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                ) : (
-                  <Save className="w-4 h-4 mr-2" />
-                )}
-                儲存
-              </Button>
             </div>
 
             {loadingLevels ? (
@@ -218,23 +219,45 @@ export default function Settings() {
               ) => {
                 const cfg = levelsForm[key];
                 const isSaving = savingLevel === key;
-                const disabled = updateMemberLevels.isPending;
+                const isEditing = editingLevel === key;
+                const otherEditing = editingLevel !== null && !isEditing;
+                const readOnly = !isEditing;
                 return (
                   <div key={key} className="p-4 border border-border rounded-xl flex flex-col">
-                    <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center justify-between mb-4 gap-2">
                       <div className={badgeClass}>{label}</div>
-                      <Button
-                        onClick={() => handleSaveSingleLevel(key)}
-                        disabled={disabled || loadingLevels}
-                        size="sm"
-                        variant="outline"
-                      >
-                        {isSaving ? (
-                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                        ) : (
-                          <Save className="w-3.5 h-3.5" />
-                        )}
-                      </Button>
+                      {isEditing ? (
+                        <div className="flex gap-1">
+                          <Button
+                            onClick={() => handleCancelEdit(key)}
+                            disabled={isSaving}
+                            size="sm"
+                            variant="ghost"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </Button>
+                          <Button
+                            onClick={() => handleSaveSingleLevel(key)}
+                            disabled={isSaving}
+                            size="sm"
+                          >
+                            {isSaving ? (
+                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            ) : (
+                              <Save className="w-3.5 h-3.5" />
+                            )}
+                          </Button>
+                        </div>
+                      ) : (
+                        <Button
+                          onClick={() => setEditingLevel(key)}
+                          disabled={otherEditing || updateMemberLevels.isPending}
+                          size="sm"
+                          variant="outline"
+                        >
+                          <Pencil className="w-3.5 h-3.5" />
+                        </Button>
+                      )}
                     </div>
                     <div className="space-y-4">
                       <div className="space-y-2">
@@ -242,6 +265,7 @@ export default function Settings() {
                         <Input
                           type="text"
                           inputMode="numeric"
+                          readOnly={readOnly}
                           value={formatAmount(cfg.vip_amount)}
                           onChange={(e) =>
                             setLevelsForm({
@@ -256,6 +280,7 @@ export default function Settings() {
                         <Input
                           type="text"
                           inputMode="numeric"
+                          readOnly={readOnly}
                           value={formatAmount(cfg.shopping_credit ?? 0)}
                           onChange={(e) =>
                             setLevelsForm({
@@ -268,6 +293,7 @@ export default function Settings() {
                       <div className="space-y-2">
                         <Label className="text-sm text-muted-foreground">消費折扣</Label>
                         <Input
+                          readOnly={readOnly}
                           value={discountToDisplay(cfg.discount)}
                           onChange={(e) =>
                             setLevelsForm({
@@ -287,6 +313,7 @@ export default function Settings() {
                           type="number"
                           step="0.5"
                           min="1"
+                          readOnly={readOnly}
                           value={cfg.points_multiplier}
                           onChange={(e) =>
                             setLevelsForm({
@@ -300,6 +327,7 @@ export default function Settings() {
                         />
                       </div>
                     </div>
+
                   </div>
                 );
               };
