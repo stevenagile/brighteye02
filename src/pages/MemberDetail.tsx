@@ -29,6 +29,8 @@ import { useMember, useUpdateMember, useDeleteMember, MemberLevel } from '@/hook
 import { useMemberLevels } from '@/hooks/useSettings';
 import { EditPrescriptionDialog } from '@/components/prescriptions/EditPrescriptionDialog';
 import type { Prescription } from '@/hooks/usePrescriptions';
+import { cn } from '@/lib/utils';
+import { memberUpdateSchema, zodErrorsToMap } from '@/lib/validation';
 
 const HEALTH_CONDITIONS = ['糖尿病', '高血壓', '甲狀腺疾病', '懷孕'];
 const EYE_CONDITIONS = ['青光眼', '白內障', '圓錐角膜', '眼球受傷', '角膜炎', '結膜炎', '乾眼症'];
@@ -488,11 +490,14 @@ function Section({ title, icon, children }: { title: string; icon?: React.ReactN
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({
+  label, children, error,
+}: { label: string; children: React.ReactNode; error?: string }) {
   return (
     <div className="space-y-2">
       <Label className="text-sm text-muted-foreground">{label}</Label>
       {children}
+      {error ? <p className="text-xs text-destructive">{error}</p> : null}
     </div>
   );
 }
