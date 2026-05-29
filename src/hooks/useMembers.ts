@@ -92,7 +92,6 @@ export function useUpdateMember() {
     },
   });
 }
-}
 
 export function useDeleteMember() {
   const queryClient = useQueryClient();
