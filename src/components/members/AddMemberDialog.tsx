@@ -249,18 +249,18 @@ export function AddMemberDialog({ open, onOpenChange }: AddMemberDialogProps) {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="email">電子郵件</Label>
-                  <Input id="email" type="email" value={formData.email}
-                <div className="space-y-2">
-                  <Label htmlFor="email">電子郵件</Label>
                   <Input id="email" type="email" value={formData.email} aria-invalid={!!errors.email}
                     className={cn(errClass('email'))}
                     onChange={(e) => { setFormData({ ...formData, email: e.target.value }); clearError('email'); }} />
                   <FieldError field="email" />
                 </div>
+                <div className="space-y-2">
+                  <Label htmlFor="line_id">LINE ID</Label>
                   <Input id="line_id" value={formData.line_id}
                     onChange={(e) => setFormData({ ...formData, line_id: e.target.value })} />
                 </div>
               </div>
+            </div>
             </div>
 
             {/* 地址 */}
