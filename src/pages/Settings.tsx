@@ -197,7 +197,7 @@ export default function Settings() {
                 <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
               </div>
             ) : (
-              <div className="grid md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {/* Gold Member */}
                 <div className="p-4 border border-border rounded-xl">
                   <div className="member-badge-gold mb-4">金卡會員</div>
