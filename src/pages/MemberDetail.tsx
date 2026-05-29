@@ -58,7 +58,16 @@ export default function MemberDetail() {
 
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState<any>(null);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [viewPrescription, setViewPrescription] = useState<Prescription | null>(null);
+
+  const clearError = (field: string) => {
+    if (errors[field]) {
+      setErrors((prev) => { const n = { ...prev }; delete n[field]; return n; });
+    }
+  };
+  const errClass = (f: string) =>
+    errors[f] ? 'border-destructive focus-visible:ring-destructive' : '';
 
   const { data: serviceRecords, isLoading: loadingRecords } = useQuery({
     queryKey: ['member-service-records', id],
