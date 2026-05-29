@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
@@ -14,15 +14,44 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const { signIn } = useAuth();
   const navigate = useNavigate();
+  const emailRef = useRef<HTMLInputElement>(null);
+  const passwordRef = useRef<HTMLInputElement>(null);
+
+  // 同步瀏覽器自動填入的值（autofill 不會觸發 React onChange）
+  useEffect(() => {
+    const sync = () => {
+      if (emailRef.current && emailRef.current.value !== email) {
+        setEmail(emailRef.current.value);
+      }
+      if (passwordRef.current && passwordRef.current.value !== password) {
+        setPassword(passwordRef.current.value);
+      }
+    };
+    // 首次掛載後稍延遲讓瀏覽器完成 autofill
+    const t1 = setTimeout(sync, 50);
+    const t2 = setTimeout(sync, 300);
+    const t3 = setTimeout(sync, 800);
+    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    // 最終以 DOM 真實值為準，避免 autofill 未同步到 state
+    const finalEmail = (emailRef.current?.value ?? email).trim();
+    const finalPassword = passwordRef.current?.value ?? password;
+
+    if (!finalEmail || !finalPassword) {
+      toast.error('請輸入電子郵件與密碼');
+      return;
+    }
+    setEmail(finalEmail);
+    setPassword(finalPassword);
     setIsLoading(true);
 
     try {
-      const { error } = await signIn(email, password);
+      const { error } = await signIn(finalEmail, finalPassword);
       if (error) {
-        // Use generic error message to prevent information leakage
         toast.error('登入失敗。請檢查您的電子郵件和密碼。');
       } else {
         toast.success('登入成功！');
@@ -52,9 +81,12 @@ export default function Login() {
               <Label htmlFor="email">電子郵件</Label>
               <Input
                 id="email"
+                name="email"
                 type="email"
+                autoComplete="username"
                 placeholder="請輸入電子郵件"
                 value={email}
+                ref={emailRef}
                 onChange={(e) => setEmail(e.target.value)}
                 required
               />
@@ -65,9 +97,12 @@ export default function Login() {
               <div className="relative">
                 <Input
                   id="password"
+                  name="password"
                   type={showPassword ? 'text' : 'password'}
+                  autoComplete="current-password"
                   placeholder="請輸入密碼"
                   value={password}
+                  ref={passwordRef}
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   minLength={6}
