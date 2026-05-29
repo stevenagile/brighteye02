@@ -18,8 +18,10 @@ export type Database = {
         Row: {
           address: string | null
           birthday: string | null
+          city: string | null
           coupon_count: number
           created_at: string
+          district: string | null
           email: string | null
           eye_conditions: string[] | null
           eye_surgeries: string[] | null
@@ -28,10 +30,13 @@ export type Database = {
           home_phone: string | null
           id: string
           level: Database["public"]["Enums"]["member_level"]
+          line_id: string | null
           name: string
           notes: string | null
           occupation: string | null
           phone: string
+          postal_code: string | null
+          referral_source: string | null
           shopping_credit: number
           updated_at: string
           vip_amount: number | null
@@ -40,8 +45,10 @@ export type Database = {
         Insert: {
           address?: string | null
           birthday?: string | null
+          city?: string | null
           coupon_count?: number
           created_at?: string
+          district?: string | null
           email?: string | null
           eye_conditions?: string[] | null
           eye_surgeries?: string[] | null
@@ -50,10 +57,13 @@ export type Database = {
           home_phone?: string | null
           id?: string
           level?: Database["public"]["Enums"]["member_level"]
+          line_id?: string | null
           name: string
           notes?: string | null
           occupation?: string | null
           phone: string
+          postal_code?: string | null
+          referral_source?: string | null
           shopping_credit?: number
           updated_at?: string
           vip_amount?: number | null
@@ -62,8 +72,10 @@ export type Database = {
         Update: {
           address?: string | null
           birthday?: string | null
+          city?: string | null
           coupon_count?: number
           created_at?: string
+          district?: string | null
           email?: string | null
           eye_conditions?: string[] | null
           eye_surgeries?: string[] | null
@@ -72,10 +84,13 @@ export type Database = {
           home_phone?: string | null
           id?: string
           level?: Database["public"]["Enums"]["member_level"]
+          line_id?: string | null
           name?: string
           notes?: string | null
           occupation?: string | null
           phone?: string
+          postal_code?: string | null
+          referral_source?: string | null
           shopping_credit?: number
           updated_at?: string
           vip_amount?: number | null
