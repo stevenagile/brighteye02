@@ -261,7 +261,6 @@ export function AddMemberDialog({ open, onOpenChange }: AddMemberDialogProps) {
                 </div>
               </div>
             </div>
-            </div>
 
             {/* 地址 */}
             <div className="space-y-4">
