@@ -126,9 +126,35 @@ export function MemberTable() {
                 <TableRow className="bg-muted/50">
                   <TableHead className="font-semibold">客戶資訊</TableHead>
                   <TableHead className="font-semibold">等級</TableHead>
-                  <TableHead className="font-semibold">VIP 金額</TableHead>
+                  <TableHead className="font-semibold">
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="inline-flex items-center gap-1 cursor-help">
+                            VIP 金額 <Info className="w-3 h-3 text-muted-foreground" />
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent side="top" className="max-w-xs">
+                          客戶加入 VIP 時所支付（或登記）的入會金額，作為等級判定與權益依據。
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </TableHead>
                   <TableHead className="font-semibold">已折抵</TableHead>
-                  <TableHead className="font-semibold">剩餘購物金</TableHead>
+                  <TableHead className="font-semibold">
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="inline-flex items-center gap-1 cursor-help">
+                            剩餘購物金 <Info className="w-3 h-3 text-muted-foreground" />
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent side="top" className="max-w-xs">
+                          剩餘購物金 ＝ 發放購物金 − 已折抵金額；可用於下次消費抵扣。
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </TableHead>
                   <TableHead className="font-semibold">入會日期</TableHead>
                   <TableHead className="text-right"></TableHead>
                 </TableRow>
