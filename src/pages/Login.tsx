@@ -11,20 +11,12 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [isSignUp, setIsSignUp] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { signIn, signUp } = useAuth();
+  const { signIn } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Disable public registration - accounts must be created by admin
-    if (isSignUp) {
-      toast.error('帳號註冊已關閉。請聯繫管理員。');
-      return;
-    }
-    
     setIsLoading(true);
 
     try {
@@ -99,20 +91,10 @@ export default function Login() {
               className="w-full gradient-primary text-primary-foreground"
               disabled={isLoading}
             >
-              {isLoading ? '處理中...' : isSignUp ? '註冊' : '登入'}
+              {isLoading ? '處理中...' : '登入'}
             </Button>
           </form>
 
-          {/* Toggle */}
-          <div className="mt-6 text-center">
-            <button
-              type="button"
-              onClick={() => setIsSignUp(!isSignUp)}
-              className="text-sm text-primary hover:underline"
-            >
-              {isSignUp ? '已有帳號？立即登入' : '沒有帳號？立即註冊'}
-            </button>
-          </div>
         </div>
       </div>
     </div>
