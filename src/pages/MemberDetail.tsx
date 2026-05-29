@@ -63,6 +63,7 @@ export default function MemberDetail() {
 
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState<any>(null);
+  const [viewPrescription, setViewPrescription] = useState<Prescription | null>(null);
 
   const { data: serviceRecords, isLoading: loadingRecords } = useQuery({
     queryKey: ['member-service-records', id],
@@ -425,9 +426,13 @@ export default function MemberDetail() {
               {loadingRecords ? (
                 <p className="text-sm text-muted-foreground">載入中…</p>
               ) : serviceRecords?.length ? (
-                <div className="space-y-2">
                   {serviceRecords.map((p: any) => (
-                    <div key={p.id} className="rounded-lg border border-border bg-card/50 p-4 space-y-2">
+                    <button
+                      key={p.id}
+                      type="button"
+                      onClick={() => setViewPrescription(p as Prescription)}
+                      className="w-full text-left rounded-lg border border-border bg-card/50 p-4 space-y-2 hover:bg-muted/50 hover:border-primary/40 transition-colors group"
+                    >
                       <div className="flex items-center justify-between flex-wrap gap-2">
                         <div className="flex items-center gap-2">
                           <span className="font-semibold text-foreground">
@@ -435,9 +440,12 @@ export default function MemberDetail() {
                           </span>
                           <Badge variant="outline" className="text-xs">{p.service_type || '驗光'}</Badge>
                         </div>
-                        <span className="text-lg font-bold text-primary">
-                          NT${formatAmount(Number(p.amount || 0))}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-lg font-bold text-primary">
+                            NT${formatAmount(Number(p.amount || 0))}
+                          </span>
+                          <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                        </div>
                       </div>
                       <div className="flex items-center justify-between text-sm text-muted-foreground flex-wrap gap-2">
                         <span>驗光師：{p.examiner || '—'}</span>
@@ -452,6 +460,8 @@ export default function MemberDetail() {
                           {p.notes}
                         </p>
                       )}
+                    </button>
+                  ))}
                     </div>
                   ))}
                 </div>
