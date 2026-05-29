@@ -17,8 +17,8 @@ import { toast } from 'sonner';
 
 const navItems = [
   { icon: LayoutDashboard, label: '儀表板', path: '/' },
-  { icon: Users, label: '會員管理', path: '/members' },
-  { icon: Receipt, label: '會員服務紀錄', path: '/transactions' },
+  { icon: Users, label: '客戶管理', path: '/members' },
+  { icon: Receipt, label: '客戶服務紀錄', path: '/transactions' },
   { icon: Settings, label: '系統設定', path: '/settings' },
 ];
 
