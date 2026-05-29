@@ -22,6 +22,8 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { cn } from '@/lib/utils';
+import { memberUpdateSchema, zodErrorsToMap } from '@/lib/validation';
 
 interface EditMemberDialogProps {
   member: Member | null;
@@ -127,12 +129,27 @@ export function EditMemberDialog({ member, open, onOpenChange }: EditMemberDialo
     }
   }, [member]);
 
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const clearError = (field: string) => {
+    if (errors[field]) {
+      setErrors((prev) => {
+        const next = { ...prev };
+        delete next[field];
+        return next;
+      });
+    }
+  };
+  const errClass = (field: string) =>
+    errors[field] ? 'border-destructive focus-visible:ring-destructive' : '';
+  const FieldError = ({ field }: { field: string }) =>
+    errors[field] ? <p className="text-xs text-destructive mt-1">{errors[field]}</p> : null;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!member) return;
 
-    await updateMember.mutateAsync({
-      id: member.id,
+    const payload = {
       name: formData.name,
       phone: formData.phone,
       email: formData.email || null,
@@ -155,9 +172,20 @@ export function EditMemberDialog({ member, open, onOpenChange }: EditMemberDialo
       health_conditions: formData.health_conditions,
       eye_conditions: formData.eye_conditions,
       eye_surgeries: formData.eye_surgeries,
-    } as any);
+    };
 
-    onOpenChange(false);
+    const parsed = memberUpdateSchema.safeParse(payload);
+    if (!parsed.success) {
+      setErrors(zodErrorsToMap(parsed.error));
+      return;
+    }
+    setErrors({});
+    try {
+      await updateMember.mutateAsync({ id: member.id, ...payload } as any);
+      onOpenChange(false);
+    } catch {
+      // 後端錯誤 hook 已 toast
+    }
   };
 
   const toggleArrayItem = (
