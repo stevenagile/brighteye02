@@ -35,26 +35,27 @@ async function fetchSetting<T>(key: SettingsKey): Promise<T | null> {
     .from('settings')
     .select('value')
     .eq('key', key)
-    .single();
+    .maybeSingle();
 
   if (error) {
     console.error(`Error fetching ${key}:`, error);
     return null;
   }
 
-  return data?.value as T;
+  return (data?.value as T) ?? null;
 }
 
 async function updateSetting<T>(key: SettingsKey, value: T): Promise<void> {
+  const payload = JSON.parse(JSON.stringify(value));
   const { error } = await supabase
     .from('settings')
-    .update({ value: JSON.parse(JSON.stringify(value)) })
-    .eq('key', key);
+    .upsert({ key, value: payload }, { onConflict: 'key' });
 
   if (error) {
     throw error;
   }
 }
+
 
 export function useStoreInfo() {
   return useQuery({
