@@ -54,7 +54,13 @@ const EYE_SURGERIES = [
   { id: 'lasik', label: '近視/遠視/散光手術' },
 ];
 
-// 金額格式化輔助函數
+const TW_CITIES = [
+  '台北市', '新北市', '桃園市', '台中市', '台南市', '高雄市',
+  '基隆市', '新竹市', '新竹縣', '苗栗縣', '彰化縣', '南投縣',
+  '雲林縣', '嘉義市', '嘉義縣', '屏東縣', '宜蘭縣', '花蓮縣',
+  '台東縣', '澎湖縣', '金門縣', '連江縣',
+];
+
 const formatAmount = (value: number): string => value.toLocaleString('zh-TW');
 const parseAmount = (value: string): number => parseInt(value.replace(/,/g, '')) || 0;
 
@@ -71,9 +77,14 @@ export function EditMemberDialog({ member, open, onOpenChange }: EditMemberDialo
     notes: '',
     gender: '',
     birthday: '',
+    city: '',
+    district: '',
+    postal_code: '',
     address: '',
     occupation: '',
     home_phone: '',
+    line_id: '',
+    referral_source: '',
     health_conditions: [] as string[],
     eye_conditions: [] as string[],
     eye_surgeries: [] as string[],
@@ -84,12 +95,9 @@ export function EditMemberDialog({ member, open, onOpenChange }: EditMemberDialo
 
   const handleLevelChange = (level: MemberLevel) => {
     const vipAmount = memberLevels?.[level]?.vip_amount ?? formData.vip_amount;
-    setFormData({ 
-      ...formData, 
-      level, 
-      vip_amount: vipAmount 
-    });
+    setFormData({ ...formData, level, vip_amount: vipAmount });
   };
+
   useEffect(() => {
     if (member) {
       setFormData({
@@ -104,9 +112,14 @@ export function EditMemberDialog({ member, open, onOpenChange }: EditMemberDialo
         notes: member.notes || '',
         gender: member.gender || '',
         birthday: member.birthday || '',
+        city: (member as any).city || '',
+        district: (member as any).district || '',
+        postal_code: (member as any).postal_code || '',
         address: member.address || '',
         occupation: member.occupation || '',
         home_phone: member.home_phone || '',
+        line_id: (member as any).line_id || '',
+        referral_source: (member as any).referral_source || '',
         health_conditions: member.health_conditions || [],
         eye_conditions: member.eye_conditions || [],
         eye_surgeries: member.eye_surgeries || [],
@@ -117,7 +130,7 @@ export function EditMemberDialog({ member, open, onOpenChange }: EditMemberDialo
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!member) return;
-    
+
     await updateMember.mutateAsync({
       id: member.id,
       name: formData.name,
@@ -131,13 +144,18 @@ export function EditMemberDialog({ member, open, onOpenChange }: EditMemberDialo
       notes: formData.notes || null,
       gender: formData.gender || null,
       birthday: formData.birthday || null,
+      city: formData.city || null,
+      district: formData.district || null,
+      postal_code: formData.postal_code || null,
       address: formData.address || null,
       occupation: formData.occupation || null,
       home_phone: formData.home_phone || null,
+      line_id: formData.line_id || null,
+      referral_source: formData.referral_source || null,
       health_conditions: formData.health_conditions,
       eye_conditions: formData.eye_conditions,
       eye_surgeries: formData.eye_surgeries,
-    });
+    } as any);
 
     onOpenChange(false);
   };
@@ -158,10 +176,8 @@ export function EditMemberDialog({ member, open, onOpenChange }: EditMemberDialo
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-2xl max-h-[90vh]">
         <DialogHeader>
-          <DialogTitle>編輯會員</DialogTitle>
-          <DialogDescription>
-            修改會員基本資料與 VIP 權益
-          </DialogDescription>
+          <DialogTitle>編輯客戶</DialogTitle>
+          <DialogDescription>修改客戶基本資料、聯絡方式與會員權益</DialogDescription>
         </DialogHeader>
 
         <ScrollArea className="max-h-[60vh] pr-4">
@@ -172,22 +188,14 @@ export function EditMemberDialog({ member, open, onOpenChange }: EditMemberDialo
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="edit-name">姓名 *</Label>
-                  <Input
-                    id="edit-name"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    required
-                  />
+                  <Input id="edit-name" value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })} required />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="edit-gender">性別</Label>
-                  <Select
-                    value={formData.gender}
-                    onValueChange={(value) => setFormData({ ...formData, gender: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="請選擇" />
-                    </SelectTrigger>
+                  <Select value={formData.gender}
+                    onValueChange={(value) => setFormData({ ...formData, gender: value })}>
+                    <SelectTrigger><SelectValue placeholder="請選擇" /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="男">男</SelectItem>
                       <SelectItem value="女">女</SelectItem>
@@ -199,76 +207,87 @@ export function EditMemberDialog({ member, open, onOpenChange }: EditMemberDialo
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="edit-birthday">出生日期</Label>
-                  <Input
-                    id="edit-birthday"
-                    type="date"
-                    value={formData.birthday}
-                    onChange={(e) => setFormData({ ...formData, birthday: e.target.value })}
-                  />
+                  <Input id="edit-birthday" type="date" value={formData.birthday}
+                    onChange={(e) => setFormData({ ...formData, birthday: e.target.value })} />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="edit-occupation">職業</Label>
-                  <Input
-                    id="edit-occupation"
-                    value={formData.occupation}
-                    onChange={(e) => setFormData({ ...formData, occupation: e.target.value })}
-                  />
+                  <Input id="edit-occupation" value={formData.occupation}
+                    onChange={(e) => setFormData({ ...formData, occupation: e.target.value })} />
                 </div>
               </div>
+            </div>
 
+            {/* 聯絡方式 */}
+            <div className="space-y-4">
+              <h4 className="font-medium text-foreground">聯絡方式</h4>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="edit-phone">手機 *</Label>
-                  <Input
-                    id="edit-phone"
-                    value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    required
-                  />
+                  <Input id="edit-phone" value={formData.phone}
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })} required />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="edit-home_phone">住家電話</Label>
-                  <Input
-                    id="edit-home_phone"
-                    value={formData.home_phone}
-                    onChange={(e) => setFormData({ ...formData, home_phone: e.target.value })}
-                  />
+                  <Input id="edit-home_phone" value={formData.home_phone}
+                    onChange={(e) => setFormData({ ...formData, home_phone: e.target.value })} />
                 </div>
               </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="edit-email">電子郵件</Label>
-                <Input
-                  id="edit-email"
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-email">電子郵件</Label>
+                  <Input id="edit-email" type="email" value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })} />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-line_id">LINE ID</Label>
+                  <Input id="edit-line_id" value={formData.line_id}
+                    onChange={(e) => setFormData({ ...formData, line_id: e.target.value })} />
+                </div>
               </div>
+            </div>
 
+            {/* 地址 */}
+            <div className="space-y-4">
+              <h4 className="font-medium text-foreground">地址（選填）</h4>
+              <div className="grid grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-city">縣市</Label>
+                  <Select value={formData.city}
+                    onValueChange={(value) => setFormData({ ...formData, city: value })}>
+                    <SelectTrigger><SelectValue placeholder="請選擇" /></SelectTrigger>
+                    <SelectContent>
+                      {TW_CITIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-district">鄉鎮市區</Label>
+                  <Input id="edit-district" value={formData.district}
+                    onChange={(e) => setFormData({ ...formData, district: e.target.value })} />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-postal_code">郵遞區號</Label>
+                  <Input id="edit-postal_code" value={formData.postal_code}
+                    onChange={(e) => setFormData({ ...formData, postal_code: e.target.value })} />
+                </div>
+              </div>
               <div className="space-y-2">
-                <Label htmlFor="edit-address">住址</Label>
-                <Input
-                  id="edit-address"
-                  value={formData.address}
-                  onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                />
+                <Label htmlFor="edit-address">街道地址</Label>
+                <Input id="edit-address" value={formData.address}
+                  onChange={(e) => setFormData({ ...formData, address: e.target.value })} />
               </div>
             </div>
 
             {/* VIP 會員權益 */}
             <div className="space-y-4">
-              <h4 className="font-medium text-foreground">VIP 會員權益</h4>
+              <h4 className="font-medium text-foreground">會員等級與權益</h4>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="edit-level">VIP 等級</Label>
-                  <Select
-                    value={(formData.level || 'regular') as MemberLevel}
-                    onValueChange={(value: MemberLevel) => handleLevelChange(value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="一般客戶" />
-                    </SelectTrigger>
+                  <Label htmlFor="edit-level">客戶等級</Label>
+                  <Select value={(formData.level || 'regular') as MemberLevel}
+                    onValueChange={(value: MemberLevel) => handleLevelChange(value)}>
+                    <SelectTrigger><SelectValue placeholder="一般客戶" /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="regular">一般客戶</SelectItem>
                       <SelectItem value="silver">VIP 銀卡</SelectItem>
@@ -279,45 +298,33 @@ export function EditMemberDialog({ member, open, onOpenChange }: EditMemberDialo
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="edit-vip_start_date">入會起始日期</Label>
-                  <Input
-                    id="edit-vip_start_date"
-                    type="date"
-                    value={formData.vip_start_date}
-                    onChange={(e) => setFormData({ ...formData, vip_start_date: e.target.value })}
-                  />
+                  <Input id="edit-vip_start_date" type="date" value={formData.vip_start_date}
+                    onChange={(e) => setFormData({ ...formData, vip_start_date: e.target.value })} />
                 </div>
               </div>
               <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="edit-vip_amount">VIP 金額</Label>
-                  <Input
-                    id="edit-vip_amount"
-                    type="text"
-                    inputMode="numeric"
+                  <Input id="edit-vip_amount" type="text" inputMode="numeric"
                     value={formatAmount(formData.vip_amount)}
-                    onChange={(e) => setFormData({ ...formData, vip_amount: parseAmount(e.target.value) })}
-                  />
+                    onChange={(e) => setFormData({ ...formData, vip_amount: parseAmount(e.target.value) })} />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="edit-shopping_credit">購物金</Label>
-                  <Input
-                    id="edit-shopping_credit"
-                    type="text"
-                    inputMode="numeric"
+                  <Input id="edit-shopping_credit" type="text" inputMode="numeric"
                     value={formatAmount(formData.shopping_credit)}
-                    onChange={(e) => setFormData({ ...formData, shopping_credit: parseAmount(e.target.value) })}
-                  />
+                    onChange={(e) => setFormData({ ...formData, shopping_credit: parseAmount(e.target.value) })} />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="edit-coupon_count">購物券</Label>
-                  <Input
-                    id="edit-coupon_count"
-                    type="number"
-                    min="0"
-                    value={formData.coupon_count}
-                    onChange={(e) => setFormData({ ...formData, coupon_count: Number(e.target.value) })}
-                  />
+                  <Input id="edit-coupon_count" type="number" min="0" value={formData.coupon_count}
+                    onChange={(e) => setFormData({ ...formData, coupon_count: Number(e.target.value) })} />
                 </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-referral_source">介紹人 / 來源</Label>
+                <Input id="edit-referral_source" value={formData.referral_source}
+                  onChange={(e) => setFormData({ ...formData, referral_source: e.target.value })} />
               </div>
             </div>
 
@@ -327,66 +334,47 @@ export function EditMemberDialog({ member, open, onOpenChange }: EditMemberDialo
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {HEALTH_CONDITIONS.map((condition) => (
                   <div key={condition.id} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={`edit-health-${condition.id}`}
+                    <Checkbox id={`edit-health-${condition.id}`}
                       checked={formData.health_conditions.includes(condition.label)}
-                      onCheckedChange={() => toggleArrayItem('health_conditions', condition.label)}
-                    />
-                    <Label htmlFor={`edit-health-${condition.id}`} className="text-sm">
-                      {condition.label}
-                    </Label>
+                      onCheckedChange={() => toggleArrayItem('health_conditions', condition.label)} />
+                    <Label htmlFor={`edit-health-${condition.id}`} className="text-sm">{condition.label}</Label>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* 眼睛狀況 */}
             <div className="space-y-4">
               <h4 className="font-medium text-foreground">眼睛狀況</h4>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {EYE_CONDITIONS.map((condition) => (
                   <div key={condition.id} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={`edit-eye-${condition.id}`}
+                    <Checkbox id={`edit-eye-${condition.id}`}
                       checked={formData.eye_conditions.includes(condition.label)}
-                      onCheckedChange={() => toggleArrayItem('eye_conditions', condition.label)}
-                    />
-                    <Label htmlFor={`edit-eye-${condition.id}`} className="text-sm">
-                      {condition.label}
-                    </Label>
+                      onCheckedChange={() => toggleArrayItem('eye_conditions', condition.label)} />
+                    <Label htmlFor={`edit-eye-${condition.id}`} className="text-sm">{condition.label}</Label>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* 眼科手術 */}
             <div className="space-y-4">
               <h4 className="font-medium text-foreground">眼科手術史</h4>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 {EYE_SURGERIES.map((surgery) => (
                   <div key={surgery.id} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={`edit-surgery-${surgery.id}`}
+                    <Checkbox id={`edit-surgery-${surgery.id}`}
                       checked={formData.eye_surgeries.includes(surgery.label)}
-                      onCheckedChange={() => toggleArrayItem('eye_surgeries', surgery.label)}
-                    />
-                    <Label htmlFor={`edit-surgery-${surgery.id}`} className="text-sm">
-                      {surgery.label}
-                    </Label>
+                      onCheckedChange={() => toggleArrayItem('eye_surgeries', surgery.label)} />
+                    <Label htmlFor={`edit-surgery-${surgery.id}`} className="text-sm">{surgery.label}</Label>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* 備註 */}
             <div className="space-y-2">
               <Label htmlFor="edit-notes">備註</Label>
-              <Textarea
-                id="edit-notes"
-                value={formData.notes}
-                onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                rows={3}
-              />
+              <Textarea id="edit-notes" value={formData.notes}
+                onChange={(e) => setFormData({ ...formData, notes: e.target.value })} rows={3} />
             </div>
           </form>
         </ScrollArea>
@@ -395,11 +383,8 @@ export function EditMemberDialog({ member, open, onOpenChange }: EditMemberDialo
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
             取消
           </Button>
-          <Button 
-            onClick={handleSubmit} 
-            disabled={updateMember.isPending} 
-            className="gradient-primary text-primary-foreground"
-          >
+          <Button onClick={handleSubmit} disabled={updateMember.isPending}
+            className="gradient-primary text-primary-foreground">
             {updateMember.isPending ? '儲存中...' : '儲存變更'}
           </Button>
         </DialogFooter>

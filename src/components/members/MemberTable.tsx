@@ -1,36 +1,33 @@
 import { useState, useMemo } from 'react';
-import { useMembers, Member } from '@/hooks/useMembers';
-import { MemberBadge } from './MemberBadge';
+import { useMembers, Member, MemberLevel } from '@/hooks/useMembers';
 import { EditMemberDialog } from './EditMemberDialog';
+import { MemberRow } from './MemberRow';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Search, Wallet, Phone, Mail, Users, Calendar, MapPin, Briefcase, AlertCircle, Edit, CreditCard, TrendingDown } from 'lucide-react';
+import { Search, Users } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Badge } from '@/components/ui/badge';
 import {
   Table,
   TableBody,
-  TableCell,
   TableHead,
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
 export function MemberTable() {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedMember, setSelectedMember] = useState<Member | null>(null);
+  const [levelFilter, setLevelFilter] = useState<MemberLevel | 'all'>('all');
   const [editMember, setEditMember] = useState<Member | null>(null);
   const { data: members, isLoading } = useMembers();
 
-  // Fetch all prescriptions to calculate total credit used per member
   const { data: prescriptions } = useQuery({
     queryKey: ['prescriptions-credit-summary'],
     queryFn: async () => {
@@ -42,21 +39,25 @@ export function MemberTable() {
     },
   });
 
-  // Calculate total credit used per member (sum of credit_used from prescriptions)
   const memberCreditUsed = useMemo(() => {
-    const creditMap: Record<string, number> = {};
+    const map: Record<string, number> = {};
     prescriptions?.forEach((p) => {
       if (p.member_id && p.credit_used) {
-        creditMap[p.member_id] = (creditMap[p.member_id] || 0) + Number(p.credit_used);
+        map[p.member_id] = (map[p.member_id] || 0) + Number(p.credit_used);
       }
     });
-    return creditMap;
+    return map;
   }, [prescriptions]);
 
-  const filteredMembers = (members || []).filter(member =>
-    member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    member.phone.includes(searchTerm)
-  );
+  const filteredMembers = (members || []).filter((m) => {
+    const term = searchTerm.toLowerCase();
+    const matchesSearch =
+      m.name.toLowerCase().includes(term) ||
+      m.phone.includes(searchTerm) ||
+      (m.email || '').toLowerCase().includes(term);
+    const matchesLevel = levelFilter === 'all' || m.level === levelFilter;
+    return matchesSearch && matchesLevel;
+  });
 
   if (isLoading) {
     return (
@@ -74,121 +75,72 @@ export function MemberTable() {
     );
   }
 
-  const calculateAge = (birthday: string | null) => {
-    if (!birthday) return null;
-    const today = new Date();
-    const birthDate = new Date(birthday);
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const monthDiff = today.getMonth() - birthDate.getMonth();
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-      age--;
-    }
-    return age;
-  };
-
   return (
     <>
       <div className="stat-card">
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
           <div>
-            <h3 className="text-lg font-semibold text-foreground">會員列表</h3>
+            <h3 className="text-lg font-semibold text-foreground">客戶列表</h3>
             <p className="text-sm text-muted-foreground">
-              共 {members?.length || 0} 位會員
+              共 {(members?.length || 0).toLocaleString()} 位客戶
+              {filteredMembers.length !== (members?.length || 0) && (
+                <span>（顯示 {filteredMembers.length.toLocaleString()} 筆）</span>
+              )}
             </p>
           </div>
-          <div className="relative w-64">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input
-              placeholder="搜尋姓名或電話..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
+          <div className="flex flex-col sm:flex-row gap-2">
+            <Select value={levelFilter} onValueChange={(v) => setLevelFilter(v as any)}>
+              <SelectTrigger className="w-full sm:w-36">
+                <SelectValue placeholder="所有等級" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">所有等級</SelectItem>
+                <SelectItem value="regular">一般客戶</SelectItem>
+                <SelectItem value="silver">VIP 銀卡</SelectItem>
+                <SelectItem value="gold">VIP 金卡</SelectItem>
+                <SelectItem value="black">VIP 黑卡</SelectItem>
+              </SelectContent>
+            </Select>
+            <div className="relative w-full sm:w-64">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                placeholder="搜尋姓名、電話或 Email..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
           </div>
         </div>
 
         {filteredMembers.length === 0 ? (
           <div className="text-center py-12 text-muted-foreground">
             <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
-            <p>{searchTerm ? '找不到符合的會員' : '尚無會員資料'}</p>
+            <p>{searchTerm || levelFilter !== 'all' ? '找不到符合的客戶' : '尚無客戶資料'}</p>
           </div>
         ) : (
           <div className="rounded-xl border border-border overflow-hidden">
             <Table>
               <TableHeader>
                 <TableRow className="bg-muted/50">
-                  <TableHead className="font-semibold">會員資訊</TableHead>
-                  <TableHead className="font-semibold">VIP 等級</TableHead>
+                  <TableHead className="w-10"></TableHead>
+                  <TableHead className="font-semibold">客戶資訊</TableHead>
+                  <TableHead className="font-semibold">等級</TableHead>
                   <TableHead className="font-semibold">VIP 金額</TableHead>
-                  <TableHead className="font-semibold">已折抵購物金額</TableHead>
+                  <TableHead className="font-semibold">已折抵</TableHead>
                   <TableHead className="font-semibold">剩餘購物金</TableHead>
                   <TableHead className="font-semibold">入會日期</TableHead>
+                  <TableHead className="text-right"></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredMembers.map((member) => (
-                  <TableRow 
+                  <MemberRow
                     key={member.id}
-                    className="hover:bg-muted/30 transition-colors cursor-pointer"
-                    onClick={() => setSelectedMember(member)}
-                  >
-                    <TableCell>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <p className="font-medium text-foreground">{member.name}</p>
-                          {member.gender && (
-                            <span className="text-xs text-muted-foreground">
-                              ({member.gender})
-                            </span>
-                          )}
-                          {member.birthday && (
-                            <span className="text-xs text-muted-foreground">
-                              {calculateAge(member.birthday)}歲
-                            </span>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-3 mt-1 text-sm text-muted-foreground">
-                          <span className="flex items-center gap-1">
-                            <Phone className="w-3 h-3" />
-                            {member.phone}
-                          </span>
-                          {member.email && (
-                            <span className="flex items-center gap-1">
-                              <Mail className="w-3 h-3" />
-                              {member.email}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <MemberBadge level={member.level} />
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1.5 text-foreground">
-                        <CreditCard className="w-4 h-4 text-accent" />
-                        <span className="font-medium">NT${Number(member.vip_amount || 0).toLocaleString()}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1.5 text-destructive">
-                        <TrendingDown className="w-4 h-4" />
-                        <span className="font-medium">NT${(memberCreditUsed[member.id] || 0).toLocaleString()}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1.5 text-primary">
-                        <Wallet className="w-4 h-4" />
-                        <span className="font-medium">NT${(Number(member.shopping_credit) - (memberCreditUsed[member.id] || 0)).toLocaleString()}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {member.vip_start_date 
-                        ? new Date(member.vip_start_date).toLocaleDateString('zh-TW')
-                        : new Date(member.created_at).toLocaleDateString('zh-TW')
-                      }
-                    </TableCell>
-                  </TableRow>
+                    member={member}
+                    creditUsed={memberCreditUsed[member.id] || 0}
+                    onEdit={setEditMember}
+                  />
                 ))}
               </TableBody>
             </Table>
@@ -196,195 +148,6 @@ export function MemberTable() {
         )}
       </div>
 
-      {/* Member Detail Dialog */}
-      <Dialog open={!!selectedMember} onOpenChange={() => setSelectedMember(null)}>
-        <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center justify-between">
-              <span className="flex items-center gap-2">
-                <Users className="w-5 h-5" />
-                會員資料
-              </span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setEditMember(selectedMember);
-                  setSelectedMember(null);
-                }}
-              >
-                <Edit className="w-4 h-4 mr-1" />
-                編輯
-              </Button>
-            </DialogTitle>
-          </DialogHeader>
-
-          {selectedMember && (
-            <div className="space-y-6">
-              {/* 基本資訊 */}
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-xl font-bold text-foreground">{selectedMember.name}</h3>
-                    <div className="flex items-center gap-2 mt-1">
-                      <MemberBadge level={selectedMember.level} />
-                      {selectedMember.gender && (
-                        <span className="text-sm text-muted-foreground">{selectedMember.gender}</span>
-                      )}
-                      {selectedMember.birthday && (
-                        <span className="text-sm text-muted-foreground">
-                          {calculateAge(selectedMember.birthday)}歲
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* VIP 資訊 */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-muted/50 rounded-lg">
-                  <div className="text-center">
-                    <p className="text-xs text-muted-foreground mb-1">VIP 金額</p>
-                    <p className="font-bold text-accent">NT${Number(selectedMember.vip_amount || 0).toLocaleString()}</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-xs text-muted-foreground mb-1">購物金</p>
-                    <p className="font-bold text-foreground">NT${Number(selectedMember.shopping_credit).toLocaleString()}</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-xs text-muted-foreground mb-1">已折抵購物金額</p>
-                    <p className="font-bold text-destructive">NT${(memberCreditUsed[selectedMember.id] || 0).toLocaleString()}</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-xs text-muted-foreground mb-1">剩餘購物金</p>
-                    <p className="font-bold text-primary">NT${(Number(selectedMember.shopping_credit) - (memberCreditUsed[selectedMember.id] || 0)).toLocaleString()}</p>
-                  </div>
-                </div>
-                
-                {/* 購物券 */}
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <span>購物券: <span className="font-medium text-foreground">{selectedMember.coupon_count} 張</span></span>
-                </div>
-
-                {/* 入會日期 */}
-                {selectedMember.vip_start_date && (
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Calendar className="w-4 h-4" />
-                    <span>入會日期: {new Date(selectedMember.vip_start_date).toLocaleDateString('zh-TW')}</span>
-                  </div>
-                )}
-              </div>
-
-              {/* 聯絡資訊 */}
-              <div className="space-y-3 p-4 bg-muted/50 rounded-lg">
-                <h4 className="font-semibold text-foreground">聯絡資訊</h4>
-                <div className="grid gap-2 text-sm">
-                  <div className="flex items-center gap-2">
-                    <Phone className="w-4 h-4 text-muted-foreground" />
-                    <span>手機: {selectedMember.phone}</span>
-                  </div>
-                  {selectedMember.home_phone && (
-                    <div className="flex items-center gap-2">
-                      <Phone className="w-4 h-4 text-muted-foreground" />
-                      <span>住家: {selectedMember.home_phone}</span>
-                    </div>
-                  )}
-                  {selectedMember.email && (
-                    <div className="flex items-center gap-2">
-                      <Mail className="w-4 h-4 text-muted-foreground" />
-                      <span>{selectedMember.email}</span>
-                    </div>
-                  )}
-                  {selectedMember.address && (
-                    <div className="flex items-center gap-2">
-                      <MapPin className="w-4 h-4 text-muted-foreground" />
-                      <span>{selectedMember.address}</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* 個人資訊 */}
-              <div className="space-y-3 p-4 bg-muted/50 rounded-lg">
-                <h4 className="font-semibold text-foreground">個人資訊</h4>
-                <div className="grid gap-2 text-sm">
-                  {selectedMember.birthday && (
-                    <div className="flex items-center gap-2">
-                      <Calendar className="w-4 h-4 text-muted-foreground" />
-                      <span>生日: {selectedMember.birthday}</span>
-                    </div>
-                  )}
-                  {selectedMember.occupation && (
-                    <div className="flex items-center gap-2">
-                      <Briefcase className="w-4 h-4 text-muted-foreground" />
-                      <span>職業: {selectedMember.occupation}</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* 健康狀況 */}
-              {(selectedMember.health_conditions?.length > 0 || 
-                selectedMember.eye_conditions?.length > 0 || 
-                selectedMember.eye_surgeries?.length > 0) && (
-                <div className="space-y-3 p-4 bg-muted/50 rounded-lg">
-                  <h4 className="font-semibold text-foreground flex items-center gap-2">
-                    <AlertCircle className="w-4 h-4" />
-                    健康狀況
-                  </h4>
-                  <div className="space-y-3">
-                    {selectedMember.health_conditions?.length > 0 && (
-                      <div>
-                        <p className="text-xs text-muted-foreground mb-1">身體狀況</p>
-                        <div className="flex flex-wrap gap-1">
-                          {selectedMember.health_conditions.map((condition, i) => (
-                            <Badge key={i} variant="secondary">{condition}</Badge>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                    {selectedMember.eye_conditions?.length > 0 && (
-                      <div>
-                        <p className="text-xs text-muted-foreground mb-1">眼睛狀況</p>
-                        <div className="flex flex-wrap gap-1">
-                          {selectedMember.eye_conditions.map((condition, i) => (
-                            <Badge key={i} variant="secondary">{condition}</Badge>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                    {selectedMember.eye_surgeries?.length > 0 && (
-                      <div>
-                        <p className="text-xs text-muted-foreground mb-1">眼科手術史</p>
-                        <div className="flex flex-wrap gap-1">
-                          {selectedMember.eye_surgeries.map((surgery, i) => (
-                            <Badge key={i} variant="outline">{surgery}</Badge>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* 備註 */}
-              {selectedMember.notes && (
-                <div className="p-4 bg-muted/50 rounded-lg">
-                  <p className="text-sm text-muted-foreground mb-1">備註</p>
-                  <p className="text-foreground">{selectedMember.notes}</p>
-                </div>
-              )}
-
-              {/* 加入時間 */}
-              <div className="text-xs text-muted-foreground text-center">
-                建立時間: {new Date(selectedMember.created_at).toLocaleString('zh-TW')}
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
-
-      {/* Edit Member Dialog */}
       <EditMemberDialog
         member={editMember}
         open={!!editMember}
