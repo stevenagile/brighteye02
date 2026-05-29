@@ -132,12 +132,12 @@ export function MemberTable() {
                 </TableRow>
               </TableHeader>
               <TableBody>
+              <TableBody>
                 {filteredMembers.map((member) => (
                   <MemberRow
                     key={member.id}
                     member={member}
                     creditUsed={memberCreditUsed[member.id] || 0}
-                    onEdit={setEditMember}
                   />
                 ))}
               </TableBody>
@@ -145,12 +145,6 @@ export function MemberTable() {
           </div>
         )}
       </div>
-
-      <EditMemberDialog
-        member={editMember}
-        open={!!editMember}
-        onOpenChange={(open) => !open && setEditMember(null)}
-      />
     </>
   );
 }
