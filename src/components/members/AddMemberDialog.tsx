@@ -22,6 +22,8 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { cn } from '@/lib/utils';
+import { memberInputSchema, zodErrorsToMap } from '@/lib/validation';
 
 interface AddMemberDialogProps {
   open: boolean;
@@ -89,9 +91,26 @@ export function AddMemberDialog({ open, onOpenChange }: AddMemberDialogProps) {
     eye_surgeries: [] as string[],
   };
   const [formData, setFormData] = useState(initialState);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const createMember = useCreateMember();
   const { data: memberLevels } = useMemberLevels();
+
+  const clearError = (field: string) => {
+    if (errors[field]) {
+      setErrors((prev) => {
+        const next = { ...prev };
+        delete next[field];
+        return next;
+      });
+    }
+  };
+
+  const errClass = (field: string) =>
+    errors[field] ? 'border-destructive focus-visible:ring-destructive' : '';
+
+  const FieldError = ({ field }: { field: string }) =>
+    errors[field] ? <p className="text-xs text-destructive mt-1">{errors[field]}</p> : null;
 
   const handleLevelChange = (level: MemberLevel) => {
     const levelConfig = memberLevels?.[level];
@@ -103,35 +122,47 @@ export function AddMemberDialog({ open, onOpenChange }: AddMemberDialogProps) {
     });
   };
 
+  const buildPayload = () => ({
+    name: formData.name,
+    phone: formData.phone,
+    email: formData.email || undefined,
+    level: formData.level,
+    shopping_credit: formData.shopping_credit,
+    coupon_count: formData.coupon_count,
+    vip_amount: formData.vip_amount,
+    vip_start_date: formData.vip_start_date || undefined,
+    notes: formData.notes || undefined,
+    gender: formData.gender || undefined,
+    birthday: formData.birthday || undefined,
+    city: formData.city || undefined,
+    district: formData.district || undefined,
+    postal_code: formData.postal_code || undefined,
+    address: formData.address || undefined,
+    occupation: formData.occupation || undefined,
+    home_phone: formData.home_phone || undefined,
+    line_id: formData.line_id || undefined,
+    referral_source: formData.referral_source || undefined,
+    health_conditions: formData.health_conditions,
+    eye_conditions: formData.eye_conditions,
+    eye_surgeries: formData.eye_surgeries,
+  });
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await createMember.mutateAsync({
-      name: formData.name,
-      phone: formData.phone,
-      email: formData.email || undefined,
-      level: formData.level,
-      shopping_credit: formData.shopping_credit,
-      coupon_count: formData.coupon_count,
-      vip_amount: formData.vip_amount,
-      vip_start_date: formData.vip_start_date || undefined,
-      notes: formData.notes || undefined,
-      gender: formData.gender || undefined,
-      birthday: formData.birthday || undefined,
-      city: formData.city || undefined,
-      district: formData.district || undefined,
-      postal_code: formData.postal_code || undefined,
-      address: formData.address || undefined,
-      occupation: formData.occupation || undefined,
-      home_phone: formData.home_phone || undefined,
-      line_id: formData.line_id || undefined,
-      referral_source: formData.referral_source || undefined,
-      health_conditions: formData.health_conditions,
-      eye_conditions: formData.eye_conditions,
-      eye_surgeries: formData.eye_surgeries,
-    });
-
-    setFormData(initialState);
-    onOpenChange(false);
+    const payload = buildPayload();
+    const parsed = memberInputSchema.safeParse(payload);
+    if (!parsed.success) {
+      setErrors(zodErrorsToMap(parsed.error));
+      return;
+    }
+    setErrors({});
+    try {
+      await createMember.mutateAsync(payload as any);
+      setFormData(initialState);
+      onOpenChange(false);
+    } catch {
+      // 後端錯誤已在 hook 中以 toast 提示
+    }
   };
 
   const toggleArrayItem = (
