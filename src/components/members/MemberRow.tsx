@@ -57,9 +57,8 @@ export function MemberRow({ member, creditUsed, onEdit }: MemberRowProps) {
   const remaining = Number(member.shopping_credit) - creditUsed;
   const age = calculateAge(member.birthday);
 
-  // Lazy-load history when row expands
-  const { data: history, isLoading } = useQuery({
   // Lazy-load 客戶服務紀錄 when row expands
+  const { data: serviceRecords, isLoading } = useQuery({
   const { data: serviceRecords, isLoading } = useQuery({
     queryKey: ['member-service-records', member.id],
     enabled: open,
