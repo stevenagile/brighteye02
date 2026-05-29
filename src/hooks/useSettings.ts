@@ -16,6 +16,7 @@ export interface MemberLevelConfig {
 }
 
 export interface MemberLevels {
+  regular: MemberLevelConfig;
   gold: MemberLevelConfig;
   silver: MemberLevelConfig;
   black: MemberLevelConfig;
