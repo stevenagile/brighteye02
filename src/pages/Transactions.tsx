@@ -95,7 +95,7 @@ export default function Transactions() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">會員服務紀錄</h1>
+            <h1 className="text-3xl font-bold text-foreground">客戶服務紀錄</h1>
             <p className="text-muted-foreground mt-1">管理驗光與服務資料</p>
           </div>
           <div className="flex items-center gap-4">

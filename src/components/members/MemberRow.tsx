@@ -59,27 +59,20 @@ export function MemberRow({ member, creditUsed, onEdit }: MemberRowProps) {
 
   // Lazy-load history when row expands
   const { data: history, isLoading } = useQuery({
-    queryKey: ['member-history', member.id],
+  // Lazy-load 客戶服務紀錄 when row expands
+  const { data: serviceRecords, isLoading } = useQuery({
+    queryKey: ['member-service-records', member.id],
     enabled: open,
     queryFn: async () => {
-      const [tx, rx] = await Promise.all([
-        supabase
-          .from('transactions')
-          .select('*, transaction_items(*)')
-          .eq('member_id', member.id)
-          .order('transaction_date', { ascending: false }),
-        supabase
-          .from('prescriptions')
-          .select('*')
-          .eq('member_id', member.id)
-          .order('exam_date', { ascending: false }),
-      ]);
-      if (tx.error) throw tx.error;
-      if (rx.error) throw rx.error;
-      return { transactions: tx.data || [], prescriptions: rx.data || [] };
+      const { data, error } = await supabase
+        .from('prescriptions')
+        .select('*')
+        .eq('member_id', member.id)
+        .order('exam_date', { ascending: false });
+      if (error) throw error;
+      return data || [];
     },
   });
-
   const address = formatAddress(member);
 
   return (
@@ -213,47 +206,24 @@ export function MemberRow({ member, creditUsed, onEdit }: MemberRowProps) {
                     )}
                     {member.eye_surgeries && member.eye_surgeries.length > 0 && (
                       <div>
-                        <p className="text-xs text-muted-foreground mb-1">眼科手術史</p>
-                        <div className="flex flex-wrap gap-1">
-                          {member.eye_surgeries.map((c, i) => (
-                            <Badge key={i} variant="outline">{c}</Badge>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                    {(!member.health_conditions?.length && !member.eye_conditions?.length && !member.eye_surgeries?.length) && (
-                      <p className="text-muted-foreground italic">尚未填寫</p>
-                    )}
-                  </div>
+              {/* 客戶服務紀錄 */}
+              <div className="rounded-lg border border-border bg-card p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                    <Receipt className="w-4 h-4" />客戶服務紀錄
+                  </h4>
+                  <span className="text-xs text-muted-foreground">
+                    共 {serviceRecords?.length || 0} 筆
+                  </span>
                 </div>
-              </div>
-
-              {member.notes && (
-                <div className="rounded-lg border border-border bg-card p-4">
-                  <p className="text-xs text-muted-foreground mb-1">備註</p>
-                  <p className="text-sm text-foreground whitespace-pre-wrap">{member.notes}</p>
-                </div>
-              )}
-
-              {/* 服務 / 交易紀錄 */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                {/* 驗光 / 服務紀錄 */}
-                <div className="rounded-lg border border-border bg-card p-4 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <h4 className="text-sm font-semibold text-foreground flex items-center gap-2">
-                      <Eye className="w-4 h-4" />驗光 / 服務紀錄
-                    </h4>
-                    <span className="text-xs text-muted-foreground">
-                      共 {history?.prescriptions.length || 0} 筆
-                    </span>
-                  </div>
-                  {isLoading ? (
-                    <p className="text-sm text-muted-foreground">載入中…</p>
-                  ) : history?.prescriptions.length ? (
-                    <div className="space-y-2 max-h-64 overflow-y-auto">
-                      {history.prescriptions.map((p: any) => (
-                        <div key={p.id} className="rounded-md border border-border/60 p-3 text-sm space-y-1">
-                          <div className="flex items-center justify-between">
+                {isLoading ? (
+                  <p className="text-sm text-muted-foreground">載入中…</p>
+                ) : serviceRecords?.length ? (
+                  <div className="space-y-2 max-h-80 overflow-y-auto">
+                    {serviceRecords.map((p: any) => (
+                      <div key={p.id} className="rounded-md border border-border/60 p-3 text-sm space-y-1">
+                        <div className="flex items-center justify-between flex-wrap gap-2">
+                          <div className="flex items-center gap-2">
                             <span className="font-medium text-foreground">
                               {new Date(p.exam_date).toLocaleDateString('zh-TW')}
                             </span>
@@ -261,46 +231,37 @@ export function MemberRow({ member, creditUsed, onEdit }: MemberRowProps) {
                               {p.service_type || '驗光'}
                             </Badge>
                           </div>
-                          <div className="flex items-center justify-between text-muted-foreground text-xs">
-                            <span>驗光師：{p.examiner || '—'}</span>
-                            <span>金額：NT${Number(p.amount || 0).toLocaleString()}</span>
-                          </div>
+                          <span className="font-bold text-primary">
+                            NT${Number(p.amount || 0).toLocaleString()}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between text-muted-foreground text-xs flex-wrap gap-2">
+                          <span>驗光師：{p.examiner || '—'}</span>
                           {Number(p.credit_used || 0) > 0 && (
-                            <div className="text-xs text-destructive">
+                            <span className="text-destructive">
                               折抵購物金：NT${Number(p.credit_used).toLocaleString()}
-                            </div>
+                            </span>
                           )}
                         </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-sm text-muted-foreground italic">尚無紀錄</p>
-                  )}
-                </div>
-
-                {/* 交易紀錄 */}
-                <div className="rounded-lg border border-border bg-card p-4 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <h4 className="text-sm font-semibold text-foreground flex items-center gap-2">
-                      <Receipt className="w-4 h-4" />交易紀錄
-                    </h4>
-                    <span className="text-xs text-muted-foreground">
-                      共 {history?.transactions.length || 0} 筆
-                    </span>
+                        {p.notes && (
+                          <p className="text-xs text-muted-foreground pt-1 border-t border-border/40">
+                            {p.notes}
+                          </p>
+                        )}
+                      </div>
+                    ))}
                   </div>
-                  {isLoading ? (
-                    <p className="text-sm text-muted-foreground">載入中…</p>
-                  ) : history?.transactions.length ? (
-                    <div className="space-y-2 max-h-64 overflow-y-auto">
-                      {history.transactions.map((t: any) => (
-                        <div key={t.id} className="rounded-md border border-border/60 p-3 text-sm space-y-1">
-                          <div className="flex items-center justify-between">
-                            <span className="font-medium text-foreground">
-                              {new Date(t.transaction_date).toLocaleDateString('zh-TW')}
-                            </span>
-                            <span className="font-bold text-primary">
-                              NT${Number(t.total || 0).toLocaleString()}
-                            </span>
+                ) : (
+                  <p className="text-sm text-muted-foreground italic">尚無紀錄</p>
+                )}
+              </div>
+            </div>
+          </TableCell>
+        </TableRow>
+      )}
+    </>
+  );
+}
                           </div>
                           {t.transaction_items?.length > 0 && (
                             <div className="text-xs text-muted-foreground truncate">
