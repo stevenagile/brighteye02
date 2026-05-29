@@ -474,6 +474,12 @@ export default function MemberDetail() {
           </TabsContent>
         </Tabs>
       </div>
+
+      <EditPrescriptionDialog
+        open={!!viewPrescription}
+        onOpenChange={(o) => !o && setViewPrescription(null)}
+        prescription={viewPrescription}
+      />
     </MainLayout>
   );
 }
