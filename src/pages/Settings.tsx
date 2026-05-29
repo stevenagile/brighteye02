@@ -198,6 +198,81 @@ export default function Settings() {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {/* Regular Member */}
+                <div className="p-4 border border-border rounded-xl">
+                  <div className="member-badge-regular mb-4">一般客戶</div>
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label className="text-sm text-muted-foreground">VIP 金額</Label>
+                      <Input
+                        type="text"
+                        inputMode="numeric"
+                        value={formatAmount(levelsForm.regular.vip_amount)}
+                        onChange={(e) =>
+                          setLevelsForm({
+                            ...levelsForm,
+                            regular: {
+                              ...levelsForm.regular,
+                              vip_amount: parseAmount(e.target.value),
+                            },
+                          })
+                        }
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-sm text-muted-foreground">購物金</Label>
+                      <Input
+                        type="text"
+                        inputMode="numeric"
+                        value={formatAmount(levelsForm.regular.shopping_credit ?? 0)}
+                        onChange={(e) =>
+                          setLevelsForm({
+                            ...levelsForm,
+                            regular: {
+                              ...levelsForm.regular,
+                              shopping_credit: parseAmount(e.target.value),
+                            },
+                          })
+                        }
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-sm text-muted-foreground">消費折扣</Label>
+                      <Input
+                        value={discountToDisplay(levelsForm.regular.discount)}
+                        onChange={(e) =>
+                          setLevelsForm({
+                            ...levelsForm,
+                            regular: {
+                              ...levelsForm.regular,
+                              discount: displayToDiscount(e.target.value) || levelsForm.regular.discount,
+                            },
+                          })
+                        }
+                        placeholder="無折扣"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-sm text-muted-foreground">積分倍率</Label>
+                      <Input
+                        type="number"
+                        step="0.5"
+                        min="1"
+                        value={levelsForm.regular.points_multiplier}
+                        onChange={(e) =>
+                          setLevelsForm({
+                            ...levelsForm,
+                            regular: {
+                              ...levelsForm.regular,
+                              points_multiplier: parseFloat(e.target.value) || 1,
+                            },
+                          })
+                        }
+                      />
+                    </div>
+                  </div>
+                </div>
+
                 {/* Gold Member */}
                 <div className="p-4 border border-border rounded-xl">
                   <div className="member-badge-gold mb-4">金卡會員</div>
