@@ -195,8 +195,10 @@ export function AddMemberDialog({ open, onOpenChange }: AddMemberDialogProps) {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="name">姓名 *</Label>
-                  <Input id="name" value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })} required />
+                  <Input id="name" value={formData.name} aria-invalid={!!errors.name}
+                    className={cn(errClass('name'))}
+                    onChange={(e) => { setFormData({ ...formData, name: e.target.value }); clearError('name'); }} />
+                  <FieldError field="name" />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="gender">性別</Label>
@@ -231,23 +233,30 @@ export function AddMemberDialog({ open, onOpenChange }: AddMemberDialogProps) {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="phone">手機 *</Label>
-                  <Input id="phone" value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })} required />
+                  <Input id="phone" value={formData.phone} aria-invalid={!!errors.phone}
+                    className={cn(errClass('phone'))}
+                    onChange={(e) => { setFormData({ ...formData, phone: e.target.value }); clearError('phone'); }} />
+                  <FieldError field="phone" />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="home_phone">住家電話</Label>
-                  <Input id="home_phone" value={formData.home_phone}
-                    onChange={(e) => setFormData({ ...formData, home_phone: e.target.value })} />
+                  <Input id="home_phone" value={formData.home_phone} aria-invalid={!!errors.home_phone}
+                    className={cn(errClass('home_phone'))}
+                    onChange={(e) => { setFormData({ ...formData, home_phone: e.target.value }); clearError('home_phone'); }} />
+                  <FieldError field="home_phone" />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="email">電子郵件</Label>
                   <Input id="email" type="email" value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })} />
-                </div>
                 <div className="space-y-2">
-                  <Label htmlFor="line_id">LINE ID</Label>
+                  <Label htmlFor="email">電子郵件</Label>
+                  <Input id="email" type="email" value={formData.email} aria-invalid={!!errors.email}
+                    className={cn(errClass('email'))}
+                    onChange={(e) => { setFormData({ ...formData, email: e.target.value }); clearError('email'); }} />
+                  <FieldError field="email" />
+                </div>
                   <Input id="line_id" value={formData.line_id}
                     onChange={(e) => setFormData({ ...formData, line_id: e.target.value })} />
                 </div>
