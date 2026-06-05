@@ -364,6 +364,7 @@ export function EditPrescriptionDialog({ open, onOpenChange, prescription }: Edi
             placeholder="2.00"
             value={(formData as any)[`${prefix}_add`]}
             onChange={(e) => setFormData({ ...formData, [`${prefix}_add`]: e.target.value })}
+            onBlur={() => formatDecimal2(`${prefix}_add`)}
           />
         </div>
         <div className="space-y-1">
@@ -374,6 +375,7 @@ export function EditPrescriptionDialog({ open, onOpenChange, prescription }: Edi
             placeholder="32"
             value={(formData as any)[`${prefix}_pd`]}
             onChange={(e) => setFormData({ ...formData, [`${prefix}_pd`]: e.target.value })}
+            onBlur={() => formatDecimal2(`${prefix}_pd`)}
           />
         </div>
       </div>
