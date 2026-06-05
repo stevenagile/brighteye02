@@ -500,12 +500,15 @@ export default function MemberDetail() {
   );
 }
 
-function Section({ title, icon, children }: { title: string; icon?: React.ReactNode; children: React.ReactNode }) {
+function Section({ title, icon, action, children }: { title: string; icon?: React.ReactNode; action?: React.ReactNode; children: React.ReactNode }) {
   return (
     <div className="stat-card space-y-4">
-      <h3 className="text-base font-semibold text-foreground flex items-center gap-2">
-        {icon}{title}
-      </h3>
+      <div className="flex items-center justify-between gap-2 flex-wrap">
+        <h3 className="text-base font-semibold text-foreground flex items-center gap-2">
+          {icon}{title}
+        </h3>
+        {action}
+      </div>
       <div className="space-y-4">{children}</div>
     </div>
   );
