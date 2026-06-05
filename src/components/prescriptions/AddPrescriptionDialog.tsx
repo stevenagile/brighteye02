@@ -230,6 +230,7 @@ export function AddPrescriptionDialog({ open, onOpenChange }: AddPrescriptionDia
               placeholder="-2.50"
               value={(formData as any)[`${prefix}_best_s`]}
               onChange={(e) => setFormData({ ...formData, [`${prefix}_best_s`]: e.target.value })}
+              onBlur={() => formatDecimal2(`${prefix}_best_s`)}
             />
           </div>
           <div className="space-y-1">
@@ -240,6 +241,7 @@ export function AddPrescriptionDialog({ open, onOpenChange }: AddPrescriptionDia
               placeholder="-0.50"
               value={(formData as any)[`${prefix}_best_c`]}
               onChange={(e) => setFormData({ ...formData, [`${prefix}_best_c`]: e.target.value })}
+              onBlur={() => formatDecimal2(`${prefix}_best_c`)}
             />
           </div>
           <div className="space-y-1">
@@ -251,6 +253,7 @@ export function AddPrescriptionDialog({ open, onOpenChange }: AddPrescriptionDia
               placeholder="180"
               value={(formData as any)[`${prefix}_best_a`]}
               onChange={(e) => setFormData({ ...formData, [`${prefix}_best_a`]: e.target.value })}
+              onBlur={() => formatDecimal2(`${prefix}_best_a`)}
             />
           </div>
         </div>
