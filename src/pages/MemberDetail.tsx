@@ -438,7 +438,15 @@ export default function MemberDetail() {
 
           {/* 服務紀錄 */}
           <TabsContent value="records">
-            <Section title="客戶服務紀錄" icon={<Receipt className="w-4 h-4" />}>
+            <Section
+              title="客戶服務紀錄"
+              icon={<Receipt className="w-4 h-4" />}
+              action={
+                <Button size="sm" onClick={() => setAddRecordOpen(true)}>
+                  <Plus className="w-4 h-4 mr-1" />新增服務紀錄
+                </Button>
+              }
+            >
               {loadingRecords ? (
                 <p className="text-sm text-muted-foreground">載入中…</p>
               ) : serviceRecords?.length ? (
