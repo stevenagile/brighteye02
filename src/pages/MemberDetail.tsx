@@ -61,6 +61,7 @@ export default function MemberDetail() {
   const [form, setForm] = useState<any>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [viewPrescription, setViewPrescription] = useState<Prescription | null>(null);
+  const [addRecordOpen, setAddRecordOpen] = useState(false);
 
   const clearError = (field: string) => {
     if (errors[field]) {
