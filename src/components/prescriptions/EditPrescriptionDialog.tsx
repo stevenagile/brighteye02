@@ -250,7 +250,7 @@ export function EditPrescriptionDialog({ open, onOpenChange, prescription }: Edi
               placeholder="180"
               value={(formData as any)[`${prefix}_best_a`]}
               onChange={(e) => setFormData({ ...formData, [`${prefix}_best_a`]: e.target.value })}
-              onBlur={() => formatDecimal2(`${prefix}_best_a`)}
+              onBlur={() => formatInt(`${prefix}_best_a`)}
             />
           </div>
         </div>
@@ -283,7 +283,7 @@ export function EditPrescriptionDialog({ open, onOpenChange, prescription }: Edi
               type="text" inputMode="decimal"
               value={(formData as any)[`${prefix}_auto_a`]}
               onChange={(e) => setFormData({ ...formData, [`${prefix}_auto_a`]: e.target.value })}
-              onBlur={() => formatDecimal2(`${prefix}_auto_a`)}
+              onBlur={() => formatInt(`${prefix}_auto_a`)}
             />
           </div>
         </div>
@@ -316,7 +316,7 @@ export function EditPrescriptionDialog({ open, onOpenChange, prescription }: Edi
               type="text" inputMode="decimal"
               value={(formData as any)[`${prefix}_old_a`]}
               onChange={(e) => setFormData({ ...formData, [`${prefix}_old_a`]: e.target.value })}
-              onBlur={() => formatDecimal2(`${prefix}_old_a`)}
+              onBlur={() => formatInt(`${prefix}_old_a`)}
             />
           </div>
         </div>
