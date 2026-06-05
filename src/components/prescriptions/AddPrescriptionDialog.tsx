@@ -198,10 +198,22 @@ export function AddPrescriptionDialog({ open, onOpenChange, lockedMemberId }: Ad
   };
 
   const formatDecimal2 = (key: string) => {
-    const val = (formData as any)[key];
-    if (val === '' || val == null) return;
-    const n = Number(val);
-    if (!isNaN(n)) setFormData({ ...formData, [key]: n.toFixed(2) });
+    setFormData((prev: any) => {
+      const val = prev[key];
+      if (val === '' || val == null) return prev;
+      const n = Number(val);
+      if (isNaN(n)) return prev;
+      return { ...prev, [key]: n.toFixed(2) };
+    });
+  };
+  const formatInt = (key: string) => {
+    setFormData((prev: any) => {
+      const val = prev[key];
+      if (val === '' || val == null) return prev;
+      const n = parseInt(String(val), 10);
+      if (isNaN(n)) return prev;
+      return { ...prev, [key]: String(n) };
+    });
   };
 
   const renderEyeSection = (prefix: 'right' | 'left') => (
@@ -257,7 +269,7 @@ export function AddPrescriptionDialog({ open, onOpenChange, lockedMemberId }: Ad
               placeholder="180"
               value={(formData as any)[`${prefix}_best_a`]}
               onChange={(e) => setFormData({ ...formData, [`${prefix}_best_a`]: e.target.value })}
-              onBlur={() => formatDecimal2(`${prefix}_best_a`)}
+              onBlur={() => formatInt(`${prefix}_best_a`)}
             />
           </div>
         </div>
@@ -291,7 +303,7 @@ export function AddPrescriptionDialog({ open, onOpenChange, lockedMemberId }: Ad
               type="text" inputMode="decimal"
               value={(formData as any)[`${prefix}_auto_a`]}
               onChange={(e) => setFormData({ ...formData, [`${prefix}_auto_a`]: e.target.value })}
-              onBlur={() => formatDecimal2(`${prefix}_auto_a`)}
+              onBlur={() => formatInt(`${prefix}_auto_a`)}
             />
           </div>
         </div>
@@ -325,7 +337,7 @@ export function AddPrescriptionDialog({ open, onOpenChange, lockedMemberId }: Ad
               type="text" inputMode="decimal"
               value={(formData as any)[`${prefix}_old_a`]}
               onChange={(e) => setFormData({ ...formData, [`${prefix}_old_a`]: e.target.value })}
-              onBlur={() => formatDecimal2(`${prefix}_old_a`)}
+              onBlur={() => formatInt(`${prefix}_old_a`)}
             />
           </div>
         </div>
