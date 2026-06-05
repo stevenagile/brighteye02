@@ -225,8 +225,7 @@ export function AddPrescriptionDialog({ open, onOpenChange }: AddPrescriptionDia
           <div className="space-y-1">
             <Label className="text-xs text-muted-foreground">球鏡 S</Label>
             <Input
-              type="number"
-              step="0.25"
+              type="text" inputMode="decimal"
               placeholder="-2.50"
               value={(formData as any)[`${prefix}_best_s`]}
               onChange={(e) => setFormData({ ...formData, [`${prefix}_best_s`]: e.target.value })}
@@ -236,8 +235,7 @@ export function AddPrescriptionDialog({ open, onOpenChange }: AddPrescriptionDia
           <div className="space-y-1">
             <Label className="text-xs text-muted-foreground">柱鏡 C</Label>
             <Input
-              type="number"
-              step="0.25"
+              type="text" inputMode="decimal"
               placeholder="-0.50"
               value={(formData as any)[`${prefix}_best_c`]}
               onChange={(e) => setFormData({ ...formData, [`${prefix}_best_c`]: e.target.value })}
@@ -247,9 +245,7 @@ export function AddPrescriptionDialog({ open, onOpenChange }: AddPrescriptionDia
           <div className="space-y-1">
             <Label className="text-xs text-muted-foreground">軸位 A</Label>
             <Input
-              type="number"
-              min="0"
-              max="180"
+              type="text" inputMode="decimal"
               placeholder="180"
               value={(formData as any)[`${prefix}_best_a`]}
               onChange={(e) => setFormData({ ...formData, [`${prefix}_best_a`]: e.target.value })}
@@ -266,8 +262,7 @@ export function AddPrescriptionDialog({ open, onOpenChange }: AddPrescriptionDia
           <div className="space-y-1">
             <Label className="text-xs text-muted-foreground">球鏡 S</Label>
             <Input
-              type="number"
-              step="0.25"
+              type="text" inputMode="decimal"
               value={(formData as any)[`${prefix}_auto_s`]}
               onChange={(e) => setFormData({ ...formData, [`${prefix}_auto_s`]: e.target.value })}
               onBlur={() => formatDecimal2(`${prefix}_auto_s`)}
@@ -276,8 +271,7 @@ export function AddPrescriptionDialog({ open, onOpenChange }: AddPrescriptionDia
           <div className="space-y-1">
             <Label className="text-xs text-muted-foreground">柱鏡 C</Label>
             <Input
-              type="number"
-              step="0.25"
+              type="text" inputMode="decimal"
               value={(formData as any)[`${prefix}_auto_c`]}
               onChange={(e) => setFormData({ ...formData, [`${prefix}_auto_c`]: e.target.value })}
               onBlur={() => formatDecimal2(`${prefix}_auto_c`)}
@@ -286,9 +280,7 @@ export function AddPrescriptionDialog({ open, onOpenChange }: AddPrescriptionDia
           <div className="space-y-1">
             <Label className="text-xs text-muted-foreground">軸位 A</Label>
             <Input
-              type="number"
-              min="0"
-              max="180"
+              type="text" inputMode="decimal"
               value={(formData as any)[`${prefix}_auto_a`]}
               onChange={(e) => setFormData({ ...formData, [`${prefix}_auto_a`]: e.target.value })}
               onBlur={() => formatDecimal2(`${prefix}_auto_a`)}
@@ -304,8 +296,7 @@ export function AddPrescriptionDialog({ open, onOpenChange }: AddPrescriptionDia
           <div className="space-y-1">
             <Label className="text-xs text-muted-foreground">球鏡 S</Label>
             <Input
-              type="number"
-              step="0.25"
+              type="text" inputMode="decimal"
               value={(formData as any)[`${prefix}_old_s`]}
               onChange={(e) => setFormData({ ...formData, [`${prefix}_old_s`]: e.target.value })}
               onBlur={() => formatDecimal2(`${prefix}_old_s`)}
@@ -314,8 +305,7 @@ export function AddPrescriptionDialog({ open, onOpenChange }: AddPrescriptionDia
           <div className="space-y-1">
             <Label className="text-xs text-muted-foreground">柱鏡 C</Label>
             <Input
-              type="number"
-              step="0.25"
+              type="text" inputMode="decimal"
               value={(formData as any)[`${prefix}_old_c`]}
               onChange={(e) => setFormData({ ...formData, [`${prefix}_old_c`]: e.target.value })}
               onBlur={() => formatDecimal2(`${prefix}_old_c`)}
@@ -324,9 +314,7 @@ export function AddPrescriptionDialog({ open, onOpenChange }: AddPrescriptionDia
           <div className="space-y-1">
             <Label className="text-xs text-muted-foreground">軸位 A</Label>
             <Input
-              type="number"
-              min="0"
-              max="180"
+              type="text" inputMode="decimal"
               value={(formData as any)[`${prefix}_old_a`]}
               onChange={(e) => setFormData({ ...formData, [`${prefix}_old_a`]: e.target.value })}
               onBlur={() => formatDecimal2(`${prefix}_old_a`)}
@@ -362,8 +350,7 @@ export function AddPrescriptionDialog({ open, onOpenChange }: AddPrescriptionDia
         <div className="space-y-1">
           <Label className="text-xs text-muted-foreground">ADD (老花度數)</Label>
           <Input
-            type="number"
-            step="0.25"
+            type="text" inputMode="decimal"
             placeholder="2.00"
             value={(formData as any)[`${prefix}_add`]}
             onChange={(e) => setFormData({ ...formData, [`${prefix}_add`]: e.target.value })}
@@ -373,8 +360,7 @@ export function AddPrescriptionDialog({ open, onOpenChange }: AddPrescriptionDia
         <div className="space-y-1">
           <Label className="text-xs text-muted-foreground">PD (瞳距 mm)</Label>
           <Input
-            type="number"
-            step="0.5"
+            type="text" inputMode="decimal"
             placeholder="32"
             value={(formData as any)[`${prefix}_pd`]}
             onChange={(e) => setFormData({ ...formData, [`${prefix}_pd`]: e.target.value })}
