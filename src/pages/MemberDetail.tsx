@@ -504,6 +504,14 @@ export default function MemberDetail() {
         onOpenChange={(o) => !o && setViewPrescription(null)}
         prescription={viewPrescription}
       />
+
+      {id && (
+        <AddPrescriptionDialog
+          open={addRecordOpen}
+          onOpenChange={setAddRecordOpen}
+          lockedMemberId={id}
+        />
+      )}
     </MainLayout>
   );
 }
