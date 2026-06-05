@@ -23,6 +23,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { MemberBadge } from '@/components/members/MemberBadge';
+import { DecimalInput } from '@/components/prescriptions/DecimalInput';
 import { Wallet } from 'lucide-react';
 
 interface AddPrescriptionDialogProps {
@@ -244,32 +245,27 @@ export function AddPrescriptionDialog({ open, onOpenChange, lockedMemberId }: Ad
         <div className="grid grid-cols-3 gap-3">
           <div className="space-y-1">
             <Label className="text-xs text-muted-foreground">球鏡 S</Label>
-            <Input
-              type="text" inputMode="decimal"
+            <DecimalInput
               placeholder="-2.50"
               value={(formData as any)[`${prefix}_best_s`]}
-              onChange={(e) => setFormData({ ...formData, [`${prefix}_best_s`]: e.target.value })}
-              onBlur={() => formatDecimal2(`${prefix}_best_s`)}
+              onCommit={(v) => setFormData((p: any) => ({ ...p, [`${prefix}_best_s`]: v }))}
             />
           </div>
           <div className="space-y-1">
             <Label className="text-xs text-muted-foreground">柱鏡 C</Label>
-            <Input
-              type="text" inputMode="decimal"
+            <DecimalInput
               placeholder="-0.50"
               value={(formData as any)[`${prefix}_best_c`]}
-              onChange={(e) => setFormData({ ...formData, [`${prefix}_best_c`]: e.target.value })}
-              onBlur={() => formatDecimal2(`${prefix}_best_c`)}
+              onCommit={(v) => setFormData((p: any) => ({ ...p, [`${prefix}_best_c`]: v }))}
             />
           </div>
           <div className="space-y-1">
             <Label className="text-xs text-muted-foreground">軸位 A</Label>
-            <Input
-              type="text" inputMode="decimal"
+            <DecimalInput
+              decimals={0}
               placeholder="180"
               value={(formData as any)[`${prefix}_best_a`]}
-              onChange={(e) => setFormData({ ...formData, [`${prefix}_best_a`]: e.target.value })}
-              onBlur={() => formatInt(`${prefix}_best_a`)}
+              onCommit={(v) => setFormData((p: any) => ({ ...p, [`${prefix}_best_a`]: v }))}
             />
           </div>
         </div>
@@ -281,29 +277,24 @@ export function AddPrescriptionDialog({ open, onOpenChange, lockedMemberId }: Ad
         <div className="grid grid-cols-3 gap-3">
           <div className="space-y-1">
             <Label className="text-xs text-muted-foreground">球鏡 S</Label>
-            <Input
-              type="text" inputMode="decimal"
+            <DecimalInput
               value={(formData as any)[`${prefix}_auto_s`]}
-              onChange={(e) => setFormData({ ...formData, [`${prefix}_auto_s`]: e.target.value })}
-              onBlur={() => formatDecimal2(`${prefix}_auto_s`)}
+              onCommit={(v) => setFormData((p: any) => ({ ...p, [`${prefix}_auto_s`]: v }))}
             />
           </div>
           <div className="space-y-1">
             <Label className="text-xs text-muted-foreground">柱鏡 C</Label>
-            <Input
-              type="text" inputMode="decimal"
+            <DecimalInput
               value={(formData as any)[`${prefix}_auto_c`]}
-              onChange={(e) => setFormData({ ...formData, [`${prefix}_auto_c`]: e.target.value })}
-              onBlur={() => formatDecimal2(`${prefix}_auto_c`)}
+              onCommit={(v) => setFormData((p: any) => ({ ...p, [`${prefix}_auto_c`]: v }))}
             />
           </div>
           <div className="space-y-1">
             <Label className="text-xs text-muted-foreground">軸位 A</Label>
-            <Input
-              type="text" inputMode="decimal"
+            <DecimalInput
+              decimals={0}
               value={(formData as any)[`${prefix}_auto_a`]}
-              onChange={(e) => setFormData({ ...formData, [`${prefix}_auto_a`]: e.target.value })}
-              onBlur={() => formatInt(`${prefix}_auto_a`)}
+              onCommit={(v) => setFormData((p: any) => ({ ...p, [`${prefix}_auto_a`]: v }))}
             />
           </div>
         </div>
@@ -315,29 +306,24 @@ export function AddPrescriptionDialog({ open, onOpenChange, lockedMemberId }: Ad
         <div className="grid grid-cols-3 gap-3">
           <div className="space-y-1">
             <Label className="text-xs text-muted-foreground">球鏡 S</Label>
-            <Input
-              type="text" inputMode="decimal"
+            <DecimalInput
               value={(formData as any)[`${prefix}_old_s`]}
-              onChange={(e) => setFormData({ ...formData, [`${prefix}_old_s`]: e.target.value })}
-              onBlur={() => formatDecimal2(`${prefix}_old_s`)}
+              onCommit={(v) => setFormData((p: any) => ({ ...p, [`${prefix}_old_s`]: v }))}
             />
           </div>
           <div className="space-y-1">
             <Label className="text-xs text-muted-foreground">柱鏡 C</Label>
-            <Input
-              type="text" inputMode="decimal"
+            <DecimalInput
               value={(formData as any)[`${prefix}_old_c`]}
-              onChange={(e) => setFormData({ ...formData, [`${prefix}_old_c`]: e.target.value })}
-              onBlur={() => formatDecimal2(`${prefix}_old_c`)}
+              onCommit={(v) => setFormData((p: any) => ({ ...p, [`${prefix}_old_c`]: v }))}
             />
           </div>
           <div className="space-y-1">
             <Label className="text-xs text-muted-foreground">軸位 A</Label>
-            <Input
-              type="text" inputMode="decimal"
+            <DecimalInput
+              decimals={0}
               value={(formData as any)[`${prefix}_old_a`]}
-              onChange={(e) => setFormData({ ...formData, [`${prefix}_old_a`]: e.target.value })}
-              onBlur={() => formatInt(`${prefix}_old_a`)}
+              onCommit={(v) => setFormData((p: any) => ({ ...p, [`${prefix}_old_a`]: v }))}
             />
           </div>
         </div>
@@ -369,22 +355,18 @@ export function AddPrescriptionDialog({ open, onOpenChange, lockedMemberId }: Ad
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-1">
           <Label className="text-xs text-muted-foreground">ADD (老花度數)</Label>
-          <Input
-            type="text" inputMode="decimal"
+          <DecimalInput
             placeholder="2.00"
             value={(formData as any)[`${prefix}_add`]}
-            onChange={(e) => setFormData({ ...formData, [`${prefix}_add`]: e.target.value })}
-            onBlur={() => formatDecimal2(`${prefix}_add`)}
+            onCommit={(v) => setFormData((p: any) => ({ ...p, [`${prefix}_add`]: v }))}
           />
         </div>
         <div className="space-y-1">
           <Label className="text-xs text-muted-foreground">PD (瞳距 mm)</Label>
-          <Input
-            type="text" inputMode="decimal"
+          <DecimalInput
             placeholder="32"
             value={(formData as any)[`${prefix}_pd`]}
-            onChange={(e) => setFormData({ ...formData, [`${prefix}_pd`]: e.target.value })}
-            onBlur={() => formatDecimal2(`${prefix}_pd`)}
+            onCommit={(v) => setFormData((p: any) => ({ ...p, [`${prefix}_pd`]: v }))}
           />
         </div>
       </div>
