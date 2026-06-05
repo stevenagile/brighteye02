@@ -90,6 +90,13 @@ export function AddPrescriptionDialog({ open, onOpenChange, lockedMemberId }: Ad
     setFormData(prev => ({ ...prev, credit_used: '' }));
   }, [formData.member_id]);
 
+  // 鎖定特定會員時，開啟對話框自動帶入
+  useEffect(() => {
+    if (open && lockedMemberId) {
+      setFormData(prev => ({ ...prev, member_id: lockedMemberId }));
+    }
+  }, [open, lockedMemberId]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
