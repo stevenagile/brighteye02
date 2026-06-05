@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { DecimalInput } from '@/components/prescriptions/DecimalInput';
 import { useUpdatePrescription, Prescription } from '@/hooks/usePrescriptions';
 import { useTransactions } from '@/hooks/useTransactions';
 import { useMembers, useUpdateMember } from '@/hooks/useMembers';
