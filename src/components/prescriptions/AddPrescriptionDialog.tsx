@@ -149,7 +149,7 @@ export function AddPrescriptionDialog({ open, onOpenChange, lockedMemberId }: Ad
 
     // Reset form
     setFormData({
-      member_id: '',
+      member_id: lockedMemberId || '',
       exam_date: new Date().toISOString().split('T')[0],
       service_type: '驗光',
       right_sc: '',
