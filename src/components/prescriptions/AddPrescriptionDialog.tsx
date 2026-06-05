@@ -189,6 +189,13 @@ export function AddPrescriptionDialog({ open, onOpenChange }: AddPrescriptionDia
     onOpenChange(false);
   };
 
+  const formatDecimal2 = (key: string) => {
+    const val = (formData as any)[key];
+    if (val === '' || val == null) return;
+    const n = Number(val);
+    if (!isNaN(n)) setFormData({ ...formData, [key]: n.toFixed(2) });
+  };
+
   const EyeSection = ({ prefix }: { prefix: 'right' | 'left' }) => (
     <div className="space-y-4">
       {/* 視力 */}
@@ -223,6 +230,7 @@ export function AddPrescriptionDialog({ open, onOpenChange }: AddPrescriptionDia
               placeholder="-2.50"
               value={(formData as any)[`${prefix}_best_s`]}
               onChange={(e) => setFormData({ ...formData, [`${prefix}_best_s`]: e.target.value })}
+              onBlur={() => formatDecimal2(`${prefix}_best_s`)}
             />
           </div>
           <div className="space-y-1">
@@ -233,6 +241,7 @@ export function AddPrescriptionDialog({ open, onOpenChange }: AddPrescriptionDia
               placeholder="-0.50"
               value={(formData as any)[`${prefix}_best_c`]}
               onChange={(e) => setFormData({ ...formData, [`${prefix}_best_c`]: e.target.value })}
+              onBlur={() => formatDecimal2(`${prefix}_best_c`)}
             />
           </div>
           <div className="space-y-1">
@@ -244,6 +253,7 @@ export function AddPrescriptionDialog({ open, onOpenChange }: AddPrescriptionDia
               placeholder="180"
               value={(formData as any)[`${prefix}_best_a`]}
               onChange={(e) => setFormData({ ...formData, [`${prefix}_best_a`]: e.target.value })}
+              onBlur={() => formatDecimal2(`${prefix}_best_a`)}
             />
           </div>
         </div>
@@ -260,6 +270,7 @@ export function AddPrescriptionDialog({ open, onOpenChange }: AddPrescriptionDia
               step="0.25"
               value={(formData as any)[`${prefix}_auto_s`]}
               onChange={(e) => setFormData({ ...formData, [`${prefix}_auto_s`]: e.target.value })}
+              onBlur={() => formatDecimal2(`${prefix}_auto_s`)}
             />
           </div>
           <div className="space-y-1">
@@ -269,6 +280,7 @@ export function AddPrescriptionDialog({ open, onOpenChange }: AddPrescriptionDia
               step="0.25"
               value={(formData as any)[`${prefix}_auto_c`]}
               onChange={(e) => setFormData({ ...formData, [`${prefix}_auto_c`]: e.target.value })}
+              onBlur={() => formatDecimal2(`${prefix}_auto_c`)}
             />
           </div>
           <div className="space-y-1">
@@ -279,6 +291,7 @@ export function AddPrescriptionDialog({ open, onOpenChange }: AddPrescriptionDia
               max="180"
               value={(formData as any)[`${prefix}_auto_a`]}
               onChange={(e) => setFormData({ ...formData, [`${prefix}_auto_a`]: e.target.value })}
+              onBlur={() => formatDecimal2(`${prefix}_auto_a`)}
             />
           </div>
         </div>
@@ -295,6 +308,7 @@ export function AddPrescriptionDialog({ open, onOpenChange }: AddPrescriptionDia
               step="0.25"
               value={(formData as any)[`${prefix}_old_s`]}
               onChange={(e) => setFormData({ ...formData, [`${prefix}_old_s`]: e.target.value })}
+              onBlur={() => formatDecimal2(`${prefix}_old_s`)}
             />
           </div>
           <div className="space-y-1">
@@ -304,6 +318,7 @@ export function AddPrescriptionDialog({ open, onOpenChange }: AddPrescriptionDia
               step="0.25"
               value={(formData as any)[`${prefix}_old_c`]}
               onChange={(e) => setFormData({ ...formData, [`${prefix}_old_c`]: e.target.value })}
+              onBlur={() => formatDecimal2(`${prefix}_old_c`)}
             />
           </div>
           <div className="space-y-1">
@@ -314,6 +329,7 @@ export function AddPrescriptionDialog({ open, onOpenChange }: AddPrescriptionDia
               max="180"
               value={(formData as any)[`${prefix}_old_a`]}
               onChange={(e) => setFormData({ ...formData, [`${prefix}_old_a`]: e.target.value })}
+              onBlur={() => formatDecimal2(`${prefix}_old_a`)}
             />
           </div>
         </div>
@@ -351,6 +367,7 @@ export function AddPrescriptionDialog({ open, onOpenChange }: AddPrescriptionDia
             placeholder="2.00"
             value={(formData as any)[`${prefix}_add`]}
             onChange={(e) => setFormData({ ...formData, [`${prefix}_add`]: e.target.value })}
+            onBlur={() => formatDecimal2(`${prefix}_add`)}
           />
         </div>
         <div className="space-y-1">
@@ -361,6 +378,7 @@ export function AddPrescriptionDialog({ open, onOpenChange }: AddPrescriptionDia
             placeholder="32"
             value={(formData as any)[`${prefix}_pd`]}
             onChange={(e) => setFormData({ ...formData, [`${prefix}_pd`]: e.target.value })}
+            onBlur={() => formatDecimal2(`${prefix}_pd`)}
           />
         </div>
       </div>
