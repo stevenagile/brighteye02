@@ -28,6 +28,7 @@ import {
 import { useMember, useUpdateMember, useDeleteMember, MemberLevel } from '@/hooks/useMembers';
 import { useMemberLevels } from '@/hooks/useSettings';
 import { EditPrescriptionDialog } from '@/components/prescriptions/EditPrescriptionDialog';
+import { AddPrescriptionDialog } from '@/components/prescriptions/AddPrescriptionDialog';
 import type { Prescription } from '@/hooks/usePrescriptions';
 import { cn } from '@/lib/utils';
 import { memberUpdateSchema, zodErrorsToMap } from '@/lib/validation';
