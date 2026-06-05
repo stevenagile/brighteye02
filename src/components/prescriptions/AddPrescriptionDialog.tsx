@@ -28,15 +28,16 @@ import { Wallet } from 'lucide-react';
 interface AddPrescriptionDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  lockedMemberId?: string;
 }
 
-export function AddPrescriptionDialog({ open, onOpenChange }: AddPrescriptionDialogProps) {
+export function AddPrescriptionDialog({ open, onOpenChange, lockedMemberId }: AddPrescriptionDialogProps) {
   const { data: members } = useMembers();
   const createPrescription = useCreatePrescription();
   const updateMember = useUpdateMember();
 
   const [formData, setFormData] = useState({
-    member_id: '',
+    member_id: lockedMemberId || '',
     exam_date: new Date().toISOString().split('T')[0],
     service_type: '驗光',
     // 右眼
@@ -88,6 +89,13 @@ export function AddPrescriptionDialog({ open, onOpenChange }: AddPrescriptionDia
   useEffect(() => {
     setFormData(prev => ({ ...prev, credit_used: '' }));
   }, [formData.member_id]);
+
+  // 鎖定特定會員時，開啟對話框自動帶入
+  useEffect(() => {
+    if (open && lockedMemberId) {
+      setFormData(prev => ({ ...prev, member_id: lockedMemberId }));
+    }
+  }, [open, lockedMemberId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -148,7 +156,7 @@ export function AddPrescriptionDialog({ open, onOpenChange }: AddPrescriptionDia
 
     // Reset form
     setFormData({
-      member_id: '',
+      member_id: lockedMemberId || '',
       exam_date: new Date().toISOString().split('T')[0],
       service_type: '驗光',
       right_sc: '',
@@ -387,21 +395,27 @@ export function AddPrescriptionDialog({ open, onOpenChange }: AddPrescriptionDia
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="member">會員 *</Label>
-                <Select
-                  value={formData.member_id}
-                  onValueChange={(value) => setFormData({ ...formData, member_id: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="選擇會員" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {members?.map((member) => (
-                      <SelectItem key={member.id} value={member.id}>
-                        {member.name} ({member.phone})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                {lockedMemberId ? (
+                  <div className="h-10 px-3 flex items-center rounded-md border bg-muted/40 text-sm">
+                    {selectedMember ? `${selectedMember.name}（${selectedMember.phone}）` : '載入中…'}
+                  </div>
+                ) : (
+                  <Select
+                    value={formData.member_id}
+                    onValueChange={(value) => setFormData({ ...formData, member_id: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="選擇會員" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {members?.map((member) => (
+                        <SelectItem key={member.id} value={member.id}>
+                          {member.name} ({member.phone})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="exam_date">檢查日期</Label>

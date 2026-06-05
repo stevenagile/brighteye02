@@ -23,11 +23,12 @@ import {
 import {
   ArrowLeft, Pencil, Save, X, Trash2, Phone, Mail, MapPin, Calendar,
   Briefcase, MessageCircle, UserPlus, CreditCard, Wallet, TrendingDown,
-  Receipt, AlertCircle, Loader2, ChevronRight,
+  Receipt, AlertCircle, Loader2, ChevronRight, Plus,
 } from 'lucide-react';
 import { useMember, useUpdateMember, useDeleteMember, MemberLevel } from '@/hooks/useMembers';
 import { useMemberLevels } from '@/hooks/useSettings';
 import { EditPrescriptionDialog } from '@/components/prescriptions/EditPrescriptionDialog';
+import { AddPrescriptionDialog } from '@/components/prescriptions/AddPrescriptionDialog';
 import type { Prescription } from '@/hooks/usePrescriptions';
 import { cn } from '@/lib/utils';
 import { memberUpdateSchema, zodErrorsToMap } from '@/lib/validation';
@@ -60,6 +61,7 @@ export default function MemberDetail() {
   const [form, setForm] = useState<any>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [viewPrescription, setViewPrescription] = useState<Prescription | null>(null);
+  const [addRecordOpen, setAddRecordOpen] = useState(false);
 
   const clearError = (field: string) => {
     if (errors[field]) {
@@ -436,7 +438,15 @@ export default function MemberDetail() {
 
           {/* 服務紀錄 */}
           <TabsContent value="records">
-            <Section title="客戶服務紀錄" icon={<Receipt className="w-4 h-4" />}>
+            <Section
+              title="客戶服務紀錄"
+              icon={<Receipt className="w-4 h-4" />}
+              action={
+                <Button size="sm" onClick={() => setAddRecordOpen(true)}>
+                  <Plus className="w-4 h-4 mr-1" />新增服務紀錄
+                </Button>
+              }
+            >
               {loadingRecords ? (
                 <p className="text-sm text-muted-foreground">載入中…</p>
               ) : serviceRecords?.length ? (
@@ -494,16 +504,27 @@ export default function MemberDetail() {
         onOpenChange={(o) => !o && setViewPrescription(null)}
         prescription={viewPrescription}
       />
+
+      {id && (
+        <AddPrescriptionDialog
+          open={addRecordOpen}
+          onOpenChange={setAddRecordOpen}
+          lockedMemberId={id}
+        />
+      )}
     </MainLayout>
   );
 }
 
-function Section({ title, icon, children }: { title: string; icon?: React.ReactNode; children: React.ReactNode }) {
+function Section({ title, icon, action, children }: { title: string; icon?: React.ReactNode; action?: React.ReactNode; children: React.ReactNode }) {
   return (
     <div className="stat-card space-y-4">
-      <h3 className="text-base font-semibold text-foreground flex items-center gap-2">
-        {icon}{title}
-      </h3>
+      <div className="flex items-center justify-between gap-2 flex-wrap">
+        <h3 className="text-base font-semibold text-foreground flex items-center gap-2">
+          {icon}{title}
+        </h3>
+        {action}
+      </div>
       <div className="space-y-4">{children}</div>
     </div>
   );
