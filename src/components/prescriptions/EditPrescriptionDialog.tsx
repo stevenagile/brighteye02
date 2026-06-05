@@ -192,6 +192,13 @@ export function EditPrescriptionDialog({ open, onOpenChange, prescription }: Edi
     onOpenChange(false);
   };
 
+  const formatDecimal2 = (key: string) => {
+    const val = (formData as any)[key];
+    if (val === '' || val == null) return;
+    const n = Number(val);
+    if (!isNaN(n)) setFormData({ ...formData, [key]: n.toFixed(2) });
+  };
+
   const EyeSection = ({ prefix }: { prefix: 'right' | 'left' }) => (
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-4">
