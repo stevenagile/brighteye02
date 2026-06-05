@@ -28,15 +28,16 @@ import { Wallet } from 'lucide-react';
 interface AddPrescriptionDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  lockedMemberId?: string;
 }
 
-export function AddPrescriptionDialog({ open, onOpenChange }: AddPrescriptionDialogProps) {
+export function AddPrescriptionDialog({ open, onOpenChange, lockedMemberId }: AddPrescriptionDialogProps) {
   const { data: members } = useMembers();
   const createPrescription = useCreatePrescription();
   const updateMember = useUpdateMember();
 
   const [formData, setFormData] = useState({
-    member_id: '',
+    member_id: lockedMemberId || '',
     exam_date: new Date().toISOString().split('T')[0],
     service_type: '驗光',
     // 右眼
