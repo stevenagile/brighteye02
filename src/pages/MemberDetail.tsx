@@ -23,7 +23,7 @@ import {
 import {
   ArrowLeft, Pencil, Save, X, Trash2, Phone, Mail, MapPin, Calendar,
   Briefcase, MessageCircle, UserPlus, CreditCard, Wallet, TrendingDown,
-  Receipt, AlertCircle, Loader2, ChevronRight,
+  Receipt, AlertCircle, Loader2, ChevronRight, Plus,
 } from 'lucide-react';
 import { useMember, useUpdateMember, useDeleteMember, MemberLevel } from '@/hooks/useMembers';
 import { useMemberLevels } from '@/hooks/useSettings';
