@@ -355,22 +355,18 @@ export function AddPrescriptionDialog({ open, onOpenChange, lockedMemberId }: Ad
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-1">
           <Label className="text-xs text-muted-foreground">ADD (老花度數)</Label>
-          <Input
-            type="text" inputMode="decimal"
+          <DecimalInput
             placeholder="2.00"
             value={(formData as any)[`${prefix}_add`]}
-            onChange={(e) => setFormData({ ...formData, [`${prefix}_add`]: e.target.value })}
-            onBlur={() => formatDecimal2(`${prefix}_add`)}
+            onCommit={(v) => setFormData((p: any) => ({ ...p, [`${prefix}_add`]: v }))}
           />
         </div>
         <div className="space-y-1">
           <Label className="text-xs text-muted-foreground">PD (瞳距 mm)</Label>
-          <Input
-            type="text" inputMode="decimal"
+          <DecimalInput
             placeholder="32"
             value={(formData as any)[`${prefix}_pd`]}
-            onChange={(e) => setFormData({ ...formData, [`${prefix}_pd`]: e.target.value })}
-            onBlur={() => formatDecimal2(`${prefix}_pd`)}
+            onCommit={(v) => setFormData((p: any) => ({ ...p, [`${prefix}_pd`]: v }))}
           />
         </div>
       </div>
