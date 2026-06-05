@@ -23,6 +23,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { MemberBadge } from '@/components/members/MemberBadge';
+import { DecimalInput } from '@/components/prescriptions/DecimalInput';
 import { Wallet } from 'lucide-react';
 
 interface AddPrescriptionDialogProps {
