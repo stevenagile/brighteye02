@@ -395,21 +395,27 @@ export function AddPrescriptionDialog({ open, onOpenChange, lockedMemberId }: Ad
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="member">會員 *</Label>
-                <Select
-                  value={formData.member_id}
-                  onValueChange={(value) => setFormData({ ...formData, member_id: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="選擇會員" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {members?.map((member) => (
-                      <SelectItem key={member.id} value={member.id}>
-                        {member.name} ({member.phone})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                {lockedMemberId ? (
+                  <div className="h-10 px-3 flex items-center rounded-md border bg-muted/40 text-sm">
+                    {selectedMember ? `${selectedMember.name}（${selectedMember.phone}）` : '載入中…'}
+                  </div>
+                ) : (
+                  <Select
+                    value={formData.member_id}
+                    onValueChange={(value) => setFormData({ ...formData, member_id: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="選擇會員" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {members?.map((member) => (
+                        <SelectItem key={member.id} value={member.id}>
+                          {member.name} ({member.phone})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="exam_date">檢查日期</Label>
