@@ -199,7 +199,7 @@ export function EditPrescriptionDialog({ open, onOpenChange, prescription }: Edi
     if (!isNaN(n)) setFormData({ ...formData, [key]: n.toFixed(2) });
   };
 
-  const EyeSection = ({ prefix }: { prefix: 'right' | 'left' }) => (
+  const renderEyeSection = (prefix: 'right' | 'left') => (
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-1">
@@ -484,10 +484,10 @@ export function EditPrescriptionDialog({ open, onOpenChange, prescription }: Edi
                 <TabsTrigger value="left">左眼 (OS)</TabsTrigger>
               </TabsList>
               <TabsContent value="right" className="mt-4">
-                <EyeSection prefix="right" />
+                {renderEyeSection('right')}
               </TabsContent>
               <TabsContent value="left" className="mt-4">
-                <EyeSection prefix="left" />
+                {renderEyeSection('left')}
               </TabsContent>
             </Tabs>
 
