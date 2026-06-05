@@ -193,10 +193,22 @@ export function EditPrescriptionDialog({ open, onOpenChange, prescription }: Edi
   };
 
   const formatDecimal2 = (key: string) => {
-    const val = (formData as any)[key];
-    if (val === '' || val == null) return;
-    const n = Number(val);
-    if (!isNaN(n)) setFormData({ ...formData, [key]: n.toFixed(2) });
+    setFormData((prev: any) => {
+      const val = prev[key];
+      if (val === '' || val == null) return prev;
+      const n = Number(val);
+      if (isNaN(n)) return prev;
+      return { ...prev, [key]: n.toFixed(2) };
+    });
+  };
+  const formatInt = (key: string) => {
+    setFormData((prev: any) => {
+      const val = prev[key];
+      if (val === '' || val == null) return prev;
+      const n = parseInt(String(val), 10);
+      if (isNaN(n)) return prev;
+      return { ...prev, [key]: String(n) };
+    });
   };
 
   const renderEyeSection = (prefix: 'right' | 'left') => (
