@@ -1,6 +1,6 @@
-// Lovable AI 閘道（OpenAI 相容）呼叫工具
-// 使用專案內建的 LOVABLE_API_KEY，無需自備 OpenAI/Anthropic 金鑰。
-// 文件：https://docs.lovable.dev/integrations/ai
+// Lovable AI 閘道(OpenAI 相容)呼叫工具
+// 使用專案內建的 LOVABLE_API_KEY,無需自備 OpenAI/Anthropic 金鑰。
+// 文件:https://docs.lovable.dev/integrations/ai
 
 const AI_ENDPOINT = "https://ai.gateway.lovable.dev/v1/chat/completions";
 const DEFAULT_MODEL = Deno.env.get("LOVABLE_AI_MODEL") ?? "google/gemini-2.5-flash";
@@ -16,7 +16,7 @@ export interface AIResult {
   tokens: number | null;
 }
 
-// 呼叫 LLM，回傳文字與 token 用量
+// 呼叫 LLM,回傳文字與 token 用量
 export async function callLovableAI(
   messages: ChatMessage[],
   model = DEFAULT_MODEL,
@@ -29,7 +29,7 @@ export async function callLovableAI(
       "Content-Type": "application/json",
       Authorization: `Bearer ${API_KEY}`,
     },
-    body: JSON.stringify({ model, messages, temperature: 0.3 }),
+    body: JSON.stringify({ model, messages, temperature: 0.2 }),
   });
 
   if (!res.ok) {
