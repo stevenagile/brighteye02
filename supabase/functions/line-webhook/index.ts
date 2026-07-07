@@ -2,17 +2,17 @@
 // line-webhook — LINE 官方帳號 Webhook 接收端點
 //
 // 職責:
-//   1. 驗證 X-Line-Signature（HMAC-SHA256 + Channel Secret）
-//   2. 解析事件並路由:follow / unfollow / message（text）
-//   3. 記錄對話（line_message_logs）、維護綁定狀態（line_bindings）
-//   4. 以 reply token 回覆（免費）
+//   1. 驗證 X-Line-Signature(HMAC-SHA256 + Channel Secret)
+//   2. 解析事件並路由:follow / unfollow / message(text)
+//   3. 記錄對話(line_message_logs)、維護綁定狀態(line_bindings)
+//   4. 以 reply token 回覆(免費)
 //
-// 綁定:未綁定者輸入「綁定碼」比對 members.bind_code 即完成綁定（階段 2）。
-// 客服:已綁定者的訊息交由 AI 智慧客服回答（階段 4，只查本人資料 + FAQ）。
+// 綁定:未綁定者輸入「綁定碼」比對 members.bind_code 即完成綁定(階段 2)。
+// 客服:已綁定者交由 AI 查本人資料 + FAQ;未綁定者的一般問題走 FAQ 客服(階段 4)。
 //
 // 所需 Secrets:
 //   LINE_CHANNEL_SECRET、LINE_CHANNEL_ACCESS_TOKEN、LOVABLE_API_KEY
-//   （SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY / LOVABLE_API_KEY 通常由環境自動提供）
+//   (SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY / LOVABLE_API_KEY 通常由環境自動提供)
 // ============================================================
 import { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
 import {
@@ -23,7 +23,10 @@ import {
   verifyLineSignature,
 } from "../_shared/line.ts";
 import { createServiceClient } from "../_shared/supabase.ts";
-import { answerMemberQuestion } from "../_shared/customerService.ts";
+import { answerGeneralQuestion, answerMemberQuestion } from "../_shared/customerService.ts";
+
+// 綁定碼樣式:8 碼,字元集與 gen_member_bind_code 一致(去除易混淆字元)
+const BIND_CODE_RE = /^[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{8}$/;
 
 const CHANNEL_SECRET = Deno.env.get("LINE_CHANNEL_SECRET") ?? "";
 const ACCESS_TOKEN = Deno.env.get("LINE_CHANNEL_ACCESS_TOKEN") ?? "";
@@ -96,7 +99,7 @@ async function onFollow(
   );
 
   const msg =
-    "歡迎加入伯洸眼鏡！👓\n\n綁定會員後即可查詢您的會員等級、購物金與驗光紀錄。\n請輸入門市提供給您的「綁定碼」（8 碼英數字）以完成綁定。";
+    "歡迎加入伯洸眼鏡！👓\n\n綁定會員後即可查詢您的會員等級、購物金與驗光紀錄。\n請輸入門市提供給您的「綁定碼」(8 碼英數字)以完成綁定。也歡迎直接詢問配鏡、鏡片、驗光等問題。";
   if (event.replyToken) {
     await replyMessage(event.replyToken, [text(msg)], ACCESS_TOKEN);
     await logMessage(supabase, lineUserId, null, "outbound", "text", msg);
@@ -111,7 +114,7 @@ async function onUnfollow(lineUserId: string, supabase: SupabaseClient) {
     .eq("line_user_id", lineUserId);
 }
 
-// ---------- 文字訊息:已綁定 → AI 客服 / 未綁定 → 以綁定碼綁定 ----------
+// ---------- 文字訊息:已綁定 → AI 客服 / 未綁定 → 綁定碼或 FAQ 客服 ----------
 async function onTextMessage(
   event: LineEvent,
   lineUserId: string,
@@ -135,39 +138,50 @@ async function onTextMessage(
   let replyMemberId = boundMemberId;
 
   if (boundMemberId) {
-    // AI 智慧客服:依 member_id 抓本人資料 + FAQ，交由 LLM 回答
+    // AI 智慧客服:依 member_id 抓本人資料 + FAQ,交由 LLM 回答
     try {
       const ai = await answerMemberQuestion(supabase, boundMemberId, incoming);
       reply = ai.content;
     } catch (err) {
       console.error("AI 客服失敗", err);
-      reply = "不好意思，查詢服務目前暫時無法使用，請稍後再試，或洽門市人員協助。";
+      reply = "不好意思,查詢服務目前暫時無法使用,請稍後再試,或洽門市人員協助。";
     }
   } else {
-    // 未綁定:把輸入文字當作綁定碼比對
     const code = incoming.trim().toUpperCase();
-    const { data: member } = await supabase
-      .from("members")
-      .select("id, name")
-      .eq("bind_code", code)
-      .maybeSingle();
 
-    if (member) {
-      // 綁定成功:更新（或建立）綁定紀錄
-      await supabase.from("line_bindings").upsert(
-        {
-          line_user_id: lineUserId,
-          member_id: member.id,
-          status: "bound",
-          bound_at: new Date().toISOString(),
-        },
-        { onConflict: "line_user_id" },
-      );
-      replyMemberId = member.id;
-      reply = `綁定成功!${member.name} 您好 👓\n之後可直接在此查詢您的會員資料。`;
+    if (BIND_CODE_RE.test(code)) {
+      // 看起來是綁定碼 → 嘗試綁定
+      const { data: member } = await supabase
+        .from("members")
+        .select("id, name")
+        .eq("bind_code", code)
+        .maybeSingle();
+
+      if (member) {
+        await supabase.from("line_bindings").upsert(
+          {
+            line_user_id: lineUserId,
+            member_id: member.id,
+            status: "bound",
+            bound_at: new Date().toISOString(),
+          },
+          { onConflict: "line_user_id" },
+        );
+        replyMemberId = member.id;
+        reply = `綁定成功!${member.name} 您好 👓\n之後可直接在此查詢您的會員資料。`;
+      } else {
+        reply =
+          "綁定碼不正確。請輸入門市提供給您的 8 碼綁定碼(英數字),或洽門市人員協助。";
+      }
     } else {
-      reply =
-        "綁定碼不正確。請輸入門市提供給您的 8 碼綁定碼（英數字），或洽門市人員協助。";
+      // 一般問題 → FAQ 客服(未綁定,不含個資)
+      try {
+        const ai = await answerGeneralQuestion(supabase, incoming);
+        reply = ai.content;
+      } catch (err) {
+        console.error("FAQ 客服失敗", err);
+        reply = "不好意思,服務目前暫時無法使用,請稍後再試,或洽門市人員協助。";
+      }
     }
   }
 
