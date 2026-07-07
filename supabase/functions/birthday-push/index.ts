@@ -1,8 +1,8 @@
 // ============================================================
-// birthday-push — 生日推播（每日排程觸發）
+// birthday-push — 生日推播(每日排程觸發)
 //
-// 流程:找出「今天生日（台灣時區）+ 已綁定 LINE + 同意通知」的會員，
-//       發送 LINE 生日祝福，並記錄到 line_push_jobs（含當日去重）。
+// 流程:找出「今天生日(台灣時區)+ 已綁定 LINE + 同意通知」的會員,
+//       發送 LINE 生日祝福,並記錄到 line_push_jobs(含當日去重)。
 //
 // 呼叫保護:需帶 x-cron-secret 標頭且與 CRON_SECRET 相符。
 // 測試:body 傳 {"dry_run": true} 只列出名單、不實際發送。
@@ -33,7 +33,7 @@ Deno.serve(async (req: Request) => {
 
   const supabase = createServiceClient();
 
-  // 今天（台灣時區）的月-日與完整日期
+  // 今天(台灣時區)的月-日與完整日期
   const now = new Date();
   const parts = new Intl.DateTimeFormat("en-CA", {
     timeZone: "Asia/Taipei",
@@ -62,7 +62,7 @@ Deno.serve(async (req: Request) => {
     return json({ error: error.message }, 500);
   }
 
-  // 篩出今天生日者（比對月-日）
+  // 篩出今天生日者(比對月-日)
   const recipients = (members ?? []).filter((m: any) => {
     return String(m.birthday).slice(5) === todayMD; // YYYY-MM-DD → MM-DD
   });
@@ -93,7 +93,7 @@ Deno.serve(async (req: Request) => {
 
     const msg =
       `🎂 ${m.name} 生日快樂!\n伯洸眼鏡祝您生日愉快、視野清晰 👓\n` +
-      `近期蓞臨門市可享生日專屬優惠，期待為您服務!`;
+      `近期蒞臨門市可享生日專屬優惠,期待為您服務!`;
 
     if (opts.dry_run) {
       results.push({ member: m.name, dryRun: true });
