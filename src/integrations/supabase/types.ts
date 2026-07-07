@@ -19,6 +19,8 @@ export type Database = {
           bound_at: string | null
           created_at: string
           display_name: string | null
+          handoff_at: string | null
+          human_mode: boolean
           id: string
           line_user_id: string
           member_id: string | null
@@ -29,6 +31,8 @@ export type Database = {
           bound_at?: string | null
           created_at?: string
           display_name?: string | null
+          handoff_at?: string | null
+          human_mode?: boolean
           id?: string
           line_user_id: string
           member_id?: string | null
@@ -39,6 +43,8 @@ export type Database = {
           bound_at?: string | null
           created_at?: string
           display_name?: string | null
+          handoff_at?: string | null
+          human_mode?: boolean
           id?: string
           line_user_id?: string
           member_id?: string | null
