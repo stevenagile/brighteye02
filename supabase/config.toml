@@ -1,6 +1,11 @@
 project_id = "wkrfmqzjzverngggiaiq"
 
-# LINE webhook 由 LINE 平台呼叫,不帶 Supabase JWT,故關閉 JWT 驗證
-# 安全改由函式內的 X-Line-Signature(HMAC-SHA256)驗證把關
+# LINE webhook 由 LINE 平台呼叫，不帶 Supabase JWT，故關閉 JWT 驗證
+# 安全改由函式內的 X-Line-Signature（HMAC-SHA256）驗證把關
 [functions.line-webhook]
+verify_jwt = false
+
+# 生日推播由排程（pg_cron）呼叫，不帶 Supabase JWT
+# 安全改由函式內的 x-cron-secret 標頭（CRON_SECRET）把關
+[functions.birthday-push]
 verify_jwt = false
