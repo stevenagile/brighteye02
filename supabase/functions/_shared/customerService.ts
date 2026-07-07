@@ -1,8 +1,8 @@
 // AI 智慧客服:
 //  - answerMemberQuestion:已綁定會員 → 本人資料 + FAQ + 門市資訊
-//  - answerGeneralQuestion:未綁定訪客 → 只用 FAQ + 門市資訊(不含任何個資)
-// FAQ 優先讀 settings.faq(後台可編輯),未設定則用 DEFAULT_FAQ。
-// 安全設計:LLM 不直接存取資料庫,只收到已過濾好的資料摘要。
+//  - answerGeneralQuestion:未綁定訪客 → 只用 FAQ + 門市資訊
+// FAQ 優先讀 settings.faq,未設定則用 DEFAULT_FAQ。
+// 若 LLM 無法回答或客戶要求真人,回傳 handoff=true(以 [[HANDOFF]] 標記偵測)。
 import { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { callLovableAI, ChatMessage } from "./ai.ts";
 import { DEFAULT_FAQ } from "./faq.ts";
@@ -14,23 +14,32 @@ const LEVEL_LABEL: Record<string, string> = {
   black: "VIP 黑卡",
 };
 
+const HANDOFF_RULE =
+  "若你無法從上述資料或 FAQ 回答,或使用者明確要求真人/專人客服,請「只回覆」[[HANDOFF]] 這個標記,不要加任何其他文字。";
+
 const SYSTEM_PROMPT_MEMBER = `你是「伯洸眼鏡」官方帳號的客服助理。請嚴格遵守:
 1. 「會員資料」是當前這位會員本人的資料,只用來回答他本人的個人問題(等級、購物金、驗光、消費紀錄等),絕不可透露或臆測他人資料。
-2. 一般性問題(例如為什麼眼鏡貴、鏡片差異、驗光流程等)請「以 FAQ 的答案為準」,盡量貼近 FAQ 原文的用語與精簡風格;控制在約 2–4 句,不要自行大幅擴充、不要新增 FAQ 未提及的內容、避免使用數字條列。
-3. 若問題超出所提供的所有資料範圍,請禮貌說明你沒有該資訊並建議洽門市人員,切勿編造。
-4. 一律以繁體中文回答,語氣親切、簡潔,適合手機閱讀,避免冗長。
-5. 涉及金額、度數等數字時,一律使用資料中的實際數值,不可虛構。
-6. 不要透露內部欄位名稱、系統或資料庫細節。`;
+2. 一般性問題請「以 FAQ 的答案為準」,盡量貼近 FAQ 原文的用語與精簡風格;控制在約 2–4 句,不要自行大幅擴充、不要新增 FAQ 未提及的內容、避免使用數字條列。
+3. 一律以繁體中文回答,語氣親切、簡潔。
+4. 涉及金額、度數等數字時,一律使用資料中的實際數值,不可虛構。
+5. 不要透露內部欄位名稱、系統或資料庫細節。
+6. ${HANDOFF_RULE}`;
 
 const SYSTEM_PROMPT_GENERAL = `你是「伯洸眼鏡」官方帳號的客服助理。目前這位訪客尚未綁定會員。請遵守:
-1. 回答一般性問題(眼鏡、鏡片、驗光、價格觀念等)時,請「以 FAQ 的答案為準」,盡量貼近 FAQ 原文的用語與精簡風格;控制在約 2–4 句,不要自行大幅擴充、不要新增 FAQ 未提及的內容、避免使用數字條列。門市資訊類問題依「門市資訊」回答。
-2. 若對方詢問個人會員資料(等級、購物金、驗光或消費紀錄),請說明需先綁定會員:輸入門市提供的 8 碼綁定碼即可,或洽門市人員。
-3. 超出 FAQ 與門市資訊範圍者,請禮貌說明並建議洽門市人員,切勿編造。
-4. 一律以繁體中文回答,語氣親切、簡潔,適合手機閱讀。`;
+1. 回答一般性問題時,請「以 FAQ 的答案為準」,盡量貼近 FAQ 原文的用語與精簡風格;控制在約 2–4 句,不要自行大幅擴充、避免使用數字條列。門市資訊類問題依「門市資訊」回答。
+2. 若對方詢問個人會員資料,請說明需先綁定會員:輸入門市提供的 8 碼綁定碼即可,或洽門市人員。
+3. 一律以繁體中文回答,語氣親切、簡潔。
+4. ${HANDOFF_RULE}`;
 
 interface AnswerResult {
   content: string;
   tokens: number | null;
+  handoff: boolean;
+}
+
+function parseAI(content: string, tokens: number | null): AnswerResult {
+  const handoff = content.includes("[[HANDOFF]]");
+  return { content: handoff ? "" : content, tokens, handoff };
 }
 
 // ---------- 已綁定會員:本人資料 + FAQ ----------
@@ -46,7 +55,7 @@ export async function answerMemberQuestion(
     .maybeSingle();
 
   if (!member) {
-    return { content: "查無您的會員資料,請洽門市人員協助。", tokens: null };
+    return { content: "查無您的會員資料,請洽門市人員協助。", tokens: null, handoff: false };
   }
 
   const { data: rx } = await supabase
@@ -87,7 +96,7 @@ export async function answerMemberQuestion(
   ];
 
   const result = await callLovableAI(messages);
-  return { content: result.content, tokens: result.tokens };
+  return parseAI(result.content, result.tokens);
 }
 
 // ---------- 未綁定訪客:只用 FAQ + 門市資訊 ----------
@@ -108,7 +117,7 @@ export async function answerGeneralQuestion(
   ];
 
   const result = await callLovableAI(messages);
-  return { content: result.content, tokens: result.tokens };
+  return parseAI(result.content, result.tokens);
 }
 
 // ---------- helpers ----------
@@ -123,7 +132,6 @@ async function fetchStore(
   return (data?.value ?? {}) as Record<string, unknown>;
 }
 
-// FAQ:優先用後台 settings.faq,未設定則用預設
 async function fetchFaq(supabase: SupabaseClient): Promise<string> {
   const { data } = await supabase
     .from("settings")

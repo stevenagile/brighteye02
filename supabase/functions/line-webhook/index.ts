@@ -1,18 +1,12 @@
 // ============================================================
 // line-webhook — LINE 官方帳號 Webhook 接收端點
 //
-// 職責:
-//   1. 驗證 X-Line-Signature(HMAC-SHA256 + Channel Secret)
-//   2. 解析事件並路由:follow / unfollow / message(text)
-//   3. 記錄對話(line_message_logs)、維護綁定狀態(line_bindings)
-//   4. 以 reply token 回覆(免費)
+// 職責:簽章驗證 → 事件路由 → 紀錄對話 → 回覆
+// 綁定:未綁定者輸入綁定碼即完成綁定。
+// 客服:已綁定→AI 查本人資料+FAQ;未綁定→FAQ 客服。
+// 轉真人:AI 回答不出來或客戶要求真人→進真人模式(human_mode),AI 停止自動回覆。
 //
-// 綁定:未綁定者輸入「綁定碼」比對 members.bind_code 即完成綁定(階段 2)。
-// 客服:已綁定者交由 AI 查本人資料 + FAQ;未綁定者的一般問題走 FAQ 客服(階段 4)。
-//
-// 所需 Secrets:
-//   LINE_CHANNEL_SECRET、LINE_CHANNEL_ACCESS_TOKEN、LOVABLE_API_KEY
-//   (SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY / LOVABLE_API_KEY 通常由環境自動提供)
+// 所需 Secrets:LINE_CHANNEL_SECRET、LINE_CHANNEL_ACCESS_TOKEN、LOVABLE_API_KEY
 // ============================================================
 import { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
 import {
@@ -25,8 +19,8 @@ import {
 import { createServiceClient } from "../_shared/supabase.ts";
 import { answerGeneralQuestion, answerMemberQuestion } from "../_shared/customerService.ts";
 
-// 綁定碼樣式:8 碼,字元集與 gen_member_bind_code 一致(去除易混淆字元)
 const BIND_CODE_RE = /^[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{8}$/;
+const HUMAN_RE = /真人|專人|人工|客服人員|轉接|轉真人/;
 
 const CHANNEL_SECRET = Deno.env.get("LINE_CHANNEL_SECRET") ?? "";
 const ACCESS_TOKEN = Deno.env.get("LINE_CHANNEL_ACCESS_TOKEN") ?? "";
@@ -39,7 +33,6 @@ Deno.serve(async (req: Request) => {
   const signature = req.headers.get("x-line-signature");
   const body = await req.text();
 
-  // 1) 簽章驗證 — 未通過一律拒絕
   if (!(await verifyLineSignature(body, signature, CHANNEL_SECRET))) {
     return new Response("Invalid signature", { status: 401 });
   }
@@ -54,7 +47,6 @@ Deno.serve(async (req: Request) => {
   const supabase = createServiceClient();
   const events = payload.events ?? [];
 
-  // LINE 要求盡快回 200;個別事件錯誤只記錄、不阻斷整體回應
   await Promise.all(
     events.map((e) =>
       handleEvent(e, supabase).catch((err) => console.error("處理事件錯誤", err))
@@ -64,7 +56,6 @@ Deno.serve(async (req: Request) => {
   return new Response("OK", { status: 200 });
 });
 
-// ---------- 事件路由 ----------
 async function handleEvent(event: LineEvent, supabase: SupabaseClient) {
   const lineUserId = event.source?.userId;
   if (!lineUserId) return;
@@ -82,12 +73,10 @@ async function handleEvent(event: LineEvent, supabase: SupabaseClient) {
       }
       break;
     default:
-      // postback 等其他事件之後再處理
       break;
   }
 }
 
-// ---------- 加好友:建立 pending 綁定並歡迎 ----------
 async function onFollow(
   event: LineEvent,
   lineUserId: string,
@@ -106,7 +95,6 @@ async function onFollow(
   }
 }
 
-// ---------- 封鎖/取消好友:標記解除綁定 ----------
 async function onUnfollow(lineUserId: string, supabase: SupabaseClient) {
   await supabase
     .from("line_bindings")
@@ -114,7 +102,6 @@ async function onUnfollow(lineUserId: string, supabase: SupabaseClient) {
     .eq("line_user_id", lineUserId);
 }
 
-// ---------- 文字訊息:已綁定 → AI 客服 / 未綁定 → 綁定碼或 FAQ 客服 ----------
 async function onTextMessage(
   event: LineEvent,
   lineUserId: string,
@@ -122,10 +109,9 @@ async function onTextMessage(
 ) {
   const incoming = event.message?.text ?? "";
 
-  // 查出綁定狀態
   const { data: binding } = await supabase
     .from("line_bindings")
-    .select("member_id, status")
+    .select("member_id, status, human_mode")
     .eq("line_user_id", lineUserId)
     .maybeSingle();
 
@@ -134,23 +120,27 @@ async function onTextMessage(
 
   await logMessage(supabase, lineUserId, boundMemberId, "inbound", "text", incoming);
 
-  let reply: string;
-  let replyMemberId = boundMemberId;
+  // 已在真人模式:只記錄,不自動回覆(由店員接手)
+  if (binding?.human_mode) return;
 
-  if (boundMemberId) {
-    // AI 智慧客服:依 member_id 抓本人資料 + FAQ,交由 LLM 回答
+  let reply = "";
+  let replyMemberId = boundMemberId;
+  let doHandoff = false;
+
+  if (HUMAN_RE.test(incoming)) {
+    doHandoff = true;
+  } else if (boundMemberId) {
     try {
       const ai = await answerMemberQuestion(supabase, boundMemberId, incoming);
-      reply = ai.content;
+      if (ai.handoff) doHandoff = true;
+      else reply = ai.content;
     } catch (err) {
       console.error("AI 客服失敗", err);
       reply = "不好意思,查詢服務目前暫時無法使用,請稍後再試,或洽門市人員協助。";
     }
   } else {
     const code = incoming.trim().toUpperCase();
-
     if (BIND_CODE_RE.test(code)) {
-      // 看起來是綁定碼 → 嘗試綁定
       const { data: member } = await supabase
         .from("members")
         .select("id, name")
@@ -174,10 +164,10 @@ async function onTextMessage(
           "綁定碼不正確。請輸入門市提供給您的 8 碼綁定碼(英數字),或洽門市人員協助。";
       }
     } else {
-      // 一般問題 → FAQ 客服(未綁定,不含個資)
       try {
         const ai = await answerGeneralQuestion(supabase, incoming);
-        reply = ai.content;
+        if (ai.handoff) doHandoff = true;
+        else reply = ai.content;
       } catch (err) {
         console.error("FAQ 客服失敗", err);
         reply = "不好意思,服務目前暫時無法使用,請稍後再試,或洽門市人員協助。";
@@ -185,13 +175,36 @@ async function onTextMessage(
     }
   }
 
-  if (event.replyToken) {
+  if (doHandoff) {
+    await enterHumanMode(supabase, lineUserId);
+    reply =
+      "已為您轉接真人客服,我們會盡快回覆您 🙇\n在此期間您的訊息將由專人處理。";
+  }
+
+  if (event.replyToken && reply) {
     await replyMessage(event.replyToken, [text(reply)], ACCESS_TOKEN);
     await logMessage(supabase, lineUserId, replyMemberId, "outbound", "text", reply);
   }
 }
 
-// ---------- 對話紀錄 ----------
+// 進入真人模式(保留現有綁定欄位)
+async function enterHumanMode(supabase: SupabaseClient, lineUserId: string) {
+  const now = new Date().toISOString();
+  const { data: upd } = await supabase
+    .from("line_bindings")
+    .update({ human_mode: true, handoff_at: now })
+    .eq("line_user_id", lineUserId)
+    .select("id");
+  if (!upd || upd.length === 0) {
+    await supabase.from("line_bindings").insert({
+      line_user_id: lineUserId,
+      status: "pending",
+      human_mode: true,
+      handoff_at: now,
+    });
+  }
+}
+
 async function logMessage(
   supabase: SupabaseClient,
   lineUserId: string,
