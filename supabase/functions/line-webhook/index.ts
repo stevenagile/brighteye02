@@ -8,11 +8,11 @@
 //   4. 以 reply token 回覆（免費）
 //
 // 綁定:未綁定者輸入「綁定碼」比對 members.bind_code 即完成綁定（階段 2）。
-// 待辦:已綁定者的 AI 客服（階段 4）目前為 echo 佔位。
+// 客服:已綁定者的訊息交由 AI 智慧客服回答（階段 4，只查本人資料 + FAQ）。
 //
-// 所需 Secrets（supabase secrets set）:
-//   LINE_CHANNEL_SECRET、LINE_CHANNEL_ACCESS_TOKEN
-//   （SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY 由執行環境自動注入）
+// 所需 Secrets:
+//   LINE_CHANNEL_SECRET、LINE_CHANNEL_ACCESS_TOKEN、LOVABLE_API_KEY
+//   （SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY / LOVABLE_API_KEY 通常由環境自動提供）
 // ============================================================
 import { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
 import {
@@ -23,6 +23,7 @@ import {
   verifyLineSignature,
 } from "../_shared/line.ts";
 import { createServiceClient } from "../_shared/supabase.ts";
+import { answerMemberQuestion } from "../_shared/customerService.ts";
 
 const CHANNEL_SECRET = Deno.env.get("LINE_CHANNEL_SECRET") ?? "";
 const ACCESS_TOKEN = Deno.env.get("LINE_CHANNEL_ACCESS_TOKEN") ?? "";
@@ -110,7 +111,7 @@ async function onUnfollow(lineUserId: string, supabase: SupabaseClient) {
     .eq("line_user_id", lineUserId);
 }
 
-// ---------- 文字訊息:已綁定 → 客服骨架 / 未綁定 → 以綁定碼綁定 ----------
+// ---------- 文字訊息:已綁定 → AI 客服 / 未綁定 → 以綁定碼綁定 ----------
 async function onTextMessage(
   event: LineEvent,
   lineUserId: string,
@@ -134,8 +135,14 @@ async function onTextMessage(
   let replyMemberId = boundMemberId;
 
   if (boundMemberId) {
-    // TODO（階段 4）:改為呼叫 line-cs（LLM + 依 member_id 過濾的查詢工具）
-    reply = `（智慧客服開發中）您說的是:「${incoming}」`;
+    // AI 智慧客服:依 member_id 抓本人資料 + FAQ，交由 LLM 回答
+    try {
+      const ai = await answerMemberQuestion(supabase, boundMemberId, incoming);
+      reply = ai.content;
+    } catch (err) {
+      console.error("AI 客服失敗", err);
+      reply = "不好意思，查詢服務目前暫時無法使用，請稍後再試，或洽門市人員協助。";
+    }
   } else {
     // 未綁定:把輸入文字當作綁定碼比對
     const code = incoming.trim().toUpperCase();
