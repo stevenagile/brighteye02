@@ -9,7 +9,9 @@ import {
   ChevronLeft,
   ChevronRight,
   Glasses,
-  LogOut
+  LogOut,
+  MessageSquare,
+  Send
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
@@ -19,6 +21,8 @@ const navItems = [
   { icon: LayoutDashboard, label: '儀表板', path: '/' },
   { icon: Users, label: '客戶管理', path: '/members' },
   { icon: Receipt, label: '客戶服務紀錄', path: '/transactions' },
+  { icon: MessageSquare, label: 'LINE 對話紀錄', path: '/line/logs' },
+  { icon: Send, label: 'LINE 推播', path: '/line/push' },
   { icon: Settings, label: '系統設定', path: '/settings' },
 ];
 
