@@ -185,6 +185,7 @@ export type Database = {
       members: {
         Row: {
           address: string | null
+          bind_code: string
           birthday: string | null
           city: string | null
           coupon_count: number
@@ -213,6 +214,7 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          bind_code?: string
           birthday?: string | null
           city?: string | null
           coupon_count?: number
@@ -241,6 +243,7 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          bind_code?: string
           birthday?: string | null
           city?: string | null
           coupon_count?: number
@@ -557,6 +560,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      gen_member_bind_code: { Args: never; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
