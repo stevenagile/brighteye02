@@ -1,1 +1,6 @@
 project_id = "wkrfmqzjzverngggiaiq"
+
+# LINE webhook 由 LINE 平台呼叫,不帶 Supabase JWT,故關閉 JWT 驗證
+# 安全改由函式內的 X-Line-Signature(HMAC-SHA256)驗證把關
+[functions.line-webhook]
+verify_jwt = false
