@@ -1,5 +1,6 @@
-// 伯洸眼鏡 — AI 客服 FAQ 預設知識庫(fallback)
-// 若後台 settings.faq 有設定,會優先使用後台版本;此處為預設值。
+// LINE AI 客服 FAQ 預設內容(供系統設定頁編輯框的初始值)
+// 與 supabase/functions/_shared/faq.ts 的 DEFAULT_FAQ 內容一致。
+// 儲存後會寫入 settings.faq,客服即以後台版本為準。
 
 export const DEFAULT_FAQ = `主題:為什麼眼鏡那麼貴 / 常見顧客 Q&A
 

@@ -1,18 +1,22 @@
 import { useState, useEffect } from 'react';
 import { MainLayout } from '@/components/layout/MainLayout';
-import { Store, Users, Bell, Save, Loader2, Pencil, X } from 'lucide-react';
+import { Store, Users, Bell, Save, Loader2, Pencil, X, HelpCircle } from 'lucide-react';
 
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { DEFAULT_FAQ } from '@/lib/faqDefault';
 import {
   useStoreInfo,
   useMemberLevels,
   useNotificationSettings,
+  useFaq,
   useUpdateStoreInfo,
   useUpdateMemberLevels,
   useUpdateNotifications,
+  useUpdateFaq,
   StoreInfo,
   MemberLevels,
   NotificationSettings,
@@ -47,6 +51,11 @@ export default function Settings() {
     daily_report: false,
   });
 
+  // FAQ State
+  const { data: faq, isLoading: loadingFaq } = useFaq();
+  const updateFaq = useUpdateFaq();
+  const [faqText, setFaqText] = useState('');
+
   // Sync form state with fetched data
   useEffect(() => {
     if (storeInfo) {
@@ -65,6 +74,12 @@ export default function Settings() {
       setNotificationsForm(notifications);
     }
   }, [notifications]);
+
+  useEffect(() => {
+    if (!loadingFaq) {
+      setFaqText(faq?.text ?? DEFAULT_FAQ);
+    }
+  }, [faq, loadingFaq]);
 
   const handleSaveStore = () => {
     updateStoreInfo.mutate(storeForm);
@@ -101,6 +116,10 @@ export default function Settings() {
 
   const handleSaveNotifications = () => {
     updateNotifications.mutate(notificationsForm);
+  };
+
+  const handleSaveFaq = () => {
+    updateFaq.mutate({ text: faqText });
   };
 
   const discountToDisplay = (discount: number) => {
@@ -402,6 +421,52 @@ export default function Settings() {
                     }
                   />
                 </div>
+              </div>
+            )}
+          </div>
+
+          {/* FAQ 知識庫 */}
+          <div className="stat-card">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-secondary">
+                  <HelpCircle className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-foreground">FAQ 知識庫</h3>
+                  <p className="text-sm text-muted-foreground">LINE AI 客服回答一般問題的依據,可自由編輯</p>
+                </div>
+              </div>
+              <Button
+                onClick={handleSaveFaq}
+                disabled={updateFaq.isPending || loadingFaq}
+                size="sm"
+              >
+                {updateFaq.isPending ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Save className="w-4 h-4 mr-2" />
+                )}
+                儲存
+              </Button>
+            </div>
+
+            {loadingFaq ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <Textarea
+                  rows={16}
+                  value={faqText}
+                  onChange={(e) => setFaqText(e.target.value)}
+                  className="font-mono text-sm"
+                  placeholder="輸入 FAQ 內容,建議以 Q: / A: 的格式撰寫"
+                />
+                <p className="text-xs text-muted-foreground">
+                  儲存後,LINE 客服回答一般問題時會依此內容作答。建議每題以「Q:問題」「A:回答」分行撰寫。
+                </p>
               </div>
             )}
           </div>
