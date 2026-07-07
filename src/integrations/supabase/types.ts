@@ -14,6 +14,174 @@ export type Database = {
   }
   public: {
     Tables: {
+      line_bindings: {
+        Row: {
+          bound_at: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+          line_user_id: string
+          member_id: string | null
+          status: Database["public"]["Enums"]["line_binding_status"]
+          updated_at: string
+        }
+        Insert: {
+          bound_at?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          line_user_id: string
+          member_id?: string | null
+          status?: Database["public"]["Enums"]["line_binding_status"]
+          updated_at?: string
+        }
+        Update: {
+          bound_at?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          line_user_id?: string
+          member_id?: string | null
+          status?: Database["public"]["Enums"]["line_binding_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "line_bindings_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      line_message_logs: {
+        Row: {
+          content: string | null
+          created_at: string
+          direction: Database["public"]["Enums"]["line_message_direction"]
+          id: string
+          intent: string | null
+          line_user_id: string
+          member_id: string | null
+          message_type: string | null
+          tokens: number | null
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string
+          direction: Database["public"]["Enums"]["line_message_direction"]
+          id?: string
+          intent?: string | null
+          line_user_id: string
+          member_id?: string | null
+          message_type?: string | null
+          tokens?: number | null
+        }
+        Update: {
+          content?: string | null
+          created_at?: string
+          direction?: Database["public"]["Enums"]["line_message_direction"]
+          id?: string
+          intent?: string | null
+          line_user_id?: string
+          member_id?: string | null
+          message_type?: string | null
+          tokens?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "line_message_logs_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      line_otp_challenges: {
+        Row: {
+          attempts: number
+          code_hash: string
+          created_at: string
+          expires_at: string
+          id: string
+          line_user_id: string
+          phone: string
+          verified_at: string | null
+        }
+        Insert: {
+          attempts?: number
+          code_hash: string
+          created_at?: string
+          expires_at: string
+          id?: string
+          line_user_id: string
+          phone: string
+          verified_at?: string | null
+        }
+        Update: {
+          attempts?: number
+          code_hash?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          line_user_id?: string
+          phone?: string
+          verified_at?: string | null
+        }
+        Relationships: []
+      }
+      line_push_jobs: {
+        Row: {
+          created_at: string
+          error: string | null
+          id: string
+          line_user_id: string | null
+          member_id: string | null
+          payload: Json
+          scheduled_for: string | null
+          sent_at: string | null
+          status: Database["public"]["Enums"]["line_push_status"]
+          type: Database["public"]["Enums"]["line_push_type"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          error?: string | null
+          id?: string
+          line_user_id?: string | null
+          member_id?: string | null
+          payload?: Json
+          scheduled_for?: string | null
+          sent_at?: string | null
+          status?: Database["public"]["Enums"]["line_push_status"]
+          type?: Database["public"]["Enums"]["line_push_type"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          error?: string | null
+          id?: string
+          line_user_id?: string | null
+          member_id?: string | null
+          payload?: Json
+          scheduled_for?: string | null
+          sent_at?: string | null
+          status?: Database["public"]["Enums"]["line_push_status"]
+          type?: Database["public"]["Enums"]["line_push_type"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "line_push_jobs_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       members: {
         Row: {
           address: string | null
@@ -31,6 +199,7 @@ export type Database = {
           id: string
           level: Database["public"]["Enums"]["member_level"]
           line_id: string | null
+          line_notify_opt_in: boolean
           name: string
           notes: string | null
           occupation: string | null
@@ -58,6 +227,7 @@ export type Database = {
           id?: string
           level?: Database["public"]["Enums"]["member_level"]
           line_id?: string | null
+          line_notify_opt_in?: boolean
           name: string
           notes?: string | null
           occupation?: string | null
@@ -85,6 +255,7 @@ export type Database = {
           id?: string
           level?: Database["public"]["Enums"]["member_level"]
           line_id?: string | null
+          line_notify_opt_in?: boolean
           name?: string
           notes?: string | null
           occupation?: string | null
@@ -398,6 +569,10 @@ export type Database = {
     Enums: {
       app_role: "admin" | "optician" | "sales"
       item_type: "frame" | "lens" | "exam" | "accessory" | "other"
+      line_binding_status: "pending" | "bound" | "unbound"
+      line_message_direction: "inbound" | "outbound"
+      line_push_status: "pending" | "sent" | "failed" | "skipped"
+      line_push_type: "birthday" | "campaign" | "system"
       member_level: "gold" | "silver" | "black" | "regular"
       payment_method: "cash" | "card" | "transfer"
     }
@@ -529,6 +704,10 @@ export const Constants = {
     Enums: {
       app_role: ["admin", "optician", "sales"],
       item_type: ["frame", "lens", "exam", "accessory", "other"],
+      line_binding_status: ["pending", "bound", "unbound"],
+      line_message_direction: ["inbound", "outbound"],
+      line_push_status: ["pending", "sent", "failed", "skipped"],
+      line_push_type: ["birthday", "campaign", "system"],
       member_level: ["gold", "silver", "black", "regular"],
       payment_method: ["cash", "card", "transfer"],
     },
