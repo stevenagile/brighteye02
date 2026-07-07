@@ -1,10 +1,11 @@
 // AI 智慧客服:
 //  - answerMemberQuestion:已綁定會員 → 本人資料 + FAQ + 門市資訊
 //  - answerGeneralQuestion:未綁定訪客 → 只用 FAQ + 門市資訊(不含任何個資)
+// FAQ 優先讀 settings.faq(後台可編輯),未設定則用 DEFAULT_FAQ。
 // 安全設計:LLM 不直接存取資料庫,只收到已過濾好的資料摘要。
 import { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { callLovableAI, ChatMessage } from "./ai.ts";
-import { FAQ_KNOWLEDGE } from "./faq.ts";
+import { DEFAULT_FAQ } from "./faq.ts";
 
 const LEVEL_LABEL: Record<string, string> = {
   regular: "一般客戶",
@@ -67,6 +68,7 @@ export async function answerMemberQuestion(
     .limit(5);
 
   const store = await fetchStore(supabase);
+  const faq = await fetchFaq(supabase);
 
   const creditUsed = (rx ?? []).reduce(
     (s: number, r: any) => s + Number(r.credit_used || 0),
@@ -79,7 +81,7 @@ export async function answerMemberQuestion(
   const messages: ChatMessage[] = [
     {
       role: "system",
-      content: `${SYSTEM_PROMPT_MEMBER}\n\n${context}\n\n【常見問題 FAQ】\n${FAQ_KNOWLEDGE}`,
+      content: `${SYSTEM_PROMPT_MEMBER}\n\n${context}\n\n【常見問題 FAQ】\n${faq}`,
     },
     { role: "user", content: question },
   ];
@@ -94,12 +96,13 @@ export async function answerGeneralQuestion(
   question: string,
 ): Promise<AnswerResult> {
   const store = await fetchStore(supabase);
+  const faq = await fetchFaq(supabase);
   const context = buildStoreContext(store);
 
   const messages: ChatMessage[] = [
     {
       role: "system",
-      content: `${SYSTEM_PROMPT_GENERAL}\n\n${context}\n\n【常見問題 FAQ】\n${FAQ_KNOWLEDGE}`,
+      content: `${SYSTEM_PROMPT_GENERAL}\n\n${context}\n\n【常見問題 FAQ】\n${faq}`,
     },
     { role: "user", content: question },
   ];
@@ -118,6 +121,18 @@ async function fetchStore(
     .eq("key", "store_info")
     .maybeSingle();
   return (data?.value ?? {}) as Record<string, unknown>;
+}
+
+// FAQ:優先用後台 settings.faq,未設定則用預設
+async function fetchFaq(supabase: SupabaseClient): Promise<string> {
+  const { data } = await supabase
+    .from("settings")
+    .select("value")
+    .eq("key", "faq")
+    .maybeSingle();
+  const v: any = data?.value;
+  const t = typeof v === "string" ? v : v?.text;
+  return t && String(t).trim() ? String(t) : DEFAULT_FAQ;
 }
 
 function buildStoreContext(store: Record<string, unknown>): string {

@@ -28,7 +28,11 @@ export interface NotificationSettings {
   daily_report: boolean;
 }
 
-type SettingsKey = 'store_info' | 'member_levels' | 'notifications';
+export interface FaqSetting {
+  text: string;
+}
+
+type SettingsKey = 'store_info' | 'member_levels' | 'notifications' | 'faq';
 
 async function fetchSetting<T>(key: SettingsKey): Promise<T | null> {
   const { data, error } = await supabase
@@ -78,6 +82,13 @@ export function useNotificationSettings() {
   });
 }
 
+export function useFaq() {
+  return useQuery({
+    queryKey: ['settings', 'faq'],
+    queryFn: () => fetchSetting<FaqSetting>('faq'),
+  });
+}
+
 export function useUpdateStoreInfo() {
   const queryClient = useQueryClient();
 
@@ -89,7 +100,7 @@ export function useUpdateStoreInfo() {
     },
     onError: (error) => {
       console.error('Error updating store info:', error);
-      toast.error('更新失敗，請確認您有管理員權限');
+      toast.error('更新失敗,請確認您有管理員權限');
     },
   });
 }
@@ -105,7 +116,7 @@ export function useUpdateMemberLevels() {
     },
     onError: (error) => {
       console.error('Error updating member levels:', error);
-      toast.error('更新失敗，請確認您有管理員權限');
+      toast.error('更新失敗,請確認您有管理員權限');
     },
   });
 }
@@ -121,7 +132,23 @@ export function useUpdateNotifications() {
     },
     onError: (error) => {
       console.error('Error updating notifications:', error);
-      toast.error('更新失敗，請確認您有管理員權限');
+      toast.error('更新失敗,請確認您有管理員權限');
+    },
+  });
+}
+
+export function useUpdateFaq() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (value: FaqSetting) => updateSetting('faq', value),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['settings', 'faq'] });
+      toast.success('FAQ 知識庫已更新');
+    },
+    onError: (error) => {
+      console.error('Error updating faq:', error);
+      toast.error('更新失敗,請確認您有管理員權限');
     },
   });
 }
