@@ -32,6 +32,7 @@ import { AddPrescriptionDialog } from '@/components/prescriptions/AddPrescriptio
 import type { Prescription } from '@/hooks/usePrescriptions';
 import { cn } from '@/lib/utils';
 import { memberUpdateSchema, zodErrorsToMap } from '@/lib/validation';
+import { LineBindingPanel } from '@/components/members/LineBindingPanel';
 
 const HEALTH_CONDITIONS = ['糖尿病', '高血壓', '甲狀腺疾病', '懷孕'];
 const EYE_CONDITIONS = ['青光眼', '白內障', '圓錐角膜', '眼球受傷', '角膜炎', '結膜炎', '乾眼症'];
@@ -373,6 +374,10 @@ export default function MemberDetail() {
             <Section title="備註">
               <Textarea readOnly={ro} value={form.notes} rows={4}
                 onChange={(e) => setForm({ ...form, notes: e.target.value })} />
+            </Section>
+
+            <Section title="LINE 綁定" icon={<MessageCircle className="w-4 h-4" />}>
+              <LineBindingPanel memberId={member.id} bindCode={(member as any).bind_code} />
             </Section>
           </TabsContent>
 
