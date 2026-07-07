@@ -10,6 +10,8 @@ import Transactions from "./pages/Transactions";
 import Settings from "./pages/Settings";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
+import LineLogs from "./pages/LineLogs";
+import LinePush from "./pages/LinePush";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 
 const queryClient = new QueryClient();
@@ -29,6 +31,8 @@ const App = () => (
           <Route path="/members/:id" element={<ProtectedRoute><MemberDetail /></ProtectedRoute>} />
           <Route path="/transactions" element={<ProtectedRoute><Transactions /></ProtectedRoute>} />
           <Route path="/prescriptions" element={<Navigate to="/transactions" replace />} />
+          <Route path="/line/logs" element={<ProtectedRoute><LineLogs /></ProtectedRoute>} />
+          <Route path="/line/push" element={<ProtectedRoute><LinePush /></ProtectedRoute>} />
           <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
